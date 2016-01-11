@@ -1,17 +1,18 @@
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class QwirkleServer {
 
     private static int port;
     private static String host;
+    private List<ClientHandler> clientHandlers;
+
     /**
      * QwirkleServer constructor, sets certificate credentials,
      * and port number. Then it will start the server.
@@ -21,7 +22,7 @@ public class QwirkleServer {
     public QwirkleServer(int port) {
 
         // Initialize and set certificate credentials for SSL connection
-        System.setProperty("javax.net.ssl.keyStore", "keystore.jks");
+        System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir").replace("src","") + "/certs/key.jks");
         System.setProperty("javax.net.ssl.keyStorePassword", "password");
 
         // Save port
@@ -33,6 +34,9 @@ public class QwirkleServer {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+
+        // Initialize clientHandlers list
+        clientHandlers = new ArrayList<ClientHandler>();
     }
 
     /**
@@ -63,6 +67,7 @@ public class QwirkleServer {
                 // Create clientHandler for incoming client
                 try {
                     ClientHandler clientHandler = new ClientHandler(this, sslsocket);
+                    clientHandlers.add(clientHandler);
                     clientHandler.start();
 
                 } catch (IOException e) {
@@ -76,6 +81,7 @@ public class QwirkleServer {
             e.printStackTrace();
         }
     }
+    //TODO see method stubs below
 //
 //    public Lobby createLobby() {
 //        return null;
@@ -86,17 +92,34 @@ public class QwirkleServer {
 //    }
 
 
-    public int getPort() {
-        return this.port;
-    }
-
-    public String getHost() {
-        return this.host;
+    /**
+     * Sends message to all clientHandlers
+     * @param message Message to send
+     */
+    public void broadcast(String message) {
+        for (int i = 0; i < clientHandlers.size(); i++) {
+            clientHandlers.get(i).sendMessage(message);
+        }
     }
 
     public static void main(String[] args) {
 
-        QwirkleServer qs = new QwirkleServer(6090);
+        // Check if valid port provided
+        int port = 6090;
+        if(args.length > 0) {
+            try {
+
+                // Valid port number
+                port = Integer.parseInt(args[0], 10);
+            } catch (NumberFormatException e) {
+
+                // Let user know client is started on default port
+                System.out.println("Provided incorrect port, using default " + port);
+            }
+        }
+
+        // Create new QwirkleServer
+        QwirkleServer qs = new QwirkleServer(port);
         qs.startServer();
     }
 }

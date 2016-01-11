@@ -9,28 +9,67 @@ public class ClientHandler extends Thread {
     private QwirkleServer server;
     private BufferedReader in;
     private BufferedWriter out;
+    private String clientName;
 
-    public ClientHandler(QwirkleServer serverArg, Socket sockArg) throws IOException {
-        server = serverArg;
-        in = new BufferedReader(new InputStreamReader(sockArg.getInputStream()));
-        out = new BufferedWriter(new OutputStreamWriter(sockArg.getOutputStream()));
+    /**
+     * ClientHandler constructor, takes a QwirkleServer and Socket,
+     * then handles all incoming messages from the client.
+     * @param server QwirkleServer on which the client connects
+     * @param sock Socket used to read from/write to client
+     * @throws IOException
+     */
+    public ClientHandler(QwirkleServer server, Socket sock) throws IOException {
+        this.server = server;
+        this.in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+        this.out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
     }
 
     /**
-     * This method takes care of sending messages from the Client.
-     * Every message that is received, is preprended with the name
-     * of the Client, and the new message is offered to the Server
-     * for broadcasting. If an IOException is thrown while reading
-     * the message, the method concludes that the socket connection is
-     * broken and shutdown() will be called.
+     * Runs on a seperate thread to handle all incoming/outgoing
+     * messages to this client.
      */
     public void run() {
-        String thisLine = null;
+        String thisLine;
 
+        // First wait for client to announce itself
+        try {
+            announce();
+        } catch (IOException e) {
+            System.out.println("Client failed to announce according to protocol:");
+            e.printStackTrace();
+        }
+
+        // Then read all incoming messages from client
         try {
             while ((thisLine = in.readLine()) != null) {
-                System.out.println(thisLine);
+                System.out.println("ClientHandler: " + thisLine);
             }
+        } catch (IOException e) {
+            System.out.println("Could not read from client, assume disconnected");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Method that initiates a server broadcast to let
+     * all clients know a new client has connected.
+     * @throws IOException
+     */
+    public void announce() throws IOException {
+        this.clientName = in.readLine();
+        server.broadcast("[" + clientName + " has entered]");
+    }
+
+    /**
+     * Send message to client belonging
+     * to this clientHandler.
+     * @param message Message to send
+     */
+    public void sendMessage(String message) {
+        try {
+            out.write(message);
+            out.newLine();
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
