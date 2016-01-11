@@ -3,5 +3,5 @@ public class Lobby {
     public List<Player>;
     public void addPlayer(Player player);
     public void findGame();
-    public Game startGame(Players[] players);
+    public Game createGame(Players[] players);
 }
