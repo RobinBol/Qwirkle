@@ -4,9 +4,9 @@ public class Coordinate {
 
     }
 
-    @Override
-    public void getHashCode ();
+    //Override
+    public void getHashCode (){};
 
-    @Override
-    public void equals();
+    //Override
+    public void equals(){};
 }

@@ -1,3 +1,3 @@
-static class ProtocolHandler implements Protocol {
+public class ProtocolHandler implements Protocol {
 
 }

@@ -1,12 +1,12 @@
 public class Game {
-    private Players[] players;
+    private Player[] players;
 
     public Game() {
         startGame();
     }
-    public void startGame();
-    public void setTurn();
-    public int getScore(Player player);
-    public void terminateGame(); // Players back to lobby
+    public void startGame(){};
+    public void setTurn(){};
+    public int getScore(Player player){return 0;};
+    public void terminateGame(){}; // Players back to lobby
 
 }
