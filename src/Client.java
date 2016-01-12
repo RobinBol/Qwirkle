@@ -3,6 +3,7 @@ import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 public class Client extends Thread {
     private static String name;
@@ -10,6 +11,7 @@ public class Client extends Thread {
     private static int port;
     private BufferedReader in;
     private BufferedWriter out;
+    private static String[] FEATURES = new String[] {"security"};
 
     /**
      * Client constructor that takes a name, host and port.
@@ -67,7 +69,17 @@ public class Client extends Thread {
      * @param name
      */
     public void announce(String name) {
-        this.sendMessage(name);
+
+        // Create parameters array
+        ArrayList<String> parameters = new ArrayList<String>();
+        parameters.add(this.name);
+
+        for (int i = 0; i < this.FEATURES.length; i++) {
+            parameters.add(this.FEATURES[i]);
+        }
+
+        // Create package according to protocol
+        sendMessage(ProtocolHandler.createPackage("HALLO", parameters));
     }
 
     /**
@@ -78,7 +90,6 @@ public class Client extends Thread {
     public void sendMessage(String message) {
         try {
             out.write(message);
-            out.newLine();
             out.flush();
         } catch (IOException e) {
             System.out.println("Failed to send message: " + message);

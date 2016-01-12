@@ -67,7 +67,7 @@ public class QwirkleServer {
                 // Create clientHandler for incoming client
                 try {
                     ClientHandler clientHandler = new ClientHandler(this, sslsocket);
-                    clientHandlers.add(clientHandler);
+                    addClientHandler(clientHandler);
                     clientHandler.start();
 
                 } catch (IOException e) {
@@ -100,6 +100,14 @@ public class QwirkleServer {
         for (int i = 0; i < clientHandlers.size(); i++) {
             clientHandlers.get(i).sendMessage(message);
         }
+    }
+
+    public void addClientHandler(ClientHandler clientHandler) {
+        clientHandlers.add(clientHandler);
+    }
+
+    public void removeClientHandler(ClientHandler clientHandler) {
+        clientHandlers.remove(clientHandler);
     }
 
     public static void main(String[] args) {

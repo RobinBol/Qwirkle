@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 public class ClientHandler extends Thread {
     private QwirkleServer server;
     private BufferedReader in;
     private BufferedWriter out;
     private String clientName;
+    ArrayList<String> enabledFeatures = new ArrayList<String>();
 
     /**
      * ClientHandler constructor, takes a QwirkleServer and Socket,
@@ -56,7 +59,20 @@ public class ClientHandler extends Thread {
      * @throws IOException
      */
     public void announce() throws IOException {
-        this.clientName = in.readLine();
+
+        // Wait for icoming package and read it
+        ArrayList<Object> incomingPackage = ProtocolHandler.readPackage(in.readLine());
+
+        // Check if initial handshake occurs, and if valid name provided
+        if (incomingPackage.get(0).equals(Protocol.Client.HALLO) && incomingPackage.get(1) != null) {
+
+            //TODO check for duplicate names
+            // Save clientname
+            this.clientName = (String) incomingPackage.get(1);
+        }
+
+        //TODO let ProtocolHandler handle this
+        // Broadcast to all clients that client has entered
         server.broadcast("[" + clientName + " has entered]");
     }
 
@@ -71,7 +87,8 @@ public class ClientHandler extends Thread {
             out.newLine();
             out.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(this.clientName + " disconnected");
+            server.removeClientHandler(this);
         }
     }
 }
