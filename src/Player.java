@@ -7,4 +7,10 @@ public class Player extends Client {
     public Player(String name, InetAddress host, int port) {
         super(name, host, port);
     }
+    
+    
+    //boolean in case makeMove didn't execute well.
+    public boolean makeMove() {
+    	return false;
+    }
 }
