@@ -1,3 +1,5 @@
+package GameLogic;
+
 public final class Coordinate {
 
     public Coordinate(int x, int y){
@@ -13,8 +15,8 @@ public final class Coordinate {
     /*
      * Returns an integer to pas into the hashmap the contains the keys to tiles that may or may not contain a stone.
      * 
-     * Usage hashmap.get(Coordinate.getCoordinateHash(x, y)).
-     * Will return the value<Stone>.
+     * Usage hashmap.get(GameLogic.Coordinate.getCoordinateHash(x, y)).
+     * Will return the value<GameLogic.Stone>.
      * .
      * @param x The x coordinate of the stone you want to request.
      * @param y The y coordinate of the stone you want to request.

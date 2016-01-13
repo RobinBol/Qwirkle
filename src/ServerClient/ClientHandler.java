@@ -1,3 +1,9 @@
+package ServerClient;
+
+import ServerClient.Protocol;
+import ServerClient.ProtocolHandler;
+import ServerClient.QwirkleServer;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -5,7 +11,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class ClientHandler extends Thread {
     private QwirkleServer server;
@@ -15,9 +20,9 @@ public class ClientHandler extends Thread {
     ArrayList<String> enabledFeatures = new ArrayList<String>();
 
     /**
-     * ClientHandler constructor, takes a QwirkleServer and Socket,
+     * ServerClient.ClientHandler constructor, takes a ServerClient.QwirkleServer and Socket,
      * then handles all incoming messages from the client.
-     * @param server QwirkleServer on which the client connects
+     * @param server ServerClient.QwirkleServer on which the client connects
      * @param sock Socket used to read from/write to client
      * @throws IOException
      */
@@ -38,14 +43,14 @@ public class ClientHandler extends Thread {
         try {
             announce();
         } catch (IOException e) {
-            System.out.println("Client failed to announce according to protocol:");
+            System.out.println("ServerClient.Client failed to announce according to protocol:");
             e.printStackTrace();
         }
 
         // Then read all incoming messages from client
         try {
             while ((thisLine = in.readLine()) != null) {
-                System.out.println("ClientHandler: " + thisLine);
+                System.out.println("ServerClient.ClientHandler: " + thisLine);
             }
         } catch (IOException e) {
             System.out.println("Could not read from client, assume disconnected");
@@ -71,7 +76,7 @@ public class ClientHandler extends Thread {
             this.clientName = (String) incomingPackage.get(1);
         }
 
-        //TODO let ProtocolHandler handle this
+        //TODO let ServerClient.ProtocolHandler handle this
         // Broadcast to all clients that client has entered
         server.broadcast("[" + clientName + " has entered]");
     }

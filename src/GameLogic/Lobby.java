@@ -1,3 +1,5 @@
+package GameLogic;
+
 import java.util.List;
 
 public class Lobby {

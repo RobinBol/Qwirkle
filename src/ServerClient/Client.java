@@ -1,8 +1,9 @@
+package ServerClient;
+
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 public class Client extends Thread {
@@ -14,7 +15,7 @@ public class Client extends Thread {
     private static String[] FEATURES = new String[] {"security"};
 
     /**
-     * Client constructor that takes a name, host and port.
+     * ServerClient.Client constructor that takes a name, host and port.
      *
      * @param name Name of client
      * @param host Host to connect client to

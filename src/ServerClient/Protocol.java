@@ -1,15 +1,16 @@
+package ServerClient;
 
 public class Protocol {
     public static class Client {
         /**
-         * <h3 id="client">Client</h3>
+         * <h3 id="client">ServerClient.Client</h3>
          */
 
         /**
          * <p>Connect <br>
          * Name: <code>HALLO</code> <br>
          * Descriptie: Commando dat verstuurd wordt om te identificeren bij de server <br>
-         * Content: <code>Player Name_</code> <code>modulesSupported_</code></p>
+         * Content: <code>GameLogic.Player Name_</code> <code>modulesSupported_</code></p>
          * <p>
          * <ul>
          * <li><code>HALLO_playername_features\n\n</code> (15) - De naam van de speler die wil connecten.</li>
@@ -95,7 +96,7 @@ public class Protocol {
         public static final String CHAT = "CHAT";
 
         /**
-         * <p>Request Game <br>
+         * <p>Request GameLogic.Game <br>
          * Name: <code>REQUESTGAME</code> <br>
          * Descriptie: Vraagt de server om een game te joinen van een aantal personen<br>
          * Content: <code>REQUESTGAME_integer\n\n<code>
@@ -195,21 +196,21 @@ public class Protocol {
         public static final String OKWAITFOR = "OKWAITFOR";
 
         /**
-         * <p>Game Start <br>
+         * <p>GameLogic.Game Start <br>
          * Name: <code>START</code> <br>
          * Descriptie: Een packet dat naar de spelers wordt gestuurd om te laten weten dat het spel gestart is. <br>
          * Content: <code>START_player_player\n\n</code>]</p>
          * <p>
          * <ul>
-         * <li><code>Player 1</code>: <code>String</code> (15) - Naam van de eerste speler</li>
-         * <li><code>Player 2</code>: <code>String</code> (15) - Naam van de tweede speler</li>
+         * <li><code>GameLogic.Player 1</code>: <code>String</code> (15) - Naam van de eerste speler</li>
+         * <li><code>GameLogic.Player 2</code>: <code>String</code> (15) - Naam van de tweede speler</li>
          * </ul>
          */
 
         public static final String STARTGAME = "STARTGAME";
 
         /**
-         * <p>Game End <br>
+         * <p>GameLogic.Game End <br>
          * Name: <code>END</code> <br>
          * Descriptie: Een packet dat naar de spelers wordt gestuurd om te laten weten dat het spel is gestopt <br>
          * Content: <code>END\n\n</code>]</p>
@@ -267,7 +268,7 @@ public class Protocol {
          * Content: <code>LEADERBOARD_playername*integer_playername*integer\n\n</code></p>
          * <p>
          * <ul>
-         * <li><code>Player Name</code>: <code>String</code> (15) - Naam van de speler in de betreffende statistiek</li>
+         * <li><code>GameLogic.Player Name</code>: <code>String</code> (15) - Naam van de speler in de betreffende statistiek</li>
          * <li><code>Ranking</code>: <code>int</code> - Ranking op de server</li>
          * </ul>
          * </li>

@@ -1,3 +1,5 @@
+package ServerClient;
+
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
@@ -14,7 +16,7 @@ public class QwirkleServer {
     private List<ClientHandler> clientHandlers;
 
     /**
-     * QwirkleServer constructor, sets certificate credentials,
+     * ServerClient.QwirkleServer constructor, sets certificate credentials,
      * and port number. Then it will start the server.
      *
      * @param port Port number to listen on by server
@@ -40,7 +42,7 @@ public class QwirkleServer {
     }
 
     /**
-     * Method that starts the QwirkleServer and creates an SSL connection,
+     * Method that starts the ServerClient.QwirkleServer and creates an SSL connection,
      * for potential clients. Returns the success value.
      *
      * @return success (of server startup)
@@ -49,6 +51,7 @@ public class QwirkleServer {
 
         try {
 
+            //TODO handle accepting clients that do not have security feature
             // Create SSLServerSocket
             SSLServerSocketFactory sslserversocketfactory =
                     (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
@@ -56,7 +59,7 @@ public class QwirkleServer {
                     (SSLServerSocket) sslserversocketfactory.createServerSocket(port);
 
             // Server startup success
-            System.out.println("QwirkleServer started at " + this.host + ":" + this.port);
+            System.out.println("ServerClient.QwirkleServer started at " + this.host + ":" + this.port);
 
             // Keep listening for incoming client connections
             while (true) {
@@ -77,17 +80,17 @@ public class QwirkleServer {
             }
 
         } catch (IOException e) {
-            System.out.println("Failed to start QwirkleServer at:" + this.port);
+            System.out.println("Failed to start ServerClient.QwirkleServer at:" + this.port);
             e.printStackTrace();
         }
     }
     //TODO see method stubs below
 //
-//    public Lobby createLobby() {
+//    public GameLogic.Lobby createLobby() {
 //        return null;
 //    }
 
-//    public Player createPlayer() {
+//    public GameLogic.Player createPlayer() {
 //        return null;
 //    }
 
@@ -98,16 +101,16 @@ public class QwirkleServer {
      */
     public void broadcast(String message) {
         for (int i = 0; i < clientHandlers.size(); i++) {
-            clientHandlers.get(i).sendMessage(message);
+            this.clientHandlers.get(i).sendMessage(message);
         }
     }
 
     public void addClientHandler(ClientHandler clientHandler) {
-        clientHandlers.add(clientHandler);
+        this.clientHandlers.add(clientHandler);
     }
 
     public void removeClientHandler(ClientHandler clientHandler) {
-        clientHandlers.remove(clientHandler);
+        this.clientHandlers.remove(clientHandler);
     }
 
     public static void main(String[] args) {
@@ -126,7 +129,7 @@ public class QwirkleServer {
             }
         }
 
-        // Create new QwirkleServer
+        // Create new ServerClient.QwirkleServer
         QwirkleServer qs = new QwirkleServer(port);
         qs.startServer();
     }

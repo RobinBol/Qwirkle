@@ -1,3 +1,5 @@
+package GameLogic;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +9,7 @@ public class Board {
     
 
     public Board() {
-    	board = new HashMap<>(); 
+    	board = new HashMap<>();
     }
     
     /* Places a stone if possible.

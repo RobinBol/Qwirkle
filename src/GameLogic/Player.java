@@ -1,3 +1,7 @@
+package GameLogic;
+
+import ServerClient.Client;
+
 import java.net.InetAddress;
 
 /**

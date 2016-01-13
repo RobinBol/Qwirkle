@@ -1,3 +1,5 @@
+package GameLogic;
+
 public class Game {
     private Player[] players;
 

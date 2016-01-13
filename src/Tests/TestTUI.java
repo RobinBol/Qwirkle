@@ -1,4 +1,6 @@
-package Tests;
+package tests;
+
+import GameLogic.Board;
 
 public class TestTUI {
 	
