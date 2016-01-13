@@ -5,17 +5,15 @@ import java.util.Scanner;
 
 public class ProtocolHandler {
 
-    private Protocol.Server protocol;
 
-    public ProtocolHandler(String type) {
-
-    }
-
-//    public void announce(String name, String features) {
-//        //HALLO_playername_features
-//
-//    }
-
+    /**
+     * Method that creates a package according to protocol. It takes a command
+     * and an array list of parameters to be send.
+     *
+     * @param command    Protocol command (e.g. "REQUESTGAME" or "QUIT")
+     * @param parameters Individual parameters in an array list
+     * @return Package formatted as a string
+     */
     public static String createPackage(String command, ArrayList<Object> parameters) {
 
         // Build the package using a string builder
@@ -41,55 +39,71 @@ public class ProtocolHandler {
             }
         }
 
+        // Return package as string
         return sb.toString();
     }
 
+    /**
+     * Parses a message and returns a more usable output format.
+     *
+     * @param packet The incoming message
+     * @return ArrayList holding all elements of the package nicely formatted
+     */
     public static ArrayList<Object> readPackage(String packet) {
-        ArrayList<Object> result = new ArrayList<Object>();
+        ArrayList<Object> result = new ArrayList<>();
 
         // Scanner to read a message
-        Scanner in1 = new Scanner(packet);
-        in1.useDelimiter(Protocol.Server.Settings.COMMAND_END);
-        String outerElement = in1.next();
+        Scanner packetScanner = new Scanner(packet);
+        packetScanner.useDelimiter(Protocol.Server.Settings.COMMAND_END);
 
-        // Scanner to read parts of a message
-        Scanner in2 = new Scanner(outerElement);
-        in2.useDelimiter(Character.toString(Protocol.Server.Settings.DELIMITER));
+        // Check if there is something to read
+        if (packetScanner.hasNext()) {
 
-        // Keep track of parameters positions
-        int counter = 0;
+            // Get whole message
+            String message = packetScanner.next();
 
-        // Loop over inner parameters
-        while (in2.hasNext())
-        {
-            String value = in2.next();
+            // Scanner to read parts of a message
+            Scanner parameterScanner = new Scanner(message);
+            parameterScanner.useDelimiter(Character.toString(Protocol.Server.Settings.DELIMITER));
 
-            if(counter == 0) {
-                result.add(value);
-            } else {
+            // Keep track of parameters positions
+            int counter = 0;
 
-                // Scanner to read parts of a parameter
-                Scanner in3 = new Scanner(value);
-                in3.useDelimiter(Protocol.Server.Settings.DELIMITER2);
+            // Loop over inner parameters
+            while (parameterScanner.hasNext()) {
+                String value = parameterScanner.next();
 
-                ArrayList<Object> subResult = new ArrayList<Object>();
-
-                // Loop over inner parameters
-                while (in3.hasNext()) {
-                    String value2 = in3.next();
-                    subResult.add(value2);
-                }
-
-                if(subResult.size() <= 1){
+                // Always add command first
+                if (counter == 0) {
                     result.add(value);
                 } else {
-                    result.add(subResult);
-                }
-            }
 
-            // Increment counter to keep
-            counter++;
+                    // Scanner to read parts of a parameter
+                    Scanner subparameterScanner = new Scanner(value);
+                    subparameterScanner.useDelimiter(Protocol.Server.Settings.DELIMITER2);
+
+                    ArrayList<Object> subResult = new ArrayList<>();
+
+                    // Loop over inner parameters
+                    while (subparameterScanner.hasNext()) {
+                        String value2 = subparameterScanner.next();
+                        subResult.add(value2);
+                    }
+
+                    // If no real subparameters found, add as regular parameter
+                    if (subResult.size() <= 1) {
+                        result.add(value);
+                    } else {
+                        result.add(subResult);
+                    }
+                }
+
+                // Increment counter to keep
+                counter++;
+            }
         }
+
+        // Return formatted package as ArrayList
         return result;
     }
 }

@@ -10,10 +10,11 @@ import java.util.ArrayList;
 
 public class ClientHandler extends Thread {
     private QwirkleServer server;
+    private Socket socket;
     private BufferedReader in;
     private BufferedWriter out;
     private String clientName;
-    ArrayList<String> enabledFeatures = new ArrayList<String>();
+    private int requestsGameType = 0;
 
     /**
      * ClientHandler constructor, takes a QwirkleServer and Socket,
@@ -24,6 +25,7 @@ public class ClientHandler extends Thread {
      */
     public ClientHandler(QwirkleServer server, Socket sock) throws IOException {
         this.server = server;
+        this.socket = sock;
         this.in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
         this.out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
     }
@@ -39,18 +41,47 @@ public class ClientHandler extends Thread {
         try {
             listenForAnnounce();
         } catch (IOException e) {
-            System.out.println("ServerClient.Client failed to announce according to protocol:");
-            e.printStackTrace();
+            System.out.println("Client failed to announce according to protocol:");
         }
 
         // Then read all incoming messages from client
         try {
-            while ((thisLine = in.readLine()) != null && !thisLine.isEmpty()) {
-                System.out.println(this.clientName + "send to server: " + thisLine);
+            while ((thisLine = in.readLine()) != null) {
+                if (!thisLine.isEmpty()) {
+                    System.out.println(this.clientName + " send to server: " + thisLine);
+
+                    // Parse package
+                    ArrayList<Object> result = ProtocolHandler.readPackage(thisLine);
+
+                    // Check if properly parsed data is present
+                    if (!result.isEmpty()) {
+
+                        // Handle incoming requests
+                        if (result.get(0).equals(Protocol.Client.REQUESTGAME) && result.size() == 2) {
+                            this.requestsGameType = Integer.valueOf((String) result.get(1));
+                            server.checkLobbiesForGame();
+                        }
+                    }
+                }
             }
+
+            // No more input stream, assume client disconnected
+            System.out.println(this.clientName + " disconnected...");
+
+            // Remove client from server
+            server.removeClientHandler(this);
+
         } catch (IOException e) {
-            System.out.println("Could not read from client, assume disconnected");
-            e.printStackTrace();
+
+            // If user is disconnected before handshake happened
+            String clientIdentifier = ((this.clientName != null) ? this.clientName : "Unidentified client");
+
+            // No more input stream, assume client disconnected
+            System.out.println(clientIdentifier + " disconnected...");
+
+            // Remove client from server
+            server.removeClientHandler(this);
+
         }
     }
 
@@ -70,24 +101,33 @@ public class ClientHandler extends Thread {
             // Get name from incoming package
             String name = (String) incomingPackage.get(1);
 
-            // If the name already exists in the server
-            if (this.server.doesNameExist(name)) {
+            // Trim all spaces
+            name = name.trim();
+
+            // If a user with this name already exists on the server
+            if (this.server.doesUsernameAlreadyExist(name)) {
 
                 // Create error package
-                ArrayList<Object> errorCode = new ArrayList<Object>();
+                ArrayList<Object> errorCode = new ArrayList<>();
                 errorCode.add(4);
 
                 // Send error package
                 sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
+
+                // Remove itself
+                server.removeClientHandler(this);
 
             } else {
 
                 // Save clientname
                 this.clientName = name;
 
-
                 // Broadcast to all clients that client has entered
-                server.broadcast("[" + clientName + " has entered]");
+                server.broadcast("[" + clientName + " has entered]", this.clientName);
+
+                System.out.println("Run listen for: " + this.getClientName());
+                // Client is ready to be added to the lobby
+                server.addClientToLobby(this);
             }
         }
     }
@@ -99,16 +139,44 @@ public class ClientHandler extends Thread {
      */
     public void sendMessage(String message) {
         try {
-            out.write(message);
-            out.newLine();
-            out.flush();
+            this.out.write(message);
+            this.out.newLine();
+            this.out.flush();
         } catch (IOException e) {
             System.out.println(this.clientName + " disconnected");
             server.removeClientHandler(this);
         }
     }
 
+    /**
+     * Getter for requestsGameType
+     * @return int gameType
+     */
+    public int getRequestsGameType() {
+        return this.requestsGameType;
+    }
+
+    /**
+     * Getter for the clientName
+     * @return String clientName
+     */
     public String getClientName() {
         return this.clientName;
+    }
+
+    @Override
+    public String toString(){
+        return getClientName();
+    }
+
+    /**
+     * Closes the client properly
+     */
+    public void closeClient() {
+        try {
+            this.socket.close();
+        } catch (IOException e) {
+            System.out.println("Failed to close client");
+        }
     }
 }

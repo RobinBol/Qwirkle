@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Client extends Thread {
@@ -32,7 +33,10 @@ public class Client extends Thread {
         if (host != null) this.host = host.getHostAddress();
         this.port = port;
 
+        // Check if parameters set on commandline, if not ask for them
         if (this.name == null && this.host == null && this.port == 0) {
+
+            // Scan the input
             Scanner sc = new Scanner(System.in);
             System.out.println("Client setup started...");
             System.out.println("Please enter your username:");
@@ -41,17 +45,18 @@ public class Client extends Thread {
             while (true) {
                 String line = sc.nextLine();
 
+                // Ask for username
                 if (counter == 0) {
                     if (line.length() > 15) {
                         System.out.println("Please use 15 characters or less, try again:");
                     } else {
                         this.name = line;
                         System.out.println("Please enter the server host IP address:");
-
                         counter++;
-
                     }
-                } else if (counter == 1) {
+                }
+                // Ask for server host
+                else if (counter == 1) {
 
                     // Check for valid IP
                     if (checkForValidIP(line)) {
@@ -61,7 +66,9 @@ public class Client extends Thread {
                     } else {
                         System.out.println("Invalid hostname/ipaddress provided, please try again:");
                     }
-                } else if (counter == 2) {
+                }
+                // Ask for server port
+                else if (counter == 2) {
 
                     // Check for valid port
                     if (checkForValidPort(line)) {
@@ -70,6 +77,8 @@ public class Client extends Thread {
                         System.out.println("Client is starting...");
                         counter++;
                         this.start();
+
+                        // Input is done, break out
                         break;
                     } else {
 
@@ -78,16 +87,21 @@ public class Client extends Thread {
                     }
                 }
             }
-        } else {
+        }
+        // User entered parameters on commandline, start client
+        else {
 
             // Client was already setup using cmdline parameters
             System.out.println("Client setup: name: " + this.name + " host: " + this.host + " port: " + this.port);
+            System.out.println("Client is starting...");
+
+            // Start client
             this.start();
         }
     }
 
     /**
-     * Runs on a seperate thread, and listens for incoming messages
+     * Runs on a separate thread, and listens for incoming messages
      * and logs that to console. Besides that it announces itself
      * to the server according to protocol.
      */
@@ -101,7 +115,9 @@ public class Client extends Thread {
             setupIOStreams(this.socket);
 
             // Announce client to server
-            this.announce(this.name);
+            this.announce();
+
+            System.out.println("Client started at " + this.host + ":" + this.port);
 
             // Start reading for incoming messages
             startInputStream();
@@ -109,32 +125,6 @@ public class Client extends Thread {
         } catch (IOException e) {
             System.out.println("Failed to start client, check if server is running and if host and port are correct.");
         }
-
-    }
-
-    /**
-     * Sends message that announces new client to the
-     * server according to protocol.
-     *
-     * @param name
-     */
-    public void announce(String name) {
-
-        // Create parameters array
-        ArrayList<Object> parameters = new ArrayList<Object>();
-
-        // Add name as first parameter
-        parameters.add(this.name);
-
-        // Loop over all features this client supports
-        for (int i = 0; i < this.FEATURES.length; i++) {
-
-            // Add them to the parameters
-            parameters.add(this.FEATURES[i]);
-        }
-
-        // Send package according to protocol
-        sendMessage(ProtocolHandler.createPackage("HALLO", parameters));
     }
 
     /**
@@ -162,32 +152,26 @@ public class Client extends Thread {
     }
 
     /**
-     * Replaces the current SSLSocket with a
-     * regular socket.
+     * Sends message that announces new client to the
+     * server according to protocol.
      */
-    public void switchToRegularSocket() {
-        try {
-            // Close current socket
-            this.socket.close();
+    public void announce() {
 
-            // Create a new regular socket
-            this.socket = new Socket(this.host, this.port);
+        // Create parameters array
+        ArrayList<Object> parameters = new ArrayList<>();
 
-            // Setup the new IO streams
-            setupIOStreams(this.socket);
+        // Add name as first parameter
+        parameters.add(this.name);
 
-            // Announce client to server
-            this.announce(this.name);
+        // Loop over all features this client supports
+        for (int i = 0; i < this.FEATURES.length; i++) {
 
-            // Start listening for incoming messages
-            // on this new socket
-            startInputStream();
-
-        } catch (IOException e) {
-
-            // When regular socket could not be created
-            System.out.println("Failed to establish socket connection to server");
+            // Add them to the parameters
+            parameters.add(this.FEATURES[i]);
         }
+
+        // Send package according to protocol
+        sendMessage(ProtocolHandler.createPackage("HALLO", parameters));
     }
 
     /**
@@ -211,7 +195,7 @@ public class Client extends Thread {
         } catch (IOException e) {
 
             // When i/o could not be created
-            System.out.println("Failed to establish IO streams");
+            System.out.println("Failed to establish I/O streams");
         }
     }
 
@@ -224,17 +208,109 @@ public class Client extends Thread {
         // Start reading incoming messages
         String incomingValue;
         try {
-
             // While there are messages to be read
-            while ((incomingValue = this.in.readLine()) != null) {
+            while ((incomingValue = in.readLine()) != null && incomingValue != "") {
+
+                // Log message if present
+                if (!incomingValue.isEmpty()) System.out.println("Incoming: " + incomingValue);
 
                 // TODO handle incoming messages from the server
-                System.out.println("Incoming: " + incomingValue);
+                // TODO readPackage and parse errors
+
+                ArrayList<Object> result = ProtocolHandler.readPackage(incomingValue);
+
+                // Check if properly parsed data is present
+                if (!result.isEmpty()) {
+
+                    // Handle incoming errors
+                    if (result.get(0).equals(Protocol.Client.ERROR)) {
+                        handleIncomingError(Integer.valueOf((String) result.get(1)));
+                    } else if (result.get(0).equals(Protocol.Server.HALLO)) {
+                        askForGameType();
+                    }
+                }
             }
-        } catch (IOException e) {
+        } catch (IOException | NoSuchElementException e) {
 
             // When something failed while reading a message
             System.out.println("Could not handle message from server.");
+        }
+    }
+
+    /**
+     * This method handles all incoming errors
+     *
+     * @param errorCode specific error code of error
+     */
+    public void handleIncomingError(int errorCode) {
+
+        // Username already exists
+        if (errorCode == 4) {
+            System.out.println("Username already exists, please reconnect with a different name");
+            System.exit(0);
+        }
+    }
+
+    public void askForGameType() {
+        System.out.println("Please request a game type by typing the number of your choice:\n[0] I don't care...\n[1] Versus AI\n[2] Versus one other players\n[3] Versus two other players\n[4] Versus three other players");
+        Scanner sc = new Scanner(System.in);
+        String line;
+        while (true) {
+            line = sc.nextLine();
+
+            if (line.trim().equals("0") || line.trim().equals("1") || line.trim().equals("2")
+                    || line.trim().equals("3") || line.trim().equals("4")) {
+                break;
+            } else {
+                System.out.println("Invalid option, please try again (type number of your choice:");
+            }
+        }
+
+        String gameType = "none";
+        if (line.trim().equals("0")) {
+            gameType = "random";
+        } else if (line.trim().equals("1")) {
+            gameType = "against a computer oponent";
+        } else if (line.trim().equals("2")) {
+            gameType = "against one human player";
+        } else if (line.trim().equals("3")) {
+            gameType = "against two human players";
+        } else if (line.trim().equals("4")) {
+            gameType = "against three human players";
+        }
+        System.out.println("Looking for a" + ((gameType.equals("random")) ? " " + gameType : "") + " game" + ((gameType.equals("random")) ? "" : " " + gameType) + "...");
+
+        ArrayList<Object> parameters = new ArrayList<>();
+        parameters.add(line);
+        sendMessage(ProtocolHandler.createPackage(Protocol.Client.REQUESTGAME, parameters));
+    }
+
+    /**
+     * Replaces the current SSLSocket with a
+     * regular socket.
+     */
+    public void switchToRegularSocket() {
+        try {
+            // Close current socket
+            this.socket.close();
+
+            // Create a new regular socket
+            this.socket = new Socket(this.host, this.port);
+
+            // Setup the new IO streams
+            setupIOStreams(this.socket);
+
+            // Announce client to server
+            this.announce();
+
+            // Start listening for incoming messages
+            // on this new socket
+            startInputStream();
+
+        } catch (IOException e) {
+
+            // When regular socket could not be created
+            System.out.println("Failed to establish socket connection to server");
         }
     }
 
@@ -277,6 +353,7 @@ public class Client extends Thread {
             // Valid port number
             int parsedPort = Integer.parseInt(port, 10);
 
+            // Port can not be 0
             if (parsedPort != 0) {
                 return true;
             } else {

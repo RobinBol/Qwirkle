@@ -1,18 +1,19 @@
 package GameLogic;
 
 import ServerClient.Client;
+import ServerClient.ClientHandler;
 
 import java.net.InetAddress;
 
-/**
- * Created by Robin on 11-01-16.
- */
-public class Player extends Client {
-    public Player(String name, InetAddress host, int port) {
-        super(name, host, port);
+public class Player {
+    private String name;
+    public Player(ClientHandler clientHandler) {
+        this.name = clientHandler.getClientName();
     }
-    
-    
+
+    public String getName(){
+        return this.name;
+    }
     //boolean in case makeMove didn't execute well.
     public boolean makeMove() {
     	return false;
