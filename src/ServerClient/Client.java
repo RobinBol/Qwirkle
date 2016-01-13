@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Client extends Thread {
     private static String name;
@@ -15,7 +16,9 @@ public class Client extends Thread {
     private Socket socket;
     private BufferedReader in;
     private BufferedWriter out;
-    private static String[] FEATURES = new String[]{"security"};
+
+    //TODO add features below when added
+    private static String[] FEATURES = new String[]{Protocol.Server.Features.SECURITY};
 
     /**
      * Client constructor that takes a name, host and port.
@@ -26,8 +29,60 @@ public class Client extends Thread {
      */
     public Client(String name, InetAddress host, int port) {
         this.name = name;
-        this.host = host.getHostAddress();
+        if (host != null) this.host = host.getHostAddress();
         this.port = port;
+
+        if (this.name == null && this.host == null && this.port == 0) {
+            Scanner sc = new Scanner(System.in);
+            System.out.println("Client setup started...");
+            System.out.println("Please enter your username:");
+
+            int counter = 0;
+            while (true) {
+                String line = sc.nextLine();
+
+                if (counter == 0) {
+                    if (line.length() > 15) {
+                        System.out.println("Please use 15 characters or less, try again:");
+                    } else {
+                        this.name = line;
+                        System.out.println("Please enter the server host IP address:");
+
+                        counter++;
+
+                    }
+                } else if (counter == 1) {
+
+                    // Check for valid IP
+                    if (checkForValidIP(line)) {
+                        this.host = line;
+                        System.out.println("Please enter the server port:");
+                        counter++;
+                    } else {
+                        System.out.println("Invalid hostname/ipaddress provided, please try again:");
+                    }
+                } else if (counter == 2) {
+
+                    // Check for valid port
+                    if (checkForValidPort(line)) {
+                        this.port = Integer.parseInt(line, 10);
+                        System.out.println("Client setup: name: " + this.name + " host: " + this.host + " port: " + this.port);
+                        System.out.println("Client is starting...");
+                        counter++;
+                        this.start();
+                    } else {
+
+                        // Invalid input provided, let user retry
+                        System.out.println("Provided incorrect port, please try again:");
+                    }
+                }
+            }
+        } else {
+
+            // Client was already setup using cmdline parameters
+            System.out.println("Client setup: name: " + this.name + " host: " + this.host + " port: " + this.port);
+            this.start();
+        }
     }
 
     /**
@@ -65,7 +120,7 @@ public class Client extends Thread {
     public void announce(String name) {
 
         // Create parameters array
-        ArrayList<String> parameters = new ArrayList<String>();
+        ArrayList<Object> parameters = new ArrayList<Object>();
 
         // Add name as first parameter
         parameters.add(this.name);
@@ -182,6 +237,56 @@ public class Client extends Thread {
         }
     }
 
+    /**
+     * Checks a string to be a valid ip address
+     *
+     * @param host ip address String
+     * @return
+     */
+    public static boolean checkForValidIP(String host) {
+
+        // Localhost is valid
+        if (host.equals("localhost")) {
+            return true;
+
+        } else if (host.matches("([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])") == true) {
+
+            // Valid ipv4 address
+            return true;
+
+        } else if (host.matches("([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)") == true) {
+
+            // Valid ipv6, but not supported
+            return false;
+        }
+
+        // Default false
+        return false;
+    }
+
+    /**
+     * Checks a string to be a valid port
+     *
+     * @param port
+     * @return
+     */
+    public static boolean checkForValidPort(String port) {
+        try {
+
+            // Valid port number
+            int parsedPort = Integer.parseInt(port, 10);
+
+            if (parsedPort != 0) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (NumberFormatException e) {
+            return false;
+        }
+
+    }
 
     /**
      * Handles starting of the client, parses the args
@@ -197,52 +302,58 @@ public class Client extends Thread {
         System.setProperty("javax.net.ssl.trustStorePassword", "password");
 
         // Define default values
-        String name = "Henk";
-        String host = "localhost";
-        int port = 8080;
+        String name = null;
+        String host = null;
+        int port = 0;
 
         // Check if proper amount of arguments is provided
         if (args.length == 3) {
 
             // If name passed in as arg use that
-            name = (args[0] instanceof String) ? args[0] : "Henk";
+            name = args[0];
 
-            // Check if valid host is provided, else use default localhost
-            if (args[1].matches("([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])") == true) {
-
-                // Valid ipv4
-                host = args[1];
-            } else if (args[1].matches("([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)") == true) {
-
-                // Valid ipv6
-                host = null;
-
-                // Let user know this is not supported
-                System.out.println("This application does not support IPV6, please use IPV4.");
+            // Cut string off after 15 chars
+            if (name.length() > 15) {
+                name = name.substring(0, 15);
+                System.out.println("Provided too long name, now cut off to: " + name);
             }
 
-            // Check if valid port provided
-            try {
+            // Check for valid ip
+            if (Client.checkForValidIP(args[1])) {
 
-                // Valid port number
-                port = Integer.parseInt(args[2], 10);
-
-            } catch (NumberFormatException e) {
+                // Use valid host
+                host = args[1];
+            } else {
 
                 // Invalid input provided, let user know client is started on default port
-                System.out.println("Provided incorrect port, using default " + port);
+                System.out.println("Invalid host address entered, termintaing...");
+                System.exit(0);
             }
 
-        } else {
+            // Check for valid port
+            if (Client.checkForValidPort(args[2])) {
 
-            // Use the defaults as invalid arguments are provided, inform user about defaults
-            System.out.println("Using default values for name, host and port. If you wish to provide custom values please add the arguments: <name> <host> <port>");
+                // Use valid port
+                port = Integer.parseInt(args[2], 10);
+            } else {
+
+                // Invalid input provided, let user know client is started on default port
+                System.out.println("Provided incorrect port, terminating...");
+                System.exit(0);
+            }
         }
 
         try {
+
+            // Make sure InetAddress does not create
+            // 127.0.0.1 when host is null
+            InetAddress hostAddress = null;
+            if (host != null) {
+                hostAddress = InetAddress.getByName(host);
+            }
+            System.out.println(hostAddress);
             // Start client on new thread
-            Client c = new Client(name, InetAddress.getByName(host), port);
-            c.start();
+            Client c = new Client(name, hostAddress, port);
 
         } catch (IOException e) {
             System.out.println("Failed to establish a connection with the client, probable cause: invalid host");

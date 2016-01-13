@@ -16,7 +16,7 @@ public class ProtocolHandler {
 //
 //    }
 
-    public static String createPackage(String command, ArrayList<String> parameters) {
+    public static String createPackage(String command, ArrayList<Object> parameters) {
 
         // Build the package using a string builder
         StringBuilder sb = new StringBuilder();

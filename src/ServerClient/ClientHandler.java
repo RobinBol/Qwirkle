@@ -1,9 +1,5 @@
 package ServerClient;
 
-import ServerClient.Protocol;
-import ServerClient.ProtocolHandler;
-import ServerClient.QwirkleServer;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -20,9 +16,9 @@ public class ClientHandler extends Thread {
     ArrayList<String> enabledFeatures = new ArrayList<String>();
 
     /**
-     * ServerClient.ClientHandler constructor, takes a ServerClient.QwirkleServer and Socket,
+     * ClientHandler constructor, takes a QwirkleServer and Socket,
      * then handles all incoming messages from the client.
-     * @param server ServerClient.QwirkleServer on which the client connects
+     * @param server QwirkleServer on which the client connects
      * @param sock Socket used to read from/write to client
      * @throws IOException
      */
@@ -41,7 +37,7 @@ public class ClientHandler extends Thread {
 
         // First wait for client to announce itself
         try {
-            announce();
+            listenForAnnounce();
         } catch (IOException e) {
             System.out.println("ServerClient.Client failed to announce according to protocol:");
             e.printStackTrace();
@@ -49,8 +45,8 @@ public class ClientHandler extends Thread {
 
         // Then read all incoming messages from client
         try {
-            while ((thisLine = in.readLine()) != null) {
-                System.out.println("ServerClient.ClientHandler: " + thisLine);
+            while ((thisLine = in.readLine()) != null && !thisLine.isEmpty()) {
+                System.out.println(this.clientName + "send to server: " + thisLine);
             }
         } catch (IOException e) {
             System.out.println("Could not read from client, assume disconnected");
@@ -63,22 +59,37 @@ public class ClientHandler extends Thread {
      * all clients know a new client has connected.
      * @throws IOException
      */
-    public void announce() throws IOException {
+    public void listenForAnnounce() throws IOException {
 
-        // Wait for icoming package and read it
+        // Wait for incoming package and read it
         ArrayList<Object> incomingPackage = ProtocolHandler.readPackage(in.readLine());
 
         // Check if initial handshake occurs, and if valid name provided
         if (incomingPackage.get(0).equals(Protocol.Client.HALLO) && incomingPackage.get(1) != null) {
 
-            //TODO check for duplicate names
-            // Save clientname
-            this.clientName = (String) incomingPackage.get(1);
-        }
+            // Get name from incoming package
+            String name = (String) incomingPackage.get(1);
 
-        //TODO let ServerClient.ProtocolHandler handle this
-        // Broadcast to all clients that client has entered
-        server.broadcast("[" + clientName + " has entered]");
+            // If the name already exists in the server
+            if (this.server.doesNameExist(name)) {
+
+                // Create error package
+                ArrayList<Object> errorCode = new ArrayList<Object>();
+                errorCode.add(4);
+
+                // Send error package
+                sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
+
+            } else {
+
+                // Save clientname
+                this.clientName = name;
+
+
+                // Broadcast to all clients that client has entered
+                server.broadcast("[" + clientName + " has entered]");
+            }
+        }
     }
 
     /**
@@ -95,5 +106,9 @@ public class ClientHandler extends Thread {
             System.out.println(this.clientName + " disconnected");
             server.removeClientHandler(this);
         }
+    }
+
+    public String getClientName() {
+        return this.clientName;
     }
 }

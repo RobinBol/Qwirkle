@@ -5,8 +5,6 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +24,7 @@ public class QwirkleServer {
     public QwirkleServer(int port) {
 
         // Initialize and set certificate credentials for SSL connection
-        System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir").replace("src","") + "/certs/key.jks");
+        System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir").replace("src", "") + "/certs/key.jks");
         System.setProperty("javax.net.ssl.keyStorePassword", "password");
 
         // Save port
@@ -99,6 +97,7 @@ public class QwirkleServer {
 
     /**
      * Sends message to all clientHandlers.
+     *
      * @param message Message to send
      */
     public void broadcast(String message) {
@@ -108,7 +107,24 @@ public class QwirkleServer {
     }
 
     /**
+     * Check if there is already a clientHandler connected
+     * that uses the same name.
+     *
+     * @param name Name user wishes to use
+     * @return true if name exists in server already
+     */
+    public boolean doesNameExist(String name) {
+        for (int i = 0; i < clientHandlers.size(); i++) {
+            if (name.equals(this.clientHandlers.get(i).getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Add clientHandler to internal list of handlers.
+     *
      * @param clientHandler
      */
     public void addClientHandler(ClientHandler clientHandler) {
@@ -117,6 +133,7 @@ public class QwirkleServer {
 
     /**
      * Remove clientHandler as client is disconnected.
+     *
      * @param clientHandler
      */
     public void removeClientHandler(ClientHandler clientHandler) {
@@ -127,6 +144,7 @@ public class QwirkleServer {
      * Handles starting the server. Takes a port number as
      * argument, on which the server will be listening for
      * clients.
+     *
      * @param args <port>
      */
     public static void main(String[] args) {
@@ -135,7 +153,7 @@ public class QwirkleServer {
         int port = 6090;
 
         // If argument provided
-        if(args.length > 0) {
+        if (args.length > 0) {
 
             try {
                 // Valid port number
