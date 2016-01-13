@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class QwirkleServer {
 
@@ -30,6 +31,35 @@ public class QwirkleServer {
         // Save port
         this.port = port;
 
+        if (this.port == 0) {
+            Scanner sc = new Scanner(System.in);
+            System.out.println("Server setup started...");
+            System.out.println("Please enter port to listen on:");
+
+            while (true) {
+                String line = sc.nextLine();
+                try {
+
+                    // Valid port number
+                    int parsedPort = Integer.parseInt(line, 10);
+
+                    if (parsedPort != 0) {
+                        this.port = parsedPort;
+                        System.out.println("Server configured at localhost:" + this.port);
+                        System.out.println("Server is starting...");
+                        break;
+                    } else {
+                        System.out.println("Invalid port provided, please try again:");
+                    }
+
+                } catch (NumberFormatException e) {
+
+                    // Could not parse int from string
+                    System.out.println("Invalid port provided, please try again:");
+                }
+            }
+        }
+
         // Save host
         try {
             this.host = InetAddress.getLocalHost().getHostAddress();
@@ -39,6 +69,9 @@ public class QwirkleServer {
 
         // Initialize clientHandlers list
         clientHandlers = new ArrayList<ClientHandler>();
+
+        // Start the server
+        this.startServer();
     }
 
     /**
@@ -150,7 +183,7 @@ public class QwirkleServer {
     public static void main(String[] args) {
 
         // Set default port
-        int port = 6090;
+        int port = 0;
 
         // If argument provided
         if (args.length > 0) {
@@ -161,14 +194,12 @@ public class QwirkleServer {
             } catch (NumberFormatException e) {
 
                 // Let user know client is started on default port
-                System.out.println("Provided incorrect port, using default " + port);
+                System.out.println("Provided incorrect port, terminating...");
+                System.exit(0);
             }
         }
 
-        // Create new QwirkleServer
+        // Create and start new QwirkleServer
         QwirkleServer qs = new QwirkleServer(port);
-
-        // Start the server
-        qs.startServer();
     }
 }

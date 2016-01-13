@@ -70,6 +70,7 @@ public class Client extends Thread {
                         System.out.println("Client is starting...");
                         counter++;
                         this.start();
+                        break;
                     } else {
 
                         // Invalid input provided, let user retry
@@ -106,7 +107,7 @@ public class Client extends Thread {
             startInputStream();
 
         } catch (IOException e) {
-            System.out.println("Failed to start client");
+            System.out.println("Failed to start client, check if server is running and if host and port are correct.");
         }
 
     }
@@ -283,9 +284,10 @@ public class Client extends Thread {
             }
 
         } catch (NumberFormatException e) {
+
+            // Could not parse int from string
             return false;
         }
-
     }
 
     /**
@@ -351,7 +353,7 @@ public class Client extends Thread {
             if (host != null) {
                 hostAddress = InetAddress.getByName(host);
             }
-            System.out.println(hostAddress);
+
             // Start client on new thread
             Client c = new Client(name, hostAddress, port);
 
