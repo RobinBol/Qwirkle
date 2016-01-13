@@ -15,8 +15,8 @@ public class Board {
     /* Places a stone if possible.
      * 
      */
-    public boolean setStone(int x, int y, Stone stone) {
-    	if (getStone(x, y) == null) {
+    public boolean placeStone(int x, int y, Stone stone) {
+    	if (isEmptySpot(x, y)) {
     		board.put(Coordinate.getCoordinateHash(x, y), stone);
     		return true;
     	}    	
@@ -33,7 +33,47 @@ public class Board {
      * then places a stone at given position.
      */
     public boolean makeMove(int x, int y, Stone stone) {
+    	if (makeMove(x, y, stone.getShape(), stone.getColor())) {
+    		return true;
+    	}
+    	return false;
+    }
+    
+    public boolean makeMove(int x, int y, char shape, char color) {
+    	//if it is the first move on the board.
+    	if (isEmptyBoard()) {
+    		if (x == 0 && y == 0) {
+    			//TODO: Not sure if the new stone might create duplicate cases. Make sure this is addressed in player.
+    			placeStone(x, y, new Stone(shape, color));
+    		}
+    		//not the first tile on 0,0;
+    		//TODO: Announce to player that it is an invalid move for the first turn?
+    		//Or just do this in the player object.
+    		
+    		//System.out.println("Invalid first move");
+    		return false;
+    	}
     	
+    	
+    	return false;
+    }
+    
+    
+    public boolean isEmptyBoard() {
+    	return board.isEmpty();
+    }
+    
+    public boolean isEmptySpot(int x, int y) {
+    	if (getStone(x, y) == null) {
+    		return true;
+    	} 
+    	return false;
+    }
+    
+    /*
+     * returns if a position is next to an alreadplaced stone.
+     */
+    public boolean isConnected(int x, int y) {
     	return false;
     }
     

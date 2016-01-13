@@ -18,4 +18,13 @@ public class Player {
     public boolean makeMove() {
     	return false;
     }
+    
+    //only if board is empty.
+    public Stone[] tradeStones(Stone [] stones) {
+    	return null;
+    }
+    
+    public void skipTurn() {
+    	
+    }
 }

@@ -7,6 +7,8 @@ public class Stone {
 	
 	private char shape, color;
 	
+	public Stone up, down, left, right;	
+	
 	//Round, X, Diamond, Square, Star, Plus.
 	public static final char[] shapes = {'r','x','d','s','*','+'};
 	//Red, Orange, Yellow, Green, Blue, Purple.
@@ -15,6 +17,7 @@ public class Stone {
 	public Stone(char shape, char color) {
 		this.shape = shape;
 		this.color = color;
+		//Maybe save the coordinates?
 	}
 	
 	//might be unfair distribution due to how type casting works to int.
@@ -24,6 +27,14 @@ public class Stone {
 	
 	public static char getRandomColor() {
 		return colors[(int)(Math.random() * (colors.length + 0.99999))];
+	}
+	
+	public char getShape() {
+		return this.shape;
+	}
+	
+	public char getColor() {
+		return this.color;
 	}
 
 }
