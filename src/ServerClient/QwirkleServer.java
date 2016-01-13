@@ -5,6 +5,8 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,10 +50,8 @@ public class QwirkleServer {
      * @return success (of server startup)
      */
     public void startServer() {
-
         try {
 
-            //TODO handle accepting clients that do not have security feature
             // Create SSLServerSocket
             SSLServerSocketFactory sslserversocketfactory =
                     (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
@@ -59,7 +59,7 @@ public class QwirkleServer {
                     (SSLServerSocket) sslserversocketfactory.createServerSocket(port);
 
             // Server startup success
-            System.out.println("ServerClient.QwirkleServer started at " + this.host + ":" + this.port);
+            System.out.println("QwirkleServer started at " + this.host + ":" + this.port);
 
             // Keep listening for incoming client connections
             while (true) {
@@ -74,14 +74,16 @@ public class QwirkleServer {
                     clientHandler.start();
 
                 } catch (IOException e) {
+
+                    // Could not make connection with client
                     System.out.println("Failed to establish a connection with the client:");
-                    e.printStackTrace();
                 }
             }
 
         } catch (IOException e) {
-            System.out.println("Failed to start ServerClient.QwirkleServer at:" + this.port);
-            e.printStackTrace();
+
+            // Could not create ServerSocket
+            System.out.println("Failed to create ServerSocket at:" + this.port);
         }
     }
     //TODO see method stubs below
@@ -96,7 +98,7 @@ public class QwirkleServer {
 
 
     /**
-     * Sends message to all clientHandlers
+     * Sends message to all clientHandlers.
      * @param message Message to send
      */
     public void broadcast(String message) {
@@ -105,21 +107,37 @@ public class QwirkleServer {
         }
     }
 
+    /**
+     * Add clientHandler to internal list of handlers.
+     * @param clientHandler
+     */
     public void addClientHandler(ClientHandler clientHandler) {
         this.clientHandlers.add(clientHandler);
     }
 
+    /**
+     * Remove clientHandler as client is disconnected.
+     * @param clientHandler
+     */
     public void removeClientHandler(ClientHandler clientHandler) {
         this.clientHandlers.remove(clientHandler);
     }
 
+    /**
+     * Handles starting the server. Takes a port number as
+     * argument, on which the server will be listening for
+     * clients.
+     * @param args <port>
+     */
     public static void main(String[] args) {
 
-        // Check if valid port provided
+        // Set default port
         int port = 6090;
-        if(args.length > 0) {
-            try {
 
+        // If argument provided
+        if(args.length > 0) {
+
+            try {
                 // Valid port number
                 port = Integer.parseInt(args[0], 10);
             } catch (NumberFormatException e) {
@@ -129,8 +147,10 @@ public class QwirkleServer {
             }
         }
 
-        // Create new ServerClient.QwirkleServer
+        // Create new QwirkleServer
         QwirkleServer qs = new QwirkleServer(port);
+
+        // Start the server
         qs.startServer();
     }
 }
