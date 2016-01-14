@@ -28,7 +28,18 @@ public class Board {
     	return false;
     }
     
-    public Stone getStone(int x, int y) {
+    /*
+	 * Take stone from the bag.
+	 */
+	public Stone[] getFirstHand() {
+		Stone[] hand = new Stone[Game.MAXHANDSIZE];
+		for (int i = 0; i < Game.MAXHANDSIZE; i++) {
+			hand[i] = bag.takeStone();
+		}
+		return hand;
+	}
+
+	public Stone getStone(int x, int y) {
     	return board.get(Coordinate.getCoordinateHash(x, y));
     }
     
@@ -53,7 +64,7 @@ public class Board {
     	if (isEmptyBoard()) {
     		if (x == 0 && y == 0) {
     			//TODO: Not sure if the new stone might create duplicate cases. Make sure this is addressed in player.
-    			placeStone(x, y, new Stone(shape, color));
+    			placeStone(x, y, new Stone(shape, color, x, y));
     		}
     		//not the first tile on 0,0;
     		//TODO: Announce to player that it is an invalid move for the first turn?
@@ -79,30 +90,81 @@ public class Board {
     	return false;
     }
     
+    public boolean isValidMove(Stone[] stones) {
+    	if(!inSameRow(stones)) return false;
+    	if(!areConnected(stones)) return false;
+    	if(takeOccupiedPlaces(stones)) return false;
+    	
+    	return true;
+    }
+    
     /*
+	 * Tests if the stones in array (moves) are in connected to each other.
+	 */
+	public boolean areConnected(Stone[] stones) {
+		if(!inSameRow(stones)) return false;    	
+		int lowestX = Integer.MAX_VALUE;
+		int lowestY = Integer.MAX_VALUE;
+		int highestX = Integer.MIN_VALUE;
+		int highestY = Integer.MIN_VALUE;
+		Stone first = stones[0];
+		for (int i = 0; i < stones.length; i ++) {
+			if (first.getY() == stones[i].getY()) {
+				lowestX = Math.min(lowestX, stones[i].getX());
+				highestX = Math.max(highestX, stones[i].getX());
+			}
+			if (first.getX() == stones[i].getX()) {
+				lowestY = Math.min(lowestY, stones[i].getY());
+				highestY = Math.max(highestY, stones[i].getY());
+			}
+		}
+		//System.out.println(stones.length);
+		//System.out.println(lowestX);
+		return ((highestX -lowestX) + 1 == stones.length || (highestY -lowestY) + 1 == stones.length);
+	}
+
+	public boolean inSameRow(Stone[] stones) {
+		int amountSameX = 0;
+		int amountSameY = 0;
+		Stone first = stones[0];
+		for (Stone stone : stones) {
+			if (first.getX() == stone.getX()) {
+				amountSameX++;
+			}
+			if (first.getY() == stone.getY()) {
+				amountSameY++;
+			}
+		}
+		return (amountSameX == stones.length || amountSameY == stones.length);
+	}
+
+	/*
      * returns if a position is next to an already placed stone.
      */
     public boolean isConnected(int x, int y) {
     	return false;
     }
     
-    /*
-     * Take stone from the bag.
-     */
-    public Stone[] getFirstHand() {
-    	Stone[] hand = new Stone[Game.MAXHANDSIZE];
-    	for (int i = 0; i < Game.MAXHANDSIZE; i++) {
-    		hand[i] = bag.takeStone();
-    	}
-    	return hand;
-    }
-    
-    public void createTestMap() {
+    public boolean takeOccupiedPlaces(Stone[] stones) {
+		for (Stone stone : stones) {
+			String positionHash = Coordinate.getCoordinateHash(stone.getX(), stone.getY());
+			if (board.containsKey(positionHash)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void createTestMap() {
     	for (int i = -2; i < 4; i++) {
     		//test purpose only, is not valid according to game rules.
-        	board.put(Coordinate.getCoordinateHash(i, 0), new Stone(Stone.getRandomShape(), Stone.getRandomColor())); 
+        	board.put(Coordinate.getCoordinateHash(i, 0), new Stone(Stone.getRandomShape(), Stone.getRandomColor(),i ,0)); 
 		}
     }
+	
+	public void resetMap() {
+		board.clear();
+	}
     
     public int[] getBoardWidthHeight() {
     	if (isEmptyBoard()) return new int[] {0,0};

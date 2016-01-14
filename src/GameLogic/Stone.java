@@ -1,11 +1,14 @@
 package GameLogic;
 
+import java.lang.reflect.GenericArrayType;
+
 public class Stone {
 	
 	//maybe unique id?
 	private int id;
 	
 	private char shape, color;
+	private int x, y;
 	
 	public Stone up, down, left, right;	
 	
@@ -14,9 +17,11 @@ public class Stone {
 	//Red, Orange, Yellow, Green, Blue, Purple.
 	public static final char[] colors = {'r','o','y','g','b','p'};
 	
-	public Stone(char shape, char color) {
+	public Stone(char shape, char color, int x, int y) {
 		this.shape = shape;
 		this.color = color;
+		this.x = x;
+		this.y = y;
 		//Maybe save the coordinates?
 	}
 	
@@ -35,6 +40,14 @@ public class Stone {
 	
 	public char getColor() {
 		return this.color;
+	}
+	
+	public int getX() {
+		return x;
+	}
+	
+	public int getY() {
+		return y;
 	}
 	
 	public String toString() {

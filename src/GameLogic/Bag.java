@@ -18,7 +18,7 @@ public class Bag {
     	for (int i = 0; i < Stone.shapes.length; i++) {
     		for (int j = 0; j < Stone.colors.length; j++) {
     			for (int j2 = 0; j2 < AMOUNTOFEACH; j2++) {
-    				stones.add(new Stone(Stone.shapes[i], Stone.colors[j]));
+    				stones.add(new Stone(Stone.shapes[i], Stone.colors[j],-1 ,-1));
 				}				
 			}			
 		}
