@@ -55,8 +55,8 @@ public class BoardTest {
 	@Test
 	public void validMoveTest() {
 		board.resetMap();
-		Stone[] valid = new Stone[] {new Stone('x', 'b', -1, 1), new Stone('x', 'b', 0, 1), new Stone('x', 'b', 1, 1)};
-		Stone[] valid2 = new Stone[] {new Stone('x', 'b', 1, 0), new Stone('x', 'b', 2, 0), new Stone('x', 'b', 3, 0)};
+		Stone[] valid = new Stone[] {new Stone('x', 'b', -1, 1), new Stone('x', 'o', 0, 1), new Stone('x', 'y', 1, 1)};
+		Stone[] valid2 = new Stone[] {new Stone('x', 'b', 1, 0), new Stone('+', 'b', 2, 0), new Stone('*', 'b', 3, 0)};
 		Stone[] inValid = new Stone[] {new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 1), new Stone('x', 'b', 1, 0)};
 		Stone[] inValid2 = new Stone[] {new Stone('x', 'b', 0, 0), new Stone('x', 'b', 1, 1), new Stone('x', 'b', 2, 2)};
 		
@@ -68,8 +68,8 @@ public class BoardTest {
 	
 	@Test
 	public void shapeColorTest() {
-		Stone[] valid = new Stone[] {new Stone('x', 'b', -1, 1), new Stone('x', 'd', 0, 1), new Stone('x', 'c', 1, 1)};
-		Stone[] valid2 = new Stone[] {new Stone('x', 'b', 1, 0), new Stone('e', 'b', 2, 0), new Stone('r', 'b', 3, 0)};
+		Stone[] valid = new Stone[] {new Stone('x', 'b', -1, 1), new Stone('x', 'o', 0, 1), new Stone('x', 'y', 1, 1)};
+		Stone[] valid2 = new Stone[] {new Stone('x', 'b', 1, 0), new Stone('+', 'b', 2, 0), new Stone('*', 'b', 3, 0)};
 		Stone[] inValid = new Stone[] {new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 1), new Stone('x', 'b', 1, 0)};
 		Stone[] inValid2 = new Stone[] {new Stone('x', 'b', 0, 0), new Stone('x', 'c', 1, 1), new Stone('r', 'c', 2, 2)};
 		

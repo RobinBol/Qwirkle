@@ -73,8 +73,6 @@ public class Board {
     		//System.out.println("Invalid first move");
     		return false;
     	}
-    	
-    	
     	return false;
     }
     
@@ -91,9 +89,11 @@ public class Board {
     }
     
     public boolean isValidMove(Stone[] stones) {
+    	if(!areValidStones(stones)) return false;
     	if(!inSameRow(stones)) return false;
     	if(!areConnected(stones)) return false;
     	if(takeOccupiedPlaces(stones)) return false;
+    	if(!validShapeColorCombination(stones)) return false;
     	
     	return true;
     }
@@ -151,6 +151,13 @@ public class Board {
 			}
 		}
 		return (amountSameShape == stones.length && amountSameColor == 1) || (amountSameColor == stones.length && amountSameShape == 1);
+	}
+	
+	public boolean areValidStones(Stone[] stones) {
+		for (int i = 0; i < stones.length; i++) {
+			if (!stones[i].isValidStone()) return false;
+		}
+		return true;
 	}
 
 	/*
