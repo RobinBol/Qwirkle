@@ -1,27 +1,39 @@
 package GameLogic;
 
-import ServerClient.ClientHandler;
-import GameLogic.Game;
+import Server.ClientHandler;
+import Server.QwirkleServer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * When a client enters the server, it is placed in a lobby.
+ * These lobbies have a fixed size, to prevent overloaded
+ * lobbies. When a lobby is full a new lobby will be created,
+ * and the client will be placed there. The lobby handles searching
+ * for a matching game and will start it when found.
+ */
 public class Lobby {
     private static final int LOBBYSIZE = 8;
     private static int id;
     private List<ClientHandler> lobbyClients;
+    private QwirkleServer server;
 
     //TODO add invitation system
-    
+
     /**
-     * Lobby constructor, takes an id to create
-     * a new lobby.
-     *
-     * @param id Lobby id
+     * Lobby constructor that takes an id to keep
+     * a reference to it, and a server, to communicate
+     * with.
+     * @param id
+     * @param server
      */
-    public Lobby(int id) {
+    public Lobby(int id, QwirkleServer server) {
         this.id = id;
         this.lobbyClients = new ArrayList<>();
+        this.server = server;
     }
 
     /**
@@ -31,18 +43,71 @@ public class Lobby {
      */
     public void startGame(ArrayList<ClientHandler> clients) {
 
-        // Start game for those who don't care
-        Game game = new Game(clients);
+//        Code below can be commented out if we want to wait some time
+//        before starting the game, to give players a chance to
+//        disconnect/decline.
 
-        // Loop over all clients in newly created game
+//        for (int i = 0; i < clients.size(); i++) {
+//            clients.get(i).sendMessage("Game was found, players: " + clients + " game will start in 10 seconds. If you don't want to play this game, please disconnect.");
+//        }
+//
+//        // Wait for 12 seconds
+//        try {
+//            Thread.sleep(12000);
+//        } catch(InterruptedException ex) {
+//            Thread.currentThread().interrupt();
+//        }
+
+        // Check if clients are still present
+        boolean clientsPresent = true;
+
+        // Loop over all clients in this lobby
         for (int i = 0; i < clients.size(); i++) {
 
-            // And remove them from the lobby
-            this.removeClient(clients.get(i));
+            // Check if this lobby has this client
+            if (!this.hasClient(clients.get(i))) {
+
+                // If not make sure game will not start
+                clientsPresent = false;
+                break;
+            }
         }
 
-        // Empty gameType list
-        clients.clear();
+        // If all clients still present
+        if (clientsPresent) {
+
+            // Start game with clients
+            Game game = new Game(clients, this);
+
+            // Loop over all clients in newly created game
+            for (int j = 0; j < clients.size(); j++) {
+
+                // Send package to client to indicate game started
+                clients.get(j).sendGameStarted(clients);
+
+                // And remove them from the lobby
+                this.removeClient(clients.get(j));
+            }
+
+            // Empty gameType list
+            clients.clear();
+        }
+        // Indicate a client has left
+        else {
+
+            // Client left
+            for (int i = 0; i < clients.size(); i++) {
+
+                // Indicate to client that game has ended
+                clients.get(i).sendGameEnd("DISCONNECT");
+
+                // Also send a message to request a new game
+                clients.get(i).requestGameType();
+            }
+
+            // Empty gameType list
+            clients.clear();
+        }
     }
 
     /**
@@ -51,12 +116,8 @@ public class Lobby {
      */
     public void searchForGame() {
 
-        // Create array lists for each type of game
-        ArrayList<ClientHandler> gameTypeZero = new ArrayList<>();
-        ArrayList<ClientHandler> gameTypeOne = new ArrayList<>();
-        ArrayList<ClientHandler> gameTypeTwo = new ArrayList<>();
-        ArrayList<ClientHandler> gameTypeThree = new ArrayList<>();
-        ArrayList<ClientHandler> gameTypeFour = new ArrayList<>();
+        // Create Map that holds all game types and clients
+        Map<Integer, ArrayList<ClientHandler>> games = new HashMap<>();
 
         // Loop over all existing clients and check if match can be made
         for (int i = 0; i < lobbyClients.size(); i++) {
@@ -64,45 +125,41 @@ public class Lobby {
             // Get game type from client
             int requestsGameType = this.lobbyClients.get(i).getRequestsGameType();
 
-            // Add client to desired gameType
-            if (requestsGameType == 0) {
-                gameTypeZero.add(this.lobbyClients.get(i));
+            // Add client to proper gameType in map
+            if (games.containsKey(requestsGameType)) {
+                games.get(requestsGameType).add(this.lobbyClients.get(i));
+            } else {
+                ArrayList<ClientHandler> clients = new ArrayList<>();
+                clients.add(this.lobbyClients.get(i));
+                games.put(requestsGameType, clients);
+            }
 
-                // We have a match
-                if (gameTypeZero.size() >= 2) {
-                    startGame(gameTypeZero);
-                }
-            } else if (requestsGameType == 1) {
-                gameTypeOne.add(this.lobbyClients.get(i));
+            // Loop over all clients in their game map
+            for (int key : games.keySet()) {
+                int gameType = key;
+                ArrayList<ClientHandler> clients = games.get(key);
 
-                // We have a match
-                if (gameTypeOne.size() > 0) {
-                    //TODO start game against AI
-                    System.out.println("Start game with AI, this is not implemented yet.");
-                }
-            } else if (requestsGameType == 2) {
-                gameTypeTwo.add(this.lobbyClients.get(i));
-
-                // We have a match
-                if (gameTypeTwo.size() == 2) {
-                    startGame(gameTypeTwo);
-                }
-            } else if (requestsGameType == 3) {
-                gameTypeThree.add(this.lobbyClients.get(i));
-
-                // We have a match
-                if (gameTypeThree.size() == 3) {
-                    startGame(gameTypeThree);
-                }
-            } else if (requestsGameType == 4) {
-                gameTypeFour.add(this.lobbyClients.get(i));
-
-                // We have a match
-                if (gameTypeFour.size() == 4) {
-                    startGame(gameTypeFour);
+                // Check if a game match can be found
+                if (gameType == 0 && clients.size() >= 2) {
+                    startGame(clients);
+                } else if (gameType == 1 && clients.size() == 1) {
+                    //TODO implement AI player
+                    //TODO add AI player to clients and start game
+//                    startGame(clients);
+                } else if (clients.size() == gameType) {
+                    startGame(clients);
                 }
             }
         }
+    }
+
+    /**
+     * Let server know a game has started with the
+     * specified clients.
+     * @param clients Clients in game
+     */
+    public void gameStarted(ArrayList<ClientHandler> clients) {
+        this.server.logGameStarted(clients);
     }
 
     /**
@@ -111,8 +168,9 @@ public class Lobby {
      * @param clientHandler Client to be added
      */
     public void addClient(ClientHandler clientHandler) {
+
+        // Add client to lobby
         lobbyClients.add(clientHandler);
-        System.out.println("Client: " + clientHandler.getClientName() + " was added to lobby: #" + this.getID());
     }
 
     /**
@@ -160,18 +218,10 @@ public class Lobby {
 
     /**
      * Check if lobby is empty
+     *
      * @return true if empty
      */
     public boolean isEmpty() {
         return lobbyClients.size() == 0;
-    }
-
-    /**
-     * Get id of this lobby.
-     *
-     * @return int lobby id
-     */
-    public int getID() {
-        return this.id;
     }
 }

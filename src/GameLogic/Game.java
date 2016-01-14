@@ -1,8 +1,9 @@
 package GameLogic;
 
-import ServerClient.ClientHandler;
+import Server.ClientHandler;
 
 import java.util.ArrayList;
+
 
 public class Game {
 	
@@ -11,11 +12,17 @@ public class Game {
     private Player[] players;
     private Board board;
 
-    public Game(ArrayList<ClientHandler> clients) {
-    	
-        System.out.println("Started a game with:");
-        System.out.println(clients);
-        
+    public Game(ArrayList<ClientHandler> clients, Lobby lobby) {
+
+        // Let lobby know game started
+        lobby.gameStarted(clients);
+
+        // TODO check if socket connection to all clients in the game still works
+        // TODO if not make sure game ends properly
+        // TODO handle properly when a client disconnects:
+        //clients.get(i).sendGameEnd("DISCONNECT");
+
+
         players = new Player[clients.size()];
         board = new Board();
         

@@ -1,4 +1,4 @@
-package ServerClient;
+package Server;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -9,16 +9,30 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import GameLogic.Lobby;
+import Protocol.Protocol;
 
+/**
+ * Class that handles the server. It starts a server,
+ * either directly from commandline, or it starts a setup
+ * process where it asks the user for input. It will handle
+ * all incoming clients, creating ClientHandlers for each incoming
+ * client. Besides that it will direct users to proper lobbies,
+ * where games can be found and started.
+ */
 public class QwirkleServer {
 
+    /* Variables needed to start the server */
     private static int port;
     private static String host;
+
+    /* Variables that keep track of the clients and lobbies */
     private List<ClientHandler> clientHandlers;
     private List<Lobby> lobbies;
+
+    /* ServerLog instance */
+    private ServerLog log;
 
     //TODO add features below when added
     private static String[] FEATURES = new String[]{Protocol.Server.Features.SECURITY};
@@ -30,49 +44,28 @@ public class QwirkleServer {
      * and port number. Then it will start the server.
      *
      * @param port Port number to listen on by server
+     * @param log ServerLog instance, handling all logging
      */
-    public QwirkleServer(int port) {
+    public QwirkleServer(int port, ServerLog log) {
+
+        // Let user know server is starting
+        log.serverSetupStarted();
 
         // Initialize and set certificate credentials for SSL connection
         System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir").replace("src", "") + "/certs/key.jks");
         System.setProperty("javax.net.ssl.keyStorePassword", "password");
 
-        // Save port
-        this.port = port;
+        // Add log middleware
+        this.log = log;
 
-        if (this.port == 0) {
-            Scanner sc = new Scanner(System.in);
-            System.out.println("Server setup started...");
-            System.out.println("Please enter port to listen on:");
+        // Get/save port
+        this.port = (this.port == 0) ? log.askForPort() : port;
 
-            while (true) {
-                String line = sc.nextLine();
-                try {
-                    // Valid port number
-                    int parsedPort = Integer.parseInt(line, 10);
-
-                    if (parsedPort != 0) {
-                        this.port = parsedPort;
-                        System.out.println("Server configured at localhost:" + this.port);
-                        System.out.println("Server is starting...");
-                        break;
-                    } else {
-                        System.out.println("Invalid port provided, please try again:");
-                    }
-
-                } catch (NumberFormatException e) {
-
-                    // Could not parse int from string
-                    System.out.println("Invalid port provided, please try again:");
-                }
-            }
-        }
-
-        // Save host
+        // Get/save host
         try {
             this.host = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            this.log.serverStartupFailed(this.host, this.port);
         }
 
         // Initialize clientHandlers list
@@ -100,7 +93,7 @@ public class QwirkleServer {
                     (SSLServerSocket) sslserversocketfactory.createServerSocket(port);
 
             // Server startup success
-            System.out.println("QwirkleServer started at " + this.host + ":" + this.port);
+            log.serverStarted(this.host, this.port);
 
             // Keep listening for incoming client connections
             while (true) {
@@ -108,52 +101,36 @@ public class QwirkleServer {
                 // Accept incoming
                 SSLSocket sslsocket = (SSLSocket) sslserversocket.accept();
 
-                // Create clientHandler for incoming client
                 try {
+                    // Create clientHandler for incoming client
                     ClientHandler clientHandler = new ClientHandler(this, sslsocket);
                     addClientHandler(clientHandler);
+
+                    // Start it on separate thread
                     clientHandler.start();
 
                 } catch (IOException e) {
 
                     // Could not make connection with client
-                    System.out.println("Failed to establish a connection with the client:");
+                    log.failedConnectionWithClient();
                 }
             }
 
         } catch (BindException e) {
-            Scanner sc = new Scanner(System.in);
-            System.out.println("The port you entered is already in use, please choose a different one:");
 
-            // Listen for new port
-            while (true) {
-                String line = sc.nextLine();
-                try {
+            // Log port in use
+            log.portInUse();
 
-                    // Valid port number
-                    int parsedPort = Integer.parseInt(line, 10);
+            // Ask for new port
+            this.port = log.askForPort();
 
-                    if (parsedPort != 0) {
-                        this.port = parsedPort;
-                        System.out.println("Server configured at localhost:" + this.port);
-                        System.out.println("Server is starting...");
-                        this.startServer();
-                        break;
-                    } else {
-                        System.out.println("Invalid port provided, please try again:");
-                    }
+            // Afterwards start the server
+            this.startServer();
 
-                } catch (NumberFormatException e2) {
-
-                    // Could not parse int from string
-                    System.out.println("Invalid port provided, please try again:");
-                }
-            }
         } catch (IOException e) {
 
             // Could not create ServerSocket
-            System.out.println("Failed to create ServerSocket at:" + this.port);
-            e.printStackTrace();
+            log.serverStartupFailed(this.host, this.port);
         }
     }
 
@@ -191,7 +168,7 @@ public class QwirkleServer {
      *
      * @param message    Message to send
      * @param clientName if provided, the broadcast will skip
-     *                   this client
+     *                   the client provided
      */
     public void broadcast(String message, String clientName) {
         for (int i = 0; i < clientHandlers.size(); i++) {
@@ -208,7 +185,7 @@ public class QwirkleServer {
      * @param name Name user wishes to use
      * @return true if name exists in server already
      */
-    public boolean doesUsernameAlreadyExist(String name) {
+    public boolean usernameAlreadyExist(String name) {
         for (int i = 0; i < clientHandlers.size(); i++) {
             if (name.equals(this.clientHandlers.get(i).getClientName())) {
                 return true;
@@ -226,7 +203,7 @@ public class QwirkleServer {
     public Lobby createLobby() {
 
         // Create new lobby with id
-        Lobby lobby = new Lobby(lobbies.size() + 1);
+        Lobby lobby = new Lobby(lobbies.size() + 1, this);
 
         // Add it to internal list
         addLobby(lobby);
@@ -323,23 +300,45 @@ public class QwirkleServer {
             // If no lobby found with room left, create new one
             Lobby lobby = createLobby();
 
-            System.out.println("Run addClientToLobby for: " + client.getClientName());
             // And add player
             lobby.addClient(client);
         }
 
-        // Create parameters list
-        ArrayList<Object> parameters = new ArrayList<>();
+        // Ask client what game he would play
+        client.requestGameType();
+    }
 
-        // Loop over all features this client supports
-        for (int i = 0; i < this.FEATURES.length; i++) {
+    /**
+     * Getter for the server features.
+     * @return String array holding the features
+     */
+    public String[] getFeatures() {
+        return this.FEATURES;
+    }
 
-            // Add them to the parameters
-            parameters.add(this.FEATURES[i]);
-        }
+    /**
+     * All functions below act as a gate to the logger,
+     * this is necessary as lobbies, and clients need
+     * to be able to trigger logging on the server.
+     */
+    public void clientAnnounceFailed(){
+        this.log.clientFailedToAnnounce();
+    }
 
-        // Send confirming handshake to client
-        client.sendMessage(ProtocolHandler.createPackage(Protocol.Server.HALLO, parameters));
+    public void logIncomingMessage(String message, String clientName){
+        this.log.incomingMessage(message, clientName);
+    }
+
+    public void logClientDisconnected(String clientName) {
+        this.log.clientDisconnected(clientName);
+    }
+
+    public void logFailedToCloseClient(String clientName) {
+        this.log.failedToCloseClient(clientName);
+    }
+
+    public void logGameStarted(ArrayList<ClientHandler> clients) {
+        this.log.gameStarted(clients);
     }
 
     /**
@@ -350,6 +349,13 @@ public class QwirkleServer {
      * @param args <port>
      */
     public static void main(String[] args) {
+
+        // Create tui and log unit
+        ServerTUI tui = new ServerTUI();
+        ServerLog log = new ServerLog();
+
+        // Add tui as observer
+        log.addObserver(tui);
 
         // Set default port
         int port = 0;
@@ -362,13 +368,15 @@ public class QwirkleServer {
                 port = Integer.parseInt(args[0], 10);
             } catch (NumberFormatException e) {
 
-                // Let user know client is started on default port
-                System.out.println("Provided incorrect port, terminating...");
+                // Let user know port is incorrect
+                log.portIncorrect();
+
+                // Exit application
                 System.exit(0);
             }
         }
 
         // Create and start new QwirkleServer
-        QwirkleServer qs = new QwirkleServer(port);
+        QwirkleServer qs = new QwirkleServer(port, log);
     }
 }

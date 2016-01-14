@@ -1,9 +1,9 @@
-package ServerClient;
+package Protocol;
 
 public class Protocol {
     public static class Client {
         /**
-         * <h3 id="client">ServerClient.Client</h3>
+         * <h3 id="client">Client.Client</h3>
          */
 
         /**

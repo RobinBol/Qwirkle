@@ -1,24 +1,38 @@
-package ServerClient;
+package Client;
+
+import Protocol.Protocol;
+import Protocol.ProtocolHandler;
 
 import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
-import java.util.Scanner;
 
+/**
+ * Client class that can work standalone. It can connect
+ * to a qwirkle server and using the protocol communicate.
+ * It will try to connect over SSL, it that fails it falls
+ * back to a regular socket. This client runs on a separate
+ * thread.
+ */
 public class Client extends Thread {
+
+    /* Variables that identify a client, and its host*/
     private static String name;
     private static String host;
     private static int port;
+
+    /* Instance variables of Socket, I/O and logger*/
     private Socket socket;
     private BufferedReader in;
     private BufferedWriter out;
+    private ClientLog log;
 
     //TODO add features below when added
+    /* Features variable, holding the features this client supports*/
     private static String[] FEATURES = new String[]{Protocol.Server.Features.SECURITY};
 
     /**
@@ -28,76 +42,29 @@ public class Client extends Thread {
      * @param host Host to connect client to
      * @param port Port to connect on at host
      */
-    public Client(String name, InetAddress host, int port) {
-        this.name = name;
-        if (host != null) this.host = host.getHostAddress();
-        this.port = port;
+    public Client(String name, InetAddress host, int port, ClientLog log) {
 
-        // Check if parameters set on commandline, if not ask for them
+        // If variables provided as parameters use them
+        if (log != null) this.log = log;
+        if (name != null) this.name = name;
+        if (host != null) this.host = host.getHostAddress();
+        if (port != 0) this.port = port;
+
+        // Check if parameters are already set on commandline, if not ask for them
         if (this.name == null && this.host == null && this.port == 0) {
 
-            // Scan the input
-            Scanner sc = new Scanner(System.in);
-            System.out.println("Client setup started...");
-            System.out.println("Please enter your username:");
-
-            int counter = 0;
-            while (true) {
-                String line = sc.nextLine();
-
-                // Ask for username
-                if (counter == 0) {
-                    if (line.length() > 15) {
-                        System.out.println("Please use 15 characters or less, try again:");
-                    } else {
-                        this.name = line;
-                        System.out.println("Please enter the server host IP address:");
-                        counter++;
-                    }
-                }
-                // Ask for server host
-                else if (counter == 1) {
-
-                    // Check for valid IP
-                    if (checkForValidIP(line)) {
-                        this.host = line;
-                        System.out.println("Please enter the server port:");
-                        counter++;
-                    } else {
-                        System.out.println("Invalid hostname/ipaddress provided, please try again:");
-                    }
-                }
-                // Ask for server port
-                else if (counter == 2) {
-
-                    // Check for valid port
-                    if (checkForValidPort(line)) {
-                        this.port = Integer.parseInt(line, 10);
-                        System.out.println("Client setup: name: " + this.name + " host: " + this.host + " port: " + this.port);
-                        System.out.println("Client is starting...");
-                        counter++;
-                        this.start();
-
-                        // Input is done, break out
-                        break;
-                    } else {
-
-                        // Invalid input provided, let user retry
-                        System.out.println("Provided incorrect port, please try again:");
-                    }
-                }
-            }
+            // Start setup process, and ask for correct input
+            this.log.clientSetupStarted();
+            this.name = this.log.askForUsername();
+            this.host = this.log.askForHostAddress();
+            this.port = this.log.askForPort();
         }
-        // User entered parameters on commandline, start client
-        else {
 
-            // Client was already setup using cmdline parameters
-            System.out.println("Client setup: name: " + this.name + " host: " + this.host + " port: " + this.port);
-            System.out.println("Client is starting...");
+        // Let user know client setup started
+        this.log.clientSetupStarted(this.name, this.host, this.port);
 
-            // Start client
-            this.start();
-        }
+        // All parameters set, start client thread
+        this.start();
     }
 
     /**
@@ -117,13 +84,14 @@ public class Client extends Thread {
             // Announce client to server
             this.announce();
 
-            System.out.println("Client started at " + this.host + ":" + this.port);
+            // Show in TUI client has started
+            this.log.clientStarted(this.host, this.port);
 
             // Start reading for incoming messages
             startInputStream();
 
         } catch (IOException e) {
-            System.out.println("Failed to start client, check if server is running and if host and port are correct.");
+            this.log.clientStartupFailed();
         }
     }
 
@@ -139,7 +107,7 @@ public class Client extends Thread {
         } catch (SSLException e) {
 
             // When Client uses SSL socket but server doesn't
-            System.out.println("It appears the server does not support SSL. Please use a regular socket connection");
+            this.log.noSSLSupport();
 
             // Switch this client to use a regular socket and reconnect
             switchToRegularSocket();
@@ -147,7 +115,7 @@ public class Client extends Thread {
         } catch (IOException e) {
 
             // When message could not be delivered
-            System.out.println("Failed to send message: " + message);
+            this.log.failedToSendMessage(message);
         }
     }
 
@@ -195,7 +163,7 @@ public class Client extends Thread {
         } catch (IOException e) {
 
             // When i/o could not be created
-            System.out.println("Failed to establish I/O streams");
+            this.log.failedToSetupIOStreams();
         }
     }
 
@@ -206,13 +174,13 @@ public class Client extends Thread {
     public void startInputStream() {
 
         // Start reading incoming messages
-        String incomingValue;
+        String incomingValue = null;
         try {
             // While there are messages to be read
-            while ((incomingValue = in.readLine()) != null && incomingValue != "") {
+            while ((incomingValue = in.readLine()) != null && incomingValue != "" && incomingValue != "\\n" && incomingValue != "\\n\\n") {
 
                 // Log message if present
-                if (!incomingValue.isEmpty()) System.out.println("Incoming: " + incomingValue);
+                if (!incomingValue.isEmpty()) this.log.incomingMessage(incomingValue);
 
                 // TODO handle incoming messages from the server
                 // TODO readPackage and parse errors
@@ -233,7 +201,7 @@ public class Client extends Thread {
         } catch (IOException | NoSuchElementException e) {
 
             // When something failed while reading a message
-            System.out.println("Could not handle message from server.");
+            this.log.failedToParseMessage(incomingValue);
         }
     }
 
@@ -246,42 +214,46 @@ public class Client extends Thread {
 
         // Username already exists
         if (errorCode == 4) {
-            System.out.println("Username already exists, please reconnect with a different name");
+            this.log.usernameExists();
             System.exit(0);
         }
     }
 
+    /**
+     * Let the client enter a preferred game type and
+     * send it to the server.
+     */
     public void askForGameType() {
-        System.out.println("Please request a game type by typing the number of your choice:\n[0] I don't care...\n[1] Versus AI\n[2] Versus one other players\n[3] Versus two other players\n[4] Versus three other players");
-        Scanner sc = new Scanner(System.in);
-        String line;
-        while (true) {
-            line = sc.nextLine();
+        int gameType = this.log.askForGameType();
 
-            if (line.trim().equals("0") || line.trim().equals("1") || line.trim().equals("2")
-                    || line.trim().equals("3") || line.trim().equals("4")) {
-                break;
-            } else {
-                System.out.println("Invalid option, please try again (type number of your choice:");
-            }
+        //TODO implement gameType 5
+//        if (gameType == 5) {
+//            this.log.askForOpponent();
+//        }
+
+        // Parse gameTyp to string representation
+        String gameTypeName = "none";
+        if (gameType == 0) {
+            gameTypeName = "random";
+        } else if (gameType == 1) {
+            gameTypeName = "against a computer oponent";
+        } else if (gameType == 2) {
+            gameTypeName = "against one human player";
+        } else if (gameType == 3) {
+            gameTypeName = "against two human players";
+        } else if (gameType == 4) {
+            gameTypeName = "against three human players";
         }
+//        else if (gameType == 5) {
+//            gameTypeName = "against a challenged opponent";
+//        }
 
-        String gameType = "none";
-        if (line.trim().equals("0")) {
-            gameType = "random";
-        } else if (line.trim().equals("1")) {
-            gameType = "against a computer oponent";
-        } else if (line.trim().equals("2")) {
-            gameType = "against one human player";
-        } else if (line.trim().equals("3")) {
-            gameType = "against two human players";
-        } else if (line.trim().equals("4")) {
-            gameType = "against three human players";
-        }
-        System.out.println("Looking for a" + ((gameType.equals("random")) ? " " + gameType : "") + " game" + ((gameType.equals("random")) ? "" : " " + gameType) + "...");
+        // Log looking for client
+        this.log.lookingForGameType(gameTypeName);
 
+        // Create and send package to request a game at the server, of this game type
         ArrayList<Object> parameters = new ArrayList<>();
-        parameters.add(line);
+        parameters.add(String.valueOf(gameType));
         sendMessage(ProtocolHandler.createPackage(Protocol.Client.REQUESTGAME, parameters));
     }
 
@@ -310,7 +282,7 @@ public class Client extends Thread {
         } catch (IOException e) {
 
             // When regular socket could not be created
-            System.out.println("Failed to establish socket connection to server");
+            this.log.failedToCreateSocket();
         }
     }
 
@@ -376,8 +348,13 @@ public class Client extends Thread {
      */
     public static void main(String[] args) {
 
+        // Create tui and log unit
+        ClientTUI tui = new ClientTUI();
+        ClientLog log = new ClientLog();
+        log.addObserver(tui);
+
         // Set needed trustStore properties in order to connect to SSLSocket
-        System.setProperty("javax.net.ssl.trustStore", System.getProperty("user.dir").replace("src", "") + "certs/key.jks");
+        System.setProperty("javax.net.ssl.trustStore", System.getProperty("user.dir").replace("src", "") + "/certs/key.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "password");
 
         // Define default values
@@ -394,7 +371,7 @@ public class Client extends Thread {
             // Cut string off after 15 chars
             if (name.length() > 15) {
                 name = name.substring(0, 15);
-                System.out.println("Provided too long name, now cut off to: " + name);
+                log.nameCutOff(name);
             }
 
             // Check for valid ip
@@ -405,7 +382,7 @@ public class Client extends Thread {
             } else {
 
                 // Invalid input provided, let user know client is started on default port
-                System.out.println("Invalid host address entered, termintaing...");
+                log.invalidHostAddress();
                 System.exit(0);
             }
 
@@ -417,7 +394,7 @@ public class Client extends Thread {
             } else {
 
                 // Invalid input provided, let user know client is started on default port
-                System.out.println("Provided incorrect port, terminating...");
+                log.incorrectPort();
                 System.exit(0);
             }
         }
@@ -432,10 +409,10 @@ public class Client extends Thread {
             }
 
             // Start client on new thread
-            Client c = new Client(name, hostAddress, port);
+            Client c = new Client(name, hostAddress, port, log);
 
         } catch (IOException e) {
-            System.out.println("Failed to establish a connection with the client, probable cause: invalid host");
+            log.failedToConnectToServer();
         }
     }
 }

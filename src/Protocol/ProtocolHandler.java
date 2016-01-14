@@ -1,4 +1,4 @@
-package ServerClient;
+package Protocol;
 
 import java.util.ArrayList;
 import java.util.Scanner;
