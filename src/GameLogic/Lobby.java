@@ -11,6 +11,8 @@ public class Lobby {
     private static int id;
     private List<ClientHandler> lobbyClients;
 
+    //TODO add invitation system
+    
     /**
      * Lobby constructor, takes an id to create
      * a new lobby.
