@@ -1,9 +1,13 @@
 package GameLogic;
 
+import Client.Client;
 import Server.ClientHandler;
+import Tests.TestTUI;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import QwirkleUI.TUIBasic;
 
 public class Player {
     private String name;
@@ -11,16 +15,25 @@ public class Player {
     public ClientHandler client;
     private Stone[] hand; //stones that are in the hand.
     
+    private TUIBasic tui;
+    
     public Player(ClientHandler clientHandler, Board board) {
     	this.client = clientHandler;
         this.name = clientHandler.getClientName();
         this.board = board;
         InitializeHand();
+        tui = new TUIBasic(board);
     }
     
     public Player(Board board) {
         this.board = board;
         InitializeHand();
+        tui = new TUIBasic(board);
+    }
+    
+    public void doTurn() {
+    	this.board.createTestMap();
+    	tui.drawBoard();
     }
 
     public String getName(){
@@ -73,5 +86,10 @@ public class Player {
     
     public Stone[] getHand() {
     	return hand;
+    }
+    
+    public static void main(String[] args) {
+    	Player player = new Player(new Board());
+    	player.doTurn();
     }
 }
