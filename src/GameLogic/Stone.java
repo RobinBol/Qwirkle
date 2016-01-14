@@ -22,11 +22,11 @@ public class Stone {
 	
 	//might be unfair distribution due to how type casting works to int.
 	public static char getRandomShape() {
-		return shapes[(int)(Math.random() * (shapes.length + 0.99999))];
+		return shapes[(int)(Math.random() * shapes.length)];
 	}
 	
 	public static char getRandomColor() {
-		return colors[(int)(Math.random() * (colors.length + 0.99999))];
+		return colors[(int)(Math.random() * colors.length)];
 	}
 	
 	public char getShape() {
@@ -35,6 +35,10 @@ public class Stone {
 	
 	public char getColor() {
 		return this.color;
+	}
+	
+	public String toString() {
+		return shape + "" + color;
 	}
 
 }

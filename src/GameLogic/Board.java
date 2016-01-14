@@ -3,13 +3,18 @@ package GameLogic;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public class Board {
+	//TODO: Dynamisch maken, maar is lastig met TUI omdat het dan heel snel heel erg te veel word in een TUI.
+	public static final int MAXBOARDSIZE = 11;
+	
     private Bag bag;
-    private Map<Integer, Stone> board;
+    private Map<String, Stone> board;
     
 
     public Board() {
     	board = new HashMap<>();
+    	bag = new Bag();
     }
     
     /* Places a stone if possible.
@@ -25,6 +30,10 @@ public class Board {
     
     public Stone getStone(int x, int y) {
     	return board.get(Coordinate.getCoordinateHash(x, y));
+    }
+    
+    public Map<String, Stone> getBoard() {
+    	return board;
     }
     
     
@@ -71,16 +80,47 @@ public class Board {
     }
     
     /*
-     * returns if a position is next to an alreadplaced stone.
+     * returns if a position is next to an already placed stone.
      */
     public boolean isConnected(int x, int y) {
     	return false;
     }
     
-    private void createTestMap() {
-    	for (int i = 0; i < 6; i++) {
+    /*
+     * Take stone from the bag.
+     */
+    public Stone[] getFirstHand() {
+    	Stone[] hand = new Stone[Game.MAXHANDSIZE];
+    	for (int i = 0; i < Game.MAXHANDSIZE; i++) {
+    		hand[i] = bag.takeStone();
+    	}
+    	return hand;
+    }
+    
+    public void createTestMap() {
+    	for (int i = -2; i < 4; i++) {
     		//test purpose only, is not valid according to game rules.
         	board.put(Coordinate.getCoordinateHash(i, 0), new Stone(Stone.getRandomShape(), Stone.getRandomColor())); 
 		}
+    }
+    
+    public int[] getBoardWidthHeight() {
+    	if (isEmptyBoard()) return new int[] {0,0};
+    	int lowestX = 0;
+    	int lowestY = 0;
+    	int highestX = 0;
+    	int highestY = 0;
+    	int[] testCoord;
+    	for (String coordinate : board.keySet()) {
+    		 testCoord = Coordinate.getCoordinates(coordinate);
+    		 if (testCoord[0] < lowestX) lowestX = testCoord[0];
+    		 if (testCoord[1] < lowestY) lowestY = testCoord[1];
+    		 if (testCoord[0] > highestX) highestX = testCoord[0];
+    		 if (testCoord[1] > highestY) highestY = testCoord[1];
+    	}
+    	int width = highestX - lowestX + 1;
+    	int height = highestY - lowestY + 1;
+    	
+    	return new int[] {width, height};
     }
 }
