@@ -137,6 +137,21 @@ public class Board {
 		}
 		return (amountSameX == stones.length || amountSameY == stones.length);
 	}
+	
+	public boolean validShapeColorCombination(Stone[] stones) {
+		int amountSameShape = 0;
+		int amountSameColor = 0;
+		Stone first = stones[0];
+		for (Stone stone : stones) {
+			if (first.getShape() == stone.getShape()) {
+				amountSameShape++;
+			}
+			if (first.getColor() == stone.getColor()) {
+				amountSameColor++;
+			}
+		}
+		return (amountSameShape == stones.length && amountSameColor == 1) || (amountSameColor == stones.length && amountSameShape == 1);
+	}
 
 	/*
      * returns if a position is next to an already placed stone.

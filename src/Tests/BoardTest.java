@@ -65,4 +65,17 @@ public class BoardTest {
 		assertFalse(board.isValidMove(inValid));
 		assertFalse(board.isValidMove(inValid2));
 	}
+	
+	@Test
+	public void shapeColorTest() {
+		Stone[] valid = new Stone[] {new Stone('x', 'b', -1, 1), new Stone('x', 'd', 0, 1), new Stone('x', 'c', 1, 1)};
+		Stone[] valid2 = new Stone[] {new Stone('x', 'b', 1, 0), new Stone('e', 'b', 2, 0), new Stone('r', 'b', 3, 0)};
+		Stone[] inValid = new Stone[] {new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 1), new Stone('x', 'b', 1, 0)};
+		Stone[] inValid2 = new Stone[] {new Stone('x', 'b', 0, 0), new Stone('x', 'c', 1, 1), new Stone('r', 'c', 2, 2)};
+		
+		assertTrue(board.validShapeColorCombination(valid));
+		assertTrue(board.validShapeColorCombination(valid2));
+		assertFalse(board.validShapeColorCombination(inValid));
+		assertFalse(board.validShapeColorCombination(inValid2));
+	}
 }
