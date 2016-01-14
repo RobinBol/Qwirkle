@@ -1,5 +1,6 @@
 package Server;
 
+import GameLogic.Board;
 import Protocol.Protocol;
 import Protocol.ProtocolHandler;
 
@@ -268,6 +269,14 @@ public class ClientHandler extends Thread {
     @Override
     public String toString() {
         return getClientName();
+    }
+
+    /**
+     * Method that forwards a request from Player
+     * to log the board to the console.
+     */
+    public void logBoard(Board board) {
+        server.logBoard(board);
     }
 
     /**

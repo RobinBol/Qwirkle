@@ -10,6 +10,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import GameLogic.Board;
 import GameLogic.Lobby;
 import Protocol.Protocol;
 
@@ -339,6 +340,10 @@ public class QwirkleServer {
 
     public void logGameStarted(ArrayList<ClientHandler> clients) {
         this.log.gameStarted(clients);
+    }
+
+    public void logBoard(Board board) {
+        this.log.drawBoard(board);
     }
 
     /**

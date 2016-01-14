@@ -1,39 +1,32 @@
 package GameLogic;
 
-import Client.Client;
 import Server.ClientHandler;
-import Tests.TestTUI;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import QwirkleUI.TUIBasic;
 
 public class Player {
     private String name;
     private Board board;
     public ClientHandler client;
     private Stone[] hand; //stones that are in the hand.
-    
-    private TUIBasic tui;
-    
+
     public Player(ClientHandler clientHandler, Board board) {
     	this.client = clientHandler;
         this.name = clientHandler.getClientName();
         this.board = board;
         InitializeHand();
-        tui = new TUIBasic(board);
     }
     
     public Player(Board board) {
         this.board = board;
         InitializeHand();
-        tui = new TUIBasic(board);
     }
     
     public void doTurn() {
     	this.board.createTestMap();
-    	tui.drawBoard();
+
+        // Tell client to log the board, client has a TUI and will handle that
+        this.client.logBoard(board);
     }
 
     public String getName(){
