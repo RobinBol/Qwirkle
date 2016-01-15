@@ -60,6 +60,7 @@ public class Log extends Observable {
 
     /**
      * Draw the current state of the board to System.out.
+     *
      * @param board The board to draw
      */
     public static void drawBoard(Board board) {

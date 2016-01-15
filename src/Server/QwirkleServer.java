@@ -45,7 +45,7 @@ public class QwirkleServer {
      * and port number. Then it will start the server.
      *
      * @param port Port number to listen on by server
-     * @param log ServerLog instance, handling all logging
+     * @param log  ServerLog instance, handling all logging
      */
     public QwirkleServer(int port, ServerLog log) {
 
@@ -60,7 +60,9 @@ public class QwirkleServer {
         this.log = log;
 
         // Get/save port
+        System.out.println("get port");
         this.port = (this.port == 0) ? log.askForPort() : port;
+        System.out.println("got port");
 
         // Get/save host
         try {
@@ -311,6 +313,7 @@ public class QwirkleServer {
 
     /**
      * Getter for the server features.
+     *
      * @return String array holding the features
      */
     public String[] getFeatures() {
@@ -322,11 +325,11 @@ public class QwirkleServer {
      * this is necessary as lobbies, and clients need
      * to be able to trigger logging on the server.
      */
-    public void clientAnnounceFailed(){
+    public void clientAnnounceFailed() {
         this.log.clientFailedToAnnounce();
     }
 
-    public void logIncomingMessage(String message, String clientName){
+    public void logIncomingMessage(String message, String clientName) {
         this.log.incomingMessage(message, clientName);
     }
 

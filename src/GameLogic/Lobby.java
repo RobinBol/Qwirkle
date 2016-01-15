@@ -27,6 +27,7 @@ public class Lobby {
      * Lobby constructor that takes an id to keep
      * a reference to it, and a server, to communicate
      * with.
+     *
      * @param id
      * @param server
      */
@@ -156,6 +157,7 @@ public class Lobby {
     /**
      * Let server know a game has started with the
      * specified clients.
+     *
      * @param clients Clients in game
      */
     public void gameStarted(ArrayList<ClientHandler> clients) {

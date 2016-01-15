@@ -8,18 +8,19 @@ import java.util.Observer;
  * On new updated input it will log this input to
  * the console.
  */
-public class ServerTUI implements Observer{
+public class ServerTUI implements Observer {
 
-    public ServerTUI (){
+    public ServerTUI() {
 
     }
 
     /**
      * Incoming update, log it to the system out.
+     *
      * @param obs Observable instance
-     * @param x Updated data
+     * @param x   Updated data
      */
-    public void update(Observable obs, Object x){
+    public void update(Observable obs, Object x) {
         System.out.println(x);
     }
 }

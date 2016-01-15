@@ -67,7 +67,6 @@ public class ServerLog extends Log {
     }
 
     public int askForPort(String enteredPort) {
-
         // If no provided as argument, ask for it
         if (enteredPort == null) {
             enteredPort = this.askInput("Please enter port to listen on:");
@@ -75,7 +74,7 @@ public class ServerLog extends Log {
 
         // While incorrect port ask for new one
         while (!Client.checkForValidPort(enteredPort)) {
-            enteredPort = String.valueOf(askForPort(this.askInput("Invalid port provided, please try again:")));
+            return Integer.parseInt(String.valueOf(askForPort(this.askInput("Invalid port provided, please try again:"))));
         }
 
         // Print that server is configured and starting

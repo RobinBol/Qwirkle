@@ -264,6 +264,7 @@ public class ClientHandler extends Thread {
     /**
      * Return a different string representation
      * of a client than default, use the clientName.
+     *
      * @return
      */
     @Override
