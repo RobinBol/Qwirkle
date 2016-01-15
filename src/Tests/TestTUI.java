@@ -1,10 +1,10 @@
-package Tests;
+package tests;
 
 import java.io.PrintWriter;
 
-import GameLogic.Board;
-import GameLogic.Coordinate;
-import GameLogic.Stone;
+import gamelogic.Board;
+import gamelogic.Coordinate;
+import gamelogic.Stone;
 
 public class TestTUI {
     PrintWriter out;

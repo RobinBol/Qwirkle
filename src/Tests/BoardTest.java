@@ -1,12 +1,12 @@
-package Tests;
+package tests;
 
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import GameLogic.Board;
-import GameLogic.Stone;
+import gamelogic.Board;
+import gamelogic.Stone;
 
 public class BoardTest {
 

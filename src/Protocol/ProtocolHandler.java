@@ -1,4 +1,4 @@
-package Protocol;
+package protocol;
 
 import java.util.ArrayList;
 import java.util.Scanner;

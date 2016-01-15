@@ -1,7 +1,6 @@
-package Tests;
+package tests;
 
-import GameLogic.Board;
-import GameLogic.Player;
+import gamelogic.Player;
 
 public class PlayerTest {
 

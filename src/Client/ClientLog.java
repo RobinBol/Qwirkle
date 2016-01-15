@@ -1,12 +1,6 @@
-package Client;
+package client;
 
-import Util.Log;
-
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.Observable;
-import java.util.Scanner;
-import java.util.jar.Pack200;
+import util.Log;
 
 /**
  * This class acts as middleware for the logging of the client.

@@ -1,6 +1,6 @@
-package GameLogic;
+package gamelogic;
 
-import Server.ClientHandler;
+import server.ClientHandler;
 
 import java.util.ArrayList;
 import java.util.List;

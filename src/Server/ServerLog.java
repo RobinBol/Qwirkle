@@ -1,13 +1,9 @@
-package Server;
+package server;
 
-import Client.Client;
-import Util.Log;
+import client.Client;
+import util.Log;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Observable;
-import java.util.Scanner;
 
 /**
  * This class acts as middleware for the logging of the server.

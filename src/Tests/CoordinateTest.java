@@ -1,6 +1,6 @@
-package Tests;
+package tests;
 
-import GameLogic.Coordinate;
+import gamelogic.Coordinate;
 
 public class CoordinateTest {
 

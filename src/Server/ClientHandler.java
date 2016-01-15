@@ -1,9 +1,9 @@
-package Server;
+package server;
 
-import GameLogic.Board;
-import GameLogic.Lobby;
-import Protocol.Protocol;
-import Protocol.ProtocolHandler;
+import gamelogic.Board;
+import gamelogic.Lobby;
+import protocol.Protocol;
+import protocol.ProtocolHandler;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -170,6 +170,7 @@ public class ClientHandler extends Thread {
         // Log client disconnected
         server.logClientDisconnected(clientIdentifier);
 
+        //TODO fix if client connects with unspoorted SSL
         // Removes client from lobby and game (if applicable)
         Lobby lobby = getLobby();
         lobby.removeClient(this);

@@ -1,4 +1,4 @@
-package GameLogic;
+package gamelogic;
 
 import java.util.HashMap;
 import java.util.Map;

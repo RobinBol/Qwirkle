@@ -1,7 +1,7 @@
-package GameLogic;
+package gamelogic;
 
-import Server.ClientHandler;
-import Server.QwirkleServer;
+import server.ClientHandler;
+import server.QwirkleServer;
 
 import java.util.ArrayList;
 import java.util.HashMap;

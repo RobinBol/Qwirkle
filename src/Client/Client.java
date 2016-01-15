@@ -1,7 +1,7 @@
-package Client;
+package client;
 
-import Protocol.Protocol;
-import Protocol.ProtocolHandler;
+import protocol.Protocol;
+import protocol.ProtocolHandler;
 
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSocketFactory;
@@ -74,6 +74,7 @@ public class Client extends Thread {
      */
     public void run() {
         try {
+
             // Create SSLSocket
             SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
             this.socket = sslsocketfactory.createSocket(this.host, this.port);
@@ -362,6 +363,7 @@ public class Client extends Thread {
         ClientLog log = new ClientLog();
         log.addObserver(tui);
 
+        //TODO if certs could not be found fall back to regular socket
         // Set needed trustStore properties in order to connect to SSLSocket
         System.setProperty("javax.net.ssl.trustStore", System.getProperty("user.dir").replace("src", "") + "/certs/key.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "password");

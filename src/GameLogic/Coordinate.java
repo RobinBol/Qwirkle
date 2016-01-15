@@ -1,6 +1,4 @@
-package GameLogic;
-
-import java.util.Scanner;
+package gamelogic;
 
 public final class Coordinate {
 
