@@ -1,4 +1,4 @@
-package gamelogic;
+package qwirkle.gamelogic;
 
 public final class Coordinate {
 

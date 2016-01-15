@@ -1,6 +1,6 @@
-package gamelogic;
+package qwirkle.gamelogic;
 
-import server.ClientHandler;
+import qwirkle.server.ClientHandler;
 
 import java.util.ArrayList;
 

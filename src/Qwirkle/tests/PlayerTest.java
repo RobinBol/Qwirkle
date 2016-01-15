@@ -1,6 +1,6 @@
-package tests;
+package qwirkle.tests;
 
-import gamelogic.Player;
+import qwirkle.gamelogic.Player;
 
 public class PlayerTest {
 

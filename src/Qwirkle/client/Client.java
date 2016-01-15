@@ -1,7 +1,7 @@
-package client;
+package qwirkle.client;
 
-import protocol.Protocol;
-import protocol.ProtocolHandler;
+import qwirkle.protocol.Protocol;
+import qwirkle.protocol.ProtocolHandler;
 
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSocketFactory;

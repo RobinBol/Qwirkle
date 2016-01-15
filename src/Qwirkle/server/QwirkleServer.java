@@ -1,4 +1,4 @@
-package server;
+package qwirkle.server;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -10,9 +10,9 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import gamelogic.Board;
-import gamelogic.Lobby;
-import protocol.Protocol;
+import qwirkle.gamelogic.Board;
+import qwirkle.gamelogic.Lobby;
+import qwirkle.protocol.Protocol;
 
 /**
  * Class that handles the server. It starts a server,

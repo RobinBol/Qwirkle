@@ -1,4 +1,4 @@
-package protocol;
+package qwirkle.protocol;
 
 import java.util.ArrayList;
 import java.util.Scanner;

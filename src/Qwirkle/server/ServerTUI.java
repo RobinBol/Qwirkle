@@ -1,16 +1,16 @@
-package client;
+package qwirkle.server;
 
 import java.util.Observable;
 import java.util.Observer;
 
 /**
- * ClientTUI, acts as an observer to the ClientLog.
+ * ServerTUI, acts as an observer to the ServerLog.
  * On new updated input it will log this input to
  * the console.
  */
-public class ClientTUI implements Observer {
+public class ServerTUI implements Observer {
 
-    public ClientTUI() {
+    public ServerTUI() {
 
     }
 

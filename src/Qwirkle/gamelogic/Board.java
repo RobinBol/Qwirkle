@@ -1,4 +1,4 @@
-package gamelogic;
+package qwirkle.gamelogic;
 
 import java.util.HashMap;
 import java.util.Map;

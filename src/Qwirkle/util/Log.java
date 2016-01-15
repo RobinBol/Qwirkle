@@ -1,8 +1,8 @@
-package util;
+package qwirkle.util;
 
-import gamelogic.Board;
-import gamelogic.Coordinate;
-import gamelogic.Stone;
+import qwirkle.gamelogic.Board;
+import qwirkle.gamelogic.Coordinate;
+import qwirkle.gamelogic.Stone;
 
 import java.sql.Timestamp;
 import java.util.Date;
