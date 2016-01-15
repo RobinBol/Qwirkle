@@ -98,6 +98,7 @@ public class Board {
         if (!areConnected(stones)) return false;
         if (takeOccupiedPlaces(stones)) return false;
         if (!validShapeColorCombination(stones)) return false;
+        if (!areConnectedToBoard(stones)) return false;
 
         return true;
     }
@@ -168,13 +169,24 @@ public class Board {
      * returns if a position is next to an already placed stone.
      */
     public boolean isConnected(Stone stone) {
-    	String coordinateHash;
     	int x = stone.getX();
     	int y = stone.getY();
-    	if ()
-    	
-    	
+    	if (board.containsKey(Coordinate.getCoordinateHash(x + 1, y))) return true;
+    	if (board.containsKey(Coordinate.getCoordinateHash(x, y + 1))) return true;
+    	if (board.containsKey(Coordinate.getCoordinateHash(x - 1, y))) return true;
+    	if (board.containsKey(Coordinate.getCoordinateHash(x, y - 1))) return true;    	
         return false;
+    }
+    
+    public boolean areConnectedToBoard(Stone[] stones) {
+    	System.out.println(board.keySet() + ";;");
+    	for (int i = 0; i < stones.length; i++) {
+			if (isConnected(stones[i])) {
+				System.out.println(isConnected(stones[i]));
+				return true;
+			}
+		}    	
+    	return false;
     }
 
     public boolean takeOccupiedPlaces(Stone[] stones) {

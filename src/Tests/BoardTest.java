@@ -55,8 +55,10 @@ public class BoardTest {
     @Test
     public void validMoveTest() {
         board.resetMap();
+        board.createTestMap();
+        System.out.println(board.getBoard().keySet());
         Stone[] valid = new Stone[]{new Stone('x', 'b', -1, 1), new Stone('x', 'o', 0, 1), new Stone('x', 'y', 1, 1)};
-        Stone[] valid2 = new Stone[]{new Stone('x', 'b', 1, 0), new Stone('+', 'b', 2, 0), new Stone('*', 'b', 3, 0)};
+        Stone[] valid2 = new Stone[]{new Stone('x', 'b', 1, 1), new Stone('+', 'b', 2, 1), new Stone('*', 'b', 3, 1)};
         Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 1), new Stone('x', 'b', 1, 0)};
         Stone[] inValid2 = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 1, 1), new Stone('x', 'b', 2, 2)};
 
@@ -77,5 +79,19 @@ public class BoardTest {
         assertTrue(board.validShapeColorCombination(valid2));
         assertFalse(board.validShapeColorCombination(inValid));
         assertFalse(board.validShapeColorCombination(inValid2));
+    }
+    @Test
+    public void connectionTest() {
+    	board.resetMap();
+    	board.createTestMap();
+        Stone valid = new Stone ('a','a',0, -1);
+        Stone valid2 = new Stone ('a','a',0 , 1);
+        Stone inValid = new Stone ('a','a',0, -2);
+        Stone inValid2 = new Stone ('a','a',-4 , 0);
+
+        assertTrue(board.isConnected(valid));
+        assertTrue(board.isConnected(valid2));
+        assertFalse(board.isConnected(inValid));
+        assertFalse(board.isConnected(inValid2));
     }
 }
