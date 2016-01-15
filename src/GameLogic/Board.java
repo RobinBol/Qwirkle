@@ -58,6 +58,10 @@ public class Board {
         }
         return false;
     }
+    
+    public boolean makeMove(Stone[] stones) {
+    	return false;
+    }
 
     public boolean makeMove(int x, int y, char shape, char color) {
         //if it is the first move on the board.
@@ -163,7 +167,13 @@ public class Board {
     /*
      * returns if a position is next to an already placed stone.
      */
-    public boolean isConnected(int x, int y) {
+    public boolean isConnected(Stone stone) {
+    	String coordinateHash;
+    	int x = stone.getX();
+    	int y = stone.getY();
+    	if ()
+    	
+    	
         return false;
     }
 
