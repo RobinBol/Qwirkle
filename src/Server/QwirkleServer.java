@@ -60,9 +60,7 @@ public class QwirkleServer {
         this.log = log;
 
         // Get/save port
-        System.out.println("get port");
         this.port = (this.port == 0) ? log.askForPort() : port;
-        System.out.println("got port");
 
         // Get/save host
         try {
