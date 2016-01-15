@@ -15,12 +15,7 @@ public class Player {
         this.client = clientHandler;
         this.name = clientHandler.getClientName();
         this.board = board;
-        InitializeHand();
-    }
-
-    public Player(Board board) {
-        this.board = board;
-        InitializeHand();
+        initializeHand();
     }
 
     public void doTurn() {
@@ -75,16 +70,11 @@ public class Player {
         return 0;
     }
 
-    public void InitializeHand() {
+    public void initializeHand() {
         hand = board.getFirstHand();
     }
 
     public Stone[] getHand() {
         return hand;
-    }
-
-    public static void main(String[] args) {
-        Player player = new Player(new Board());
-        player.doTurn();
     }
 }

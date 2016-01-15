@@ -20,6 +20,7 @@ public class Lobby {
     private static int id;
     private List<ClientHandler> lobbyClients;
     private QwirkleServer server;
+    private List<Game> games;
 
     //TODO add invitation system
 
@@ -34,6 +35,7 @@ public class Lobby {
     public Lobby(int id, QwirkleServer server) {
         this.id = id;
         this.lobbyClients = new ArrayList<>();
+        this.games = new ArrayList<>();
         this.server = server;
     }
 
@@ -80,6 +82,9 @@ public class Lobby {
             // Start game with clients
             Game game = new Game(clients, this);
 
+            // Add game to internal games list
+            addGame(game);
+
             // Loop over all clients in newly created game
             for (int j = 0; j < clients.size(); j++) {
 
@@ -87,7 +92,7 @@ public class Lobby {
                 clients.get(j).sendGameStarted(clients);
 
                 // And remove them from the lobby
-                this.removeClient(clients.get(j));
+                this.removeClientFromLobby(clients.get(j));
             }
 
             // Empty gameType list
@@ -165,22 +170,62 @@ public class Lobby {
     }
 
     /**
+     * Keep track of all games running in this lobby.
+     * @param game Game that was started
+     */
+    public void addGame(Game game) {
+        games.add(game);
+    }
+
+    /**
      * Add client to the lobby.
      *
      * @param clientHandler Client to be added
      */
     public void addClient(ClientHandler clientHandler) {
 
+        // Add reference to lobby within clientHandler
+        clientHandler.addLobby(this);
+
         // Add client to lobby
         lobbyClients.add(clientHandler);
     }
 
     /**
-     * Remove client from internal lobby list.
+     * Remove client from internal lobby list and from
+     * game if it is in-game.
      *
      * @param clientHandler Client to be removed
      */
     public void removeClient(ClientHandler clientHandler) {
+
+        System.out.println("REMOVE CLIENT FROM LOBBY");
+        // Loop over all existing games
+        for (int i = 0; i < games.size(); i++) {
+
+            System.out.println("ITERATE GAMES");
+            // If client is in game, end game and remove client
+            if (games.get(i).hasPlayer(clientHandler.getClientName())){
+
+                System.out.println("FOUND GAME WITH CLIENT");
+                // Let client know game has ended
+                clientHandler.sendGameEnd("DISCONNECT");
+                System.out.println("SENDED GAME END");
+
+                // Terminate the game
+                games.get(i).terminateGame();
+            }
+        }
+
+        removeClientFromLobby(clientHandler);
+    }
+
+    /**
+     * Removes client from lobby, for example when game is started,
+     * or client disconnected.
+     * @param clientHandler
+     */
+    public void removeClientFromLobby(ClientHandler clientHandler) {
 
         // Remove client from lobbylist
         this.lobbyClients.remove(clientHandler);

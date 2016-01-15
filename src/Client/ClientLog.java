@@ -82,6 +82,12 @@ public class ClientLog extends Log {
         print("Username already exists, please reconnect with a different name");
     }
 
+    public void gameEnded() {
+        print("Game has ended...");
+    }
+    public void gameEnded(String type) {
+        print("Game has ended because: " + type);
+    }
     //TODO implement asking for oppoonent
 //    public String askForOpponent() {
 //        return null;

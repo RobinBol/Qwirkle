@@ -189,12 +189,21 @@ public class Client extends Thread {
 
                 // Check if properly parsed data is present
                 if (!result.isEmpty()) {
+                    System.out.println(result.get(0));
+
 
                     // Handle incoming errors
                     if (result.get(0).equals(Protocol.Client.ERROR)) {
                         handleIncomingError(Integer.valueOf((String) result.get(1)));
                     } else if (result.get(0).equals(Protocol.Server.HALLO)) {
                         askForGameType();
+                    } else if (result.get(0).equals(Protocol.Server.GAME_END)) {
+                        //TODO handle game end
+                        if(result.size() >= 1) {
+                            log.gameEnded(String.valueOf(result.get(1)));
+                        } else {
+                            log.gameEnded();
+                        }
                     }
                 }
             }

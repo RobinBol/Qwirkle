@@ -1,6 +1,7 @@
 package Server;
 
 import GameLogic.Board;
+import GameLogic.Lobby;
 import Protocol.Protocol;
 import Protocol.ProtocolHandler;
 
@@ -22,11 +23,13 @@ public class ClientHandler extends Thread {
 
     /* Instance variables for server, socket and I/O */
     private QwirkleServer server;
+    private Lobby lobby;
     private Socket socket;
     private BufferedReader in;
     private BufferedWriter out;
     private String clientName;
     private int requestsGameType = 999;
+    private boolean disconnected = false;
 
     /**
      * ClientHandler constructor, takes a QwirkleServer and Socket,
@@ -78,22 +81,13 @@ public class ClientHandler extends Thread {
                 }
             }
 
-            // No more input stream, assume client disconnected
-            server.logClientDisconnected(this.clientName);
-
-            // Remove client from server
-            server.removeClientHandler(this);
+            // Handle disconnecting client from server, game and lobby
+            if (!disconnected) disconnectClient();
 
         } catch (IOException e) {
 
-            // If user is disconnected before handshake happened
-            String clientIdentifier = ((this.clientName != null) ? this.clientName : "Unidentified client");
-
-            // No more input stream, assume client disconnected
-            server.logClientDisconnected(clientIdentifier);
-
-            // Remove client from server
-            server.removeClientHandler(this);
+            // Remove client from game, lobby and server
+            if (!disconnected) disconnectClient();
         }
     }
 
@@ -154,15 +148,51 @@ public class ClientHandler extends Thread {
             this.out.flush();
         } catch (IOException e) {
 
-            // If user is disconnected before handshake happened
-            String clientIdentifier = ((this.clientName != null) ? this.clientName : "Unidentified client");
-
-            // Log client disconnected
-            server.logClientDisconnected(clientIdentifier);
-
-            // Remove client from server
-            server.removeClientHandler(this);
+            // Remove client from game, lobby and server
+            if (!disconnected) disconnectClient();
         }
+    }
+
+    /**
+     * Handles properly removing a client from the server, lobby and games
+     * it might be in.
+     */
+    public void disconnectClient(){
+
+        //TODO FIX bug that sended game end does not arrive at clients
+
+        // Make sure client doesnt get disconnected more than once
+        this.disconnected = true;
+
+        // If user is disconnected before handshake happened
+        String clientIdentifier = ((this.clientName != null) ? this.clientName : "Unidentified client");
+
+        // Log client disconnected
+        server.logClientDisconnected(clientIdentifier);
+
+        // Removes client from lobby and game (if applicable)
+        Lobby lobby = getLobby();
+        lobby.removeClient(this);
+
+        // Remove client from server
+        server.removeClientHandler(this);
+    }
+
+    /**
+     * Get lobby which client is in.
+     * @return Lobby of client
+     */
+    public Lobby getLobby() {
+        return this.lobby;
+    }
+
+    /**
+     * Add lobby to this clientHandler to keep
+     * track of the lobby a client is in.
+     * @param lobby
+     */
+    public void addLobby(Lobby lobby){
+        this.lobby = lobby;
     }
 
     /**
@@ -197,8 +227,11 @@ public class ClientHandler extends Thread {
         // Add winner if applicable
         if (type == "WIN" && winner != null) parameters.add(winner);
 
+        System.out.println("CLIENTHANDLER SENDED GAME END");
         // Send confirming handshake to client
-        this.sendMessage(ProtocolHandler.createPackage(Protocol.Server.STARTGAME, parameters));
+        String p = ProtocolHandler.createPackage(Protocol.Server.GAME_END, parameters);
+        System.out.println(p);
+        this.sendMessage(p);
     }
 
     /**
