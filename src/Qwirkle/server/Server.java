@@ -1,3 +1,8 @@
+/**
+ * TODO Major todo's listed below:
+ * - Match features met client
+ */
+
 package qwirkle.server;
 
 import javax.net.ssl.SSLServerSocket;
@@ -7,12 +12,11 @@ import java.io.IOException;
 import java.net.BindException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-import qwirkle.gamelogic.Board;
+import qwirkle.client.Client;
 import qwirkle.gamelogic.Lobby;
-import qwirkle.protocol.Protocol;
+import qwirkle.util.Protocol;
 
 /**
  * Class that handles the server. It starts a server,
@@ -22,51 +26,68 @@ import qwirkle.protocol.Protocol;
  * client. Besides that it will direct users to proper lobbies,
  * where games can be found and started.
  */
-public class QwirkleServer {
+public class Server extends Observable {
 
-    /* Variables needed to start the server */
+    /* Port variable needed to start the server */
     private static int port;
-    private static String host;
 
     /* Variables that keep track of the clients and lobbies */
     private List<ClientHandler> clientHandlers;
     private List<Lobby> lobbies;
 
-    /* ServerLog instance */
-    private ServerLog log;
-
-    //TODO add features below when added
-    private static String[] FEATURES = new String[]{Protocol.Server.Features.SECURITY};
-
-    //TODO match features with client
+    /* Keep track of features of the server */
+    private static String[] FEATURES = new String[]{Protocol.Server.Features.SECURITY, Protocol.Server.Features.CHALLENGE};
 
     /**
-     * QwirkleServer constructor, sets certificate credentials,
+     * Server constructor, sets certificate credentials,
      * and port number. Then it will start the server.
      *
      * @param port Port number to listen on by server
-     * @param log  ServerLog instance, handling all logging
      */
-    public QwirkleServer(int port, ServerLog log) {
+    public Server(int port) {
 
-        // Let user know server is starting
-        log.serverSetupStarted();
+        // Store port
+        this.port = port;
+    }
+
+    /**
+     * Updates listening observers, this makes sure
+     * it is easy to switch TUIs/GUIs by implementing
+     * a different observer.
+     *
+     * @param parameter Object to print to TUI
+     */
+    public void updateObserver(Object parameter) {
+        setChanged();
+        notifyObservers(parameter);
+    }
+
+    /**
+     * Method that starts the Server and creates an SSL connection,
+     * for potential clients. Returns the success value.
+     *
+     * @return success (of server startup)
+     */
+    public void startServer() {
+
+        // Let observer know server is starting
+        updateObserver(ServerLogger.SETUP_STARTED);
 
         // Initialize and set certificate credentials for SSL connection
         System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir").replace("src", "") + "/certs/key.jks");
         System.setProperty("javax.net.ssl.keyStorePassword", "password");
 
-        // Add log middleware
-        this.log = log;
+        // Check port validity, ask for a valid one if needed
+        this.port = (port == 0) ? askForPort() : port;
 
-        // Get/save port
-        this.port = (this.port == 0) ? log.askForPort() : port;
-
-        // Get/save host
+        // Get host address
+        String host = null;
         try {
-            this.host = InetAddress.getLocalHost().getHostAddress();
+            host = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            this.log.serverStartupFailed(this.host, this.port);
+
+            // Unknown host, update observer
+            updateObserver(ServerLogger.SETUP_FAILED);
         }
 
         // Initialize clientHandlers list
@@ -75,17 +96,7 @@ public class QwirkleServer {
         // Initialize lobbies list
         this.lobbies = new ArrayList<>();
 
-        // Start the server
-        this.startServer();
-    }
-
-    /**
-     * Method that starts the QwirkleServer and creates an SSL connection,
-     * for potential clients. Returns the success value.
-     *
-     * @return success (of server startup)
-     */
-    public void startServer() {
+        // Try to create SSLSocket
         try {
             // Create SSLServerSocket
             SSLServerSocketFactory sslserversocketfactory =
@@ -94,7 +105,7 @@ public class QwirkleServer {
                     (SSLServerSocket) sslserversocketfactory.createServerSocket(port);
 
             // Server startup success
-            log.serverStarted(this.host, this.port);
+            updateObserver(ServerLogger.SERVER_STARTED + port);
 
             // Keep listening for incoming client connections
             while (true) {
@@ -113,25 +124,24 @@ public class QwirkleServer {
                 } catch (IOException e) {
 
                     // Could not make connection with client
-                    log.failedConnectionWithClient();
+                    updateObserver(ServerLogger.FAILED_CONN);
                 }
             }
-
         } catch (BindException e) {
 
-            // Log port in use
-            log.portInUse();
+            // Update observer, port in use
+            updateObserver(ServerLogger.PORT_IN_USE);
 
-            // Ask for new port
-            this.port = log.askForPort();
+            // Ask for new valid port
+            this.port = askForPort();
 
-            // Afterwards start the server
+            // Afterwards re-start the server
             this.startServer();
 
         } catch (IOException e) {
 
             // Could not create ServerSocket
-            log.serverStartupFailed(this.host, this.port);
+            updateObserver(ServerLogger.SETUP_FAILED);
         }
     }
 
@@ -159,24 +169,6 @@ public class QwirkleServer {
 
         // Remove from clientHandlers
         this.clientHandlers.remove(clientHandler);
-
-        // Remove unnecessary lobbies
-        removeEmptyLobbies();
-    }
-
-    /**
-     * Sends message to all clientHandlers.
-     *
-     * @param message    Message to send
-     * @param clientName if provided, the broadcast will skip
-     *                   the client provided
-     */
-    public void broadcast(String message, String clientName) {
-        for (int i = 0; i < clientHandlers.size(); i++) {
-            if (!this.clientHandlers.get(i).getClientName().equals(clientName)) {
-                this.clientHandlers.get(i).sendMessage(message);
-            }
-        }
     }
 
     /**
@@ -186,9 +178,9 @@ public class QwirkleServer {
      * @param name Name user wishes to use
      * @return true if name exists in server already
      */
-    public boolean usernameAlreadyExist(String name) {
+    public boolean usernameTaken(String name) {
         for (int i = 0; i < clientHandlers.size(); i++) {
-            if (name.equals(this.clientHandlers.get(i).getClientName())) {
+            if (name.equalsIgnoreCase(this.clientHandlers.get(i).getClientName())) {
                 return true;
             }
         }
@@ -223,30 +215,10 @@ public class QwirkleServer {
     }
 
     /**
-     * Check if lobby is empty and can be removed.
+     * Removes lobby.
      */
-    public void removeEmptyLobbies() {
-        // Loop over all existing lobbies
-        for (int i = 0; i < lobbies.size(); i++) {
-
-            // If lobby is empty, remove it
-            if (lobbies.get(i).isEmpty()) {
-                lobbies.remove(i);
-            }
-        }
-    }
-
-    /**
-     * Starts search on all lobbies for a possible match.
-     */
-    public void checkLobbiesForGame() {
-
-        // Loop over all existing lobbies
-        for (int i = 0; i < lobbies.size(); i++) {
-
-            // Trigger search for game
-            lobbies.get(i).searchForGame();
-        }
+    public void removeLobby(Lobby lobby) {
+        lobbies.remove(lobby);
     }
 
     /**
@@ -279,7 +251,7 @@ public class QwirkleServer {
      */
     public void addClientToLobby(ClientHandler client) {
 
-        // Keep track of wheter client is added to a lobby
+        // Keep track of whether client is added to a lobby
         boolean clientIsAdded = false;
 
         // Loop over all existing lobbies
@@ -319,32 +291,56 @@ public class QwirkleServer {
     }
 
     /**
-     * All functions below act as a gate to the logger,
-     * this is necessary as lobbies, and clients need
-     * to be able to trigger logging on the server.
+     * Handles asking the user on the server for
+     * input.
+     *
+     * @param question Question to ask the user
      */
-    public void clientAnnounceFailed() {
-        this.log.clientFailedToAnnounce();
+    public String ask(String question) {
+
+        // Print question
+        updateObserver(question);
+
+        // Create new scanner to listen for input
+        Scanner sc = new Scanner(System.in);
+
+        return sc.nextLine();
     }
 
-    public void logIncomingMessage(String message, String clientName) {
-        this.log.incomingMessage(message, clientName);
+    /**
+     * Method that starts asking for a port, if
+     * invalid input is provided it will keep asking
+     * for valid input.
+     *
+     * @return int valid port number
+     */
+    public int askForPort() {
+        return askForPort(null);
     }
 
-    public void logClientDisconnected(String clientName) {
-        this.log.clientDisconnected(clientName);
-    }
+    /**
+     * Methods that starts asking for a port, if
+     * invalid input is provided it will keep asking
+     * for valid input.
+     *
+     * @return int valid port number
+     */
+    public int askForPort(String enteredPort) {
+        // If no provided as argument, ask for it
+        if (enteredPort == null) {
+            enteredPort = ask(ServerLogger.ENTER_PORT);
+        }
 
-    public void logFailedToCloseClient(String clientName) {
-        this.log.failedToCloseClient(clientName);
-    }
+        // While incorrect port ask for new one
+        while (!Client.checkForValidPort(enteredPort)) {
+            return Integer.parseInt(String.valueOf(askForPort(ask(ServerLogger.PORT_INVALID_RETRY))));
+        }
 
-    public void logGameStarted(ArrayList<ClientHandler> clients) {
-        this.log.gameStarted(clients);
-    }
+        // Print that server is configured and starting
+        updateObserver(ServerLogger.SERVER_STARTED + enteredPort);
 
-    public void logBoard(Board board) {
-        this.log.drawBoard(board);
+        // Return valid port
+        return Integer.parseInt(enteredPort);
     }
 
     /**
@@ -356,33 +352,34 @@ public class QwirkleServer {
      */
     public static void main(String[] args) {
 
-        // Create tui and log unit
-        ServerTUI tui = new ServerTUI();
-        ServerLog log = new ServerLog();
-
-        // Add tui as observer
-        log.addObserver(tui);
-
         // Set default port
         int port = 0;
 
         // If argument provided
         if (args.length > 0) {
-
             try {
                 // Valid port number
                 port = Integer.parseInt(args[0], 10);
             } catch (NumberFormatException e) {
 
                 // Let user know port is incorrect
-                log.portIncorrect();
+                System.out.println(ServerLogger.PORT_INVALID);
 
                 // Exit application
                 System.exit(0);
             }
         }
 
-        // Create and start new QwirkleServer
-        QwirkleServer qs = new QwirkleServer(port, log);
+        // Create and start new Server
+        Server qs = new Server(port);
+
+        // Create tui and log unit
+        ServerTUI tui = new ServerTUI();
+
+        // Add tui as observer
+        qs.addObserver(tui);
+
+        // Start server after observer is set
+        qs.startServer();
     }
 }

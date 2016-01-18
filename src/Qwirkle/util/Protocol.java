@@ -1,4 +1,4 @@
-package qwirkle.protocol;
+package qwirkle.util;
 
 public class Protocol {
     public static class Client {

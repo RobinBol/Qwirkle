@@ -1,9 +1,15 @@
+/**
+ * TODO Major todo's listed below:
+ * - Fix niet arriverende END_GAME
+ * - Fix crash wanneer client met foute SSL connect
+ */
+
 package qwirkle.server;
 
 import qwirkle.gamelogic.Board;
 import qwirkle.gamelogic.Lobby;
-import qwirkle.protocol.Protocol;
-import qwirkle.protocol.ProtocolHandler;
+import qwirkle.util.Protocol;
+import qwirkle.util.ProtocolHandler;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -22,14 +28,26 @@ import java.util.ArrayList;
 public class ClientHandler extends Thread {
 
     /* Instance variables for server, socket and I/O */
-    private QwirkleServer server;
+    private Server server;
     private Lobby lobby;
     private Socket socket;
     private BufferedReader in;
     private BufferedWriter out;
+
+    /* Keep track of clients name */
     private String clientName;
+
+    /* Init gameType to invalid number */
     private int requestsGameType = 999;
+
+    /* Need to know state of connection */
     private boolean disconnected = false;
+
+    /* Internal reference to clients features */
+    private ArrayList<String> FEATURES = new ArrayList<>();
+
+    /* Keep track of in game mode */
+    private boolean inGame = false;
 
     /**
      * ClientHandler constructor, takes a QwirkleServer and Socket,
@@ -39,7 +57,7 @@ public class ClientHandler extends Thread {
      * @param sock   Socket used to read from/write to client
      * @throws IOException
      */
-    public ClientHandler(QwirkleServer server, Socket sock) throws IOException {
+    public ClientHandler(Server server, Socket sock) throws IOException {
         this.server = server;
         this.socket = sock;
         this.in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
@@ -51,31 +69,39 @@ public class ClientHandler extends Thread {
      * messages to this client.
      */
     public void run() {
-        String thisLine;
-
-        // First wait for client to announce itself
-        try {
-            listenForAnnounce();
-        } catch (IOException e) {
-            server.clientAnnounceFailed();
-        }
+        String incomingMessage;
 
         // Then read all incoming messages from client
         try {
-            while ((thisLine = in.readLine()) != null) {
-                if (!thisLine.isEmpty()) {
-                    server.logIncomingMessage(thisLine, this.clientName);
+
+            // First wait for client to announce itself
+            waitForHandshake();
+
+            // Now we can start listening for incoming messages to the server
+            while ((incomingMessage = in.readLine()) != null) {
+
+                // Make sure message is not empty
+                if (!incomingMessage.isEmpty()) {
+
+                    // Update server with new message
+                    server.updateObserver(ServerLogger.INCOMING_MESSAGE + incomingMessage);
 
                     // Parse package
-                    ArrayList<Object> result = ProtocolHandler.readPackage(thisLine);
+                    ArrayList<Object> result = ProtocolHandler.readPackage(incomingMessage);
 
                     // Check if properly parsed data is present
                     if (!result.isEmpty()) {
 
-                        // Handle incoming requests
-                        if (result.get(0).equals(Protocol.Client.REQUESTGAME) && result.size() == 2) {
+                        // Handle incoming packages
+                        if (result.get(0).equals(Protocol.Client.ERROR)) {
+                            handleIncomingError(result);
+                        } else if (result.get(0).equals(Protocol.Client.REQUESTGAME) && result.size() == 2) {
+
+                            // Client requested a gameType
                             this.requestsGameType = Integer.valueOf((String) result.get(1));
-                            server.checkLobbiesForGame();
+
+                            // Check updated lobby for matches
+                            this.getLobby().checkForGame();
                         }
                     }
                 }
@@ -92,12 +118,21 @@ public class ClientHandler extends Thread {
     }
 
     /**
+     * Acts on error input from the client.
+     *
+     * @param error ArrayList holding the error object
+     */
+    public void handleIncomingError(ArrayList<Object> error) {
+        //TODO handle incoming errors
+    }
+
+    /**
      * Method that initiates a server broadcast to let
      * all clients know a new client has connected.
      *
      * @throws IOException
      */
-    public void listenForAnnounce() throws IOException {
+    public void waitForHandshake() throws IOException {
 
         // Wait for incoming package and read it
         ArrayList<Object> incomingPackage = ProtocolHandler.readPackage(in.readLine());
@@ -112,7 +147,7 @@ public class ClientHandler extends Thread {
             name = name.trim();
 
             // If a user with this name already exists on the server
-            if (this.server.usernameAlreadyExist(name)) {
+            if (this.server.usernameTaken(name)) {
 
                 // Create error package
                 ArrayList<Object> errorCode = new ArrayList<>();
@@ -125,6 +160,11 @@ public class ClientHandler extends Thread {
                 server.removeClientHandler(this);
 
             } else {
+
+                // Add all features of the client
+                for (int i = 2; i < incomingPackage.size(); i++) {
+                    this.FEATURES.add(String.valueOf(incomingPackage.get(i)));
+                }
 
                 // Save clientname
                 this.clientName = name;
@@ -157,20 +197,17 @@ public class ClientHandler extends Thread {
      * Handles properly removing a client from the server, lobby and games
      * it might be in.
      */
-    public void disconnectClient(){
+    public void disconnectClient() {
 
-        //TODO FIX bug that sended game end does not arrive at clients
-
-        // Make sure client doesnt get disconnected more than once
+        // Make sure client doesn't get disconnected more than once
         this.disconnected = true;
 
         // If user is disconnected before handshake happened
         String clientIdentifier = ((this.clientName != null) ? this.clientName : "Unidentified client");
 
         // Log client disconnected
-        server.logClientDisconnected(clientIdentifier);
+        server.updateObserver(clientIdentifier + ServerLogger.CLIENT_DISCONNECTED);
 
-        //TODO fix if client connects with unspoorted SSL
         // Removes client from lobby and game (if applicable)
         Lobby lobby = getLobby();
         lobby.removeClient(this);
@@ -181,6 +218,7 @@ public class ClientHandler extends Thread {
 
     /**
      * Get lobby which client is in.
+     *
      * @return Lobby of client
      */
     public Lobby getLobby() {
@@ -190,9 +228,10 @@ public class ClientHandler extends Thread {
     /**
      * Add lobby to this clientHandler to keep
      * track of the lobby a client is in.
+     *
      * @param lobby
      */
-    public void addLobby(Lobby lobby){
+    public void setLobby(Lobby lobby) {
         this.lobby = lobby;
     }
 
@@ -228,10 +267,8 @@ public class ClientHandler extends Thread {
         // Add winner if applicable
         if (type == "WIN" && winner != null) parameters.add(winner);
 
-        System.out.println("CLIENTHANDLER SENDED GAME END");
         // Send confirming handshake to client
         String p = ProtocolHandler.createPackage(Protocol.Server.GAME_END, parameters);
-        System.out.println(p);
         this.sendMessage(p);
     }
 
@@ -310,8 +347,17 @@ public class ClientHandler extends Thread {
      * Method that forwards a request from Player
      * to log the board to the console.
      */
-    public void logBoard(Board board) {
-        server.logBoard(board);
+    public void showBoard(Board board) {
+        server.updateObserver(board);
+    }
+
+    /**
+     * Mark clientHandler is in game/or not.
+     *
+     * @param state in game
+     */
+    public void setGameState(boolean state) {
+        this.inGame = state;
     }
 
     /**
@@ -321,12 +367,7 @@ public class ClientHandler extends Thread {
         try {
             this.socket.close();
         } catch (IOException e) {
-
-            // If user is disconnected before handshake happened
-            String clientIdentifier = ((this.clientName != null) ? this.clientName : "Unidentified client");
-
-            // Log user could not be closed
-            server.logFailedToCloseClient(clientIdentifier);
+            // Assume socket already shut down
         }
     }
 }

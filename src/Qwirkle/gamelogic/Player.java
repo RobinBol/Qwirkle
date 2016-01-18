@@ -22,7 +22,7 @@ public class Player {
         this.board.createTestMap();
 
         // Tell client to log the board, client has a TUI and will handle that
-        this.client.logBoard(board);
+        this.client.showBoard(board);
     }
 
     public String getName() {

@@ -1,10 +1,20 @@
-package qwirkle.protocol;
+package qwirkle.util;
 
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class ProtocolHandler {
 
+    /**
+     * Method that creates a package according to protocol. It takes a command
+     * but no parameters.
+     *
+     * @param command Protocol command (e.g. "REQUESTGAME" or "QUIT")
+     * @return Package formatted as a string
+     */
+    public static String createPackage(String command) {
+        return createPackage(command, new ArrayList<>());
+    }
 
     /**
      * Method that creates a package according to protocol. It takes a command
@@ -37,6 +47,13 @@ public class ProtocolHandler {
                 // Append command end
                 sb.append(Protocol.Server.Settings.COMMAND_END);
             }
+        }
+
+        // If no parameters provided
+        if (parameters.size() == 0) {
+
+            // Append command end
+            sb.append(Protocol.Server.Settings.COMMAND_END);
         }
 
         // Return package as string

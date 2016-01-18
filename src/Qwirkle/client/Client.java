@@ -1,7 +1,13 @@
+/**
+ * TODO Major todo's listed below:
+ * - Match features met server
+ * - Als invalid certs voor SSL worden gebruikt, fallback to Socket
+ */
+
 package qwirkle.client;
 
-import qwirkle.protocol.Protocol;
-import qwirkle.protocol.ProtocolHandler;
+import qwirkle.util.Protocol;
+import qwirkle.util.ProtocolHandler;
 
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSocketFactory;
@@ -9,7 +15,8 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.NoSuchElementException;
+import java.util.Observable;
+import java.util.Scanner;
 
 /**
  * Client class that can work standalone. It can connect
@@ -18,7 +25,7 @@ import java.util.NoSuchElementException;
  * back to a regular socket. This client runs on a separate
  * thread.
  */
-public class Client extends Thread {
+public class Client extends Observable implements Runnable {
 
     /* Variables that identify a client, and its host*/
     private static String name;
@@ -29,11 +36,12 @@ public class Client extends Thread {
     private Socket socket;
     private BufferedReader in;
     private BufferedWriter out;
-    private ClientLog log;
 
-    //TODO add features below when added
-    /* Features variable, holding the features this client supports*/
-    private static String[] FEATURES = new String[]{Protocol.Server.Features.SECURITY};
+    /* State of client */
+    private boolean inGame = false;
+
+    /* Features variable, holding the features this client supports */
+    private static String[] FEATURES = new String[]{Protocol.Server.Features.SECURITY, Protocol.Server.Features.CHALLENGE};
 
     /**
      * Client constructor that takes a name, host and port.
@@ -42,29 +50,12 @@ public class Client extends Thread {
      * @param host Host to connect client to
      * @param port Port to connect on at host
      */
-    public Client(String name, InetAddress host, int port, ClientLog log) {
+    public Client(String name, InetAddress host, int port) {
 
         // If variables provided as parameters use them
-        if (log != null) this.log = log;
         if (name != null) this.name = name;
         if (host != null) this.host = host.getHostAddress();
         if (port != 0) this.port = port;
-
-        // Check if parameters are already set on commandline, if not ask for them
-        if (this.name == null && this.host == null && this.port == 0) {
-
-            // Start setup process, and ask for correct input
-            this.log.clientSetupStarted();
-            this.name = this.log.askForUsername();
-            this.host = this.log.askForHostAddress();
-            this.port = this.log.askForPort();
-        }
-
-        // Let user know client setup started
-        this.log.clientSetupStarted(this.name, this.host, this.port);
-
-        // All parameters set, start client thread
-        this.start();
     }
 
     /**
@@ -73,31 +64,47 @@ public class Client extends Thread {
      * to the server according to protocol.
      */
     public void run() {
+
+        // Check if parameters are already set on commandline, if not ask for them
+        if (name == null && host == null && port == 0) {
+
+            // Update observer, setup has started
+            updateObserver(ClientLogger.SETUP_STARTED);
+
+            // Start setup process, and ask for correct input
+            name = askForUsername();
+            host = askForHostAddress();
+            port = askForPort();
+        }
+
+        // Try to create SSLSocket
         try {
 
             // Create SSLSocket
             SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            this.socket = sslsocketfactory.createSocket(this.host, this.port);
+            socket = sslsocketfactory.createSocket(host, port);
 
             // Create in/out for socket
-            setupIOStreams(this.socket);
+            setupIOStreams(socket);
 
             // Announce client to server
-            this.announce();
+            shakeHand();
 
             // Show in TUI client has started
-            this.log.clientStarted(this.host, this.port);
+            updateObserver(ClientLogger.CLIENT_STARTED + host + ":" + port);
 
             // Start reading for incoming messages
             startInputStream();
 
         } catch (IOException e) {
-            this.log.clientStartupFailed();
+
+            // Update observer, setup has failed
+            updateObserver(ClientLogger.SETUP_FAILED);
         }
     }
 
     /**
-     * Sends a message the server.
+     * Sends a message the clientHandler on the server server.
      *
      * @param message Message to send
      */
@@ -108,7 +115,7 @@ public class Client extends Thread {
         } catch (SSLException e) {
 
             // When Client uses SSL socket but server doesn't
-            this.log.noSSLSupport();
+            updateObserver(ClientLogger.NO_SSL);
 
             // Switch this client to use a regular socket and reconnect
             switchToRegularSocket();
@@ -116,7 +123,7 @@ public class Client extends Thread {
         } catch (IOException e) {
 
             // When message could not be delivered
-            this.log.failedToSendMessage(message);
+            updateObserver(ClientLogger.CLIENT_DISCONNECTED);
         }
     }
 
@@ -124,7 +131,7 @@ public class Client extends Thread {
      * Sends message that announces new client to the
      * server according to protocol.
      */
-    public void announce() {
+    public void shakeHand() {
 
         // Create parameters array
         ArrayList<Object> parameters = new ArrayList<>();
@@ -163,8 +170,8 @@ public class Client extends Thread {
 
         } catch (IOException e) {
 
-            // When i/o could not be created
-            this.log.failedToSetupIOStreams();
+            // Could not setup IO streams
+            updateObserver(ClientLogger.SETUP_FAILED);
         }
     }
 
@@ -173,98 +180,8 @@ public class Client extends Thread {
      * handles the incoming messages from the server.
      */
     public void startInputStream() {
-
-        // Start reading incoming messages
-        String incomingValue = null;
-        try {
-            // While there are messages to be read
-            while ((incomingValue = in.readLine()) != null && incomingValue != "" && incomingValue != "\\n" && incomingValue != "\\n\\n") {
-
-                // Log message if present
-                if (!incomingValue.isEmpty()) this.log.incomingMessage(incomingValue);
-
-                // TODO handle incoming messages from the server
-                // TODO readPackage and parse errors
-
-                ArrayList<Object> result = ProtocolHandler.readPackage(incomingValue);
-
-                // Check if properly parsed data is present
-                if (!result.isEmpty()) {
-                    System.out.println(result.get(0));
-
-
-                    // Handle incoming errors
-                    if (result.get(0).equals(Protocol.Client.ERROR)) {
-                        handleIncomingError(Integer.valueOf((String) result.get(1)));
-                    } else if (result.get(0).equals(Protocol.Server.HALLO)) {
-                        askForGameType();
-                    } else if (result.get(0).equals(Protocol.Server.GAME_END)) {
-                        //TODO handle game end
-                        if(result.size() >= 1) {
-                            log.gameEnded(String.valueOf(result.get(1)));
-                        } else {
-                            log.gameEnded();
-                        }
-                    }
-                }
-            }
-        } catch (IOException | NoSuchElementException e) {
-
-            // When something failed while reading a message
-            this.log.failedToParseMessage(incomingValue);
-        }
-    }
-
-    /**
-     * This method handles all incoming errors
-     *
-     * @param errorCode specific error code of error
-     */
-    public void handleIncomingError(int errorCode) {
-
-        // Username already exists
-        if (errorCode == 4) {
-            this.log.usernameExists();
-            System.exit(0);
-        }
-    }
-
-    /**
-     * Let the client enter a preferred game type and
-     * send it to the server.
-     */
-    public void askForGameType() {
-        int gameType = this.log.askForGameType();
-
-        //TODO implement gameType 5
-//        if (gameType == 5) {
-//            this.log.askForOpponent();
-//        }
-
-        // Parse gameTyp to string representation
-        String gameTypeName = "none";
-        if (gameType == 0) {
-            gameTypeName = "random";
-        } else if (gameType == 1) {
-            gameTypeName = "against a computer oponent";
-        } else if (gameType == 2) {
-            gameTypeName = "against one human player";
-        } else if (gameType == 3) {
-            gameTypeName = "against two human players";
-        } else if (gameType == 4) {
-            gameTypeName = "against three human players";
-        }
-//        else if (gameType == 5) {
-//            gameTypeName = "against a challenged opponent";
-//        }
-
-        // Log looking for client
-        this.log.lookingForGameType(gameTypeName);
-
-        // Create and send package to request a game at the server, of this game type
-        ArrayList<Object> parameters = new ArrayList<>();
-        parameters.add(String.valueOf(gameType));
-        sendMessage(ProtocolHandler.createPackage(Protocol.Client.REQUESTGAME, parameters));
+        InputHandler inputHandler = new InputHandler(this, in);
+        inputHandler.start();
     }
 
     /**
@@ -283,7 +200,7 @@ public class Client extends Thread {
             setupIOStreams(this.socket);
 
             // Announce client to server
-            this.announce();
+            this.shakeHand();
 
             // Start listening for incoming messages
             // on this new socket
@@ -291,8 +208,8 @@ public class Client extends Thread {
 
         } catch (IOException e) {
 
-            // When regular socket could not be created
-            this.log.failedToCreateSocket();
+            // Could not setup IO streams
+            updateObserver(ClientLogger.SETUP_FAILED);
         }
     }
 
@@ -350,6 +267,178 @@ public class Client extends Thread {
     }
 
     /**
+     * Marks client as in game, or out of game.
+     *
+     * @param state in game or noet
+     */
+    public void setInGame(boolean state) {
+        this.inGame = state;
+    }
+
+    /**
+     * Getter for in game state.
+     *
+     * @return true if in game
+     */
+    public boolean inGame() {
+        return this.inGame;
+    }
+
+    /**
+     * Updates observer with messages.
+     *
+     * @param message
+     */
+    public void updateObserver(String message) {
+        setChanged();
+        notifyObservers(message);
+    }
+
+    /**
+     * Handles asking the user on the client for
+     * input.
+     *
+     * @param question Question to ask the user
+     */
+    public String ask(String question) {
+
+        // Print question
+        updateObserver(question);
+
+        // Create new scanner to listen for input
+        Scanner sc = new Scanner(System.in);
+
+        return sc.nextLine();
+    }
+
+    /**
+     * Ask user to give a valid game type.
+     *
+     * @return int gameType
+     */
+    public int askForGameType() {
+        return askForGameType(null);
+    }
+
+    /**
+     * Ask user to give a valid game type.
+     *
+     * @param enteredGameType gameType, to check if valid
+     * @return int gameType
+     */
+    public int askForGameType(String enteredGameType) {
+
+        // If not used recursively, ask first for input
+        if (enteredGameType == null) {
+            enteredGameType = ask("Please request a game type by typing the number of your choice:\n[0] I don't care...\n[1] Versus AI\n[2] Versus one other player\n[3] Versus two other players\n[4] Versus three other players\n[5] I want to challenge someone\n[6] Wait for incoming invitation");
+        }
+
+        // While the input is not correct, keep asking for correct input
+        if (!enteredGameType.trim().equals("0") && !enteredGameType.trim().equals("1") && !enteredGameType.trim().equals("2")
+                && !enteredGameType.trim().equals("3") && !enteredGameType.trim().equals("4") && !enteredGameType.trim().equals("5")
+                && !enteredGameType.trim().equals("6")) {
+            enteredGameType = ask("Invalid option, please try again (type number of your choice:");
+        }
+
+        // Correct input was provided, return it
+        return Integer.parseInt(enteredGameType);
+    }
+
+    /**
+     * Ask user to give a valid opponent to challenge.
+     *
+     * @return String playername
+     */
+    public String askForOpponent() {
+        return ask("Please provide the name of the player you would like to challenge:");
+    }
+
+    /**
+     * Ask user to give a username.
+     *
+     * @return String valid username
+     */
+    public String askForUsername() {
+        return askForUsername(null);
+    }
+
+    /**
+     * Ask user to give a username.
+     *
+     * @return String valid username
+     */
+    public String askForUsername(String enteredUsername) {
+
+        // If not provided as argument, ask for it
+        if (enteredUsername == null) {
+            enteredUsername = ask("Please enter your username:");
+        }
+
+        // While input is too long, ask for smaller input
+        while (enteredUsername.length() > 15) {
+            enteredUsername = askForUsername(ask("Please use 15 characters or less, try again:"));
+        }
+
+        // Correct input provided, return it
+        return enteredUsername;
+    }
+
+    /**
+     * Ask user to give a valid host address for the server.
+     *
+     * @return String valid host address
+     */
+    public String askForHostAddress() {
+        return askForHostAddress(null);
+    }
+
+    /**
+     * Ask user to give a valid host address for the server.
+     *
+     * @return String valid host address
+     */
+    public String askForHostAddress(String enteredAddress) {
+
+        // If not provided as argument, ask for it
+        if (enteredAddress == null) {
+            enteredAddress = ask("Please enter the server host IP address:");
+        }
+
+        // While entered address is not valid ask for valid input
+        while (!Client.checkForValidIP(enteredAddress)) {
+            enteredAddress = askForUsername(ask("Invalid hostname/ipaddress provided, please try again:"));
+        }
+
+        // Valid input provided, return it
+        return enteredAddress;
+    }
+
+    /**
+     * Ask user to give a valid port of the server.
+     *
+     * @return int valid port number
+     */
+    public int askForPort() {
+        return askForPort(null);
+    }
+
+    public int askForPort(String enteredPort) {
+
+        // If not provided as argument, ask for it
+        if (enteredPort == null) {
+            enteredPort = ask("Please enter the server port:");
+        }
+
+        // While incorrect port ask for new one
+        while (!Client.checkForValidPort(enteredPort)) {
+            enteredPort = String.valueOf(askForPort(ask("Invalid port provided, please try again:")));
+        }
+
+        // Return valid port
+        return Integer.parseInt(enteredPort);
+    }
+
+    /**
      * Handles starting of the client, parses the args
      * given to the program (<name> <host> <port>) or uses
      * default values if none are provided.
@@ -358,12 +447,6 @@ public class Client extends Thread {
      */
     public static void main(String[] args) {
 
-        // Create tui and log unit
-        ClientTUI tui = new ClientTUI();
-        ClientLog log = new ClientLog();
-        log.addObserver(tui);
-
-        //TODO if certs could not be found fall back to regular socket
         // Set needed trustStore properties in order to connect to SSLSocket
         System.setProperty("javax.net.ssl.trustStore", System.getProperty("user.dir").replace("src", "") + "/certs/key.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "password");
@@ -382,7 +465,7 @@ public class Client extends Thread {
             // Cut string off after 15 chars
             if (name.length() > 15) {
                 name = name.substring(0, 15);
-                log.nameCutOff(name);
+                System.out.println(ClientLogger.NAME_TOO_LONG);
             }
 
             // Check for valid ip
@@ -393,7 +476,7 @@ public class Client extends Thread {
             } else {
 
                 // Invalid input provided, let user know client is started on default port
-                log.invalidHostAddress();
+                System.out.println(ClientLogger.HOSTNAME_INVALID);
                 System.exit(0);
             }
 
@@ -405,7 +488,7 @@ public class Client extends Thread {
             } else {
 
                 // Invalid input provided, let user know client is started on default port
-                log.incorrectPort();
+                System.out.println(ClientLogger.PORT_INVALID);
                 System.exit(0);
             }
         }
@@ -419,11 +502,18 @@ public class Client extends Thread {
                 hostAddress = InetAddress.getByName(host);
             }
 
+            // Create new client
+            Client c = new Client(name, hostAddress, port);
+
+            // Create tui and attach observer
+            ClientTUI tui = new ClientTUI();
+            c.addObserver(tui);
+
             // Start client on new thread
-            Client c = new Client(name, hostAddress, port, log);
+            new Thread(c).start();
 
         } catch (IOException e) {
-            log.failedToConnectToServer();
+            System.out.println(ClientLogger.SETUP_FAILED);
         }
     }
 }

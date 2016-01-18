@@ -1,7 +1,8 @@
 package qwirkle.gamelogic;
 
 import qwirkle.server.ClientHandler;
-import qwirkle.server.QwirkleServer;
+import qwirkle.server.Server;
+import qwirkle.server.ServerLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,10 +17,10 @@ import java.util.Map;
  * for a matching game and will start it when found.
  */
 public class Lobby {
-    private static final int LOBBYSIZE = 8;
+    private static final int LOBBYSIZE = 100;
     private static int id;
     private List<ClientHandler> lobbyClients;
-    private QwirkleServer server;
+    private Server server;
     private List<Game> games;
 
     //TODO add invitation system
@@ -32,7 +33,7 @@ public class Lobby {
      * @param id
      * @param server
      */
-    public Lobby(int id, QwirkleServer server) {
+    public Lobby(int id, Server server) {
         this.id = id;
         this.lobbyClients = new ArrayList<>();
         this.games = new ArrayList<>();
@@ -120,7 +121,7 @@ public class Lobby {
      * Looks at all connected clients if there is
      * a matching game, if so it starts it.
      */
-    public void searchForGame() {
+    public void checkForGame() {
 
         // Create Map that holds all game types and clients
         Map<Integer, ArrayList<ClientHandler>> games = new HashMap<>();
@@ -160,17 +161,15 @@ public class Lobby {
     }
 
     /**
-     * Let server know a game has started with the
-     * specified clients.
-     *
-     * @param clients Clients in game
+     * Let server know a game has started.
      */
-    public void gameStarted(ArrayList<ClientHandler> clients) {
-        this.server.logGameStarted(clients);
+    public void gameStarted() {
+        this.server.updateObserver(ServerLogger.GAME_STARTED);
     }
 
     /**
      * Keep track of all games running in this lobby.
+     *
      * @param game Game that was started
      */
     public void addGame(Game game) {
@@ -185,7 +184,7 @@ public class Lobby {
     public void addClient(ClientHandler clientHandler) {
 
         // Add reference to lobby within clientHandler
-        clientHandler.addLobby(this);
+        clientHandler.setLobby(this);
 
         // Add client to lobby
         lobbyClients.add(clientHandler);
@@ -205,7 +204,7 @@ public class Lobby {
 
             System.out.println("ITERATE GAMES");
             // If client is in game, end game and remove client
-            if (games.get(i).hasPlayer(clientHandler.getClientName())){
+            if (games.get(i).hasPlayer(clientHandler.getClientName())) {
 
                 System.out.println("FOUND GAME WITH CLIENT");
                 // Let client know game has ended
@@ -223,12 +222,17 @@ public class Lobby {
     /**
      * Removes client from lobby, for example when game is started,
      * or client disconnected.
+     *
      * @param clientHandler
      */
     public void removeClientFromLobby(ClientHandler clientHandler) {
 
         // Remove client from lobbylist
         this.lobbyClients.remove(clientHandler);
+
+        if (isEmpty()) {
+            server.removeLobby(this);
+        }
     }
 
     /**

@@ -80,14 +80,15 @@ public class BoardTest {
         assertFalse(board.validShapeColorCombination(inValid));
         assertFalse(board.validShapeColorCombination(inValid2));
     }
+
     @Test
     public void connectionTest() {
-    	board.resetMap();
-    	board.createTestMap();
-        Stone valid = new Stone ('a','a',0, -1);
-        Stone valid2 = new Stone ('a','a',0 , 1);
-        Stone inValid = new Stone ('a','a',0, -2);
-        Stone inValid2 = new Stone ('a','a',-4 , 0);
+        board.resetMap();
+        board.createTestMap();
+        Stone valid = new Stone('a', 'a', 0, -1);
+        Stone valid2 = new Stone('a', 'a', 0, 1);
+        Stone inValid = new Stone('a', 'a', 0, -2);
+        Stone inValid2 = new Stone('a', 'a', -4, 0);
 
         assertTrue(board.isConnected(valid));
         assertTrue(board.isConnected(valid2));
