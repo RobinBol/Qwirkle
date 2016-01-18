@@ -1,4 +1,4 @@
-package qwirkle.server;
+package Qwirkle.server;
 
 import java.util.Observable;
 import java.util.Observer;

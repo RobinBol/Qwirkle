@@ -1,12 +1,12 @@
-package qwirkle.tests;
+package Qwirkle.tests;
 
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import qwirkle.gamelogic.Board;
-import qwirkle.gamelogic.Stone;
+import Qwirkle.gamelogic.Board;
+import Qwirkle.gamelogic.Stone;
 
 public class BoardTest {
 

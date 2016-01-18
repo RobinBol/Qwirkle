@@ -1,10 +1,10 @@
-package qwirkle.tests;
+package Qwirkle.tests;
 
 import java.io.PrintWriter;
 
-import qwirkle.gamelogic.Board;
-import qwirkle.gamelogic.Coordinate;
-import qwirkle.gamelogic.Stone;
+import Qwirkle.gamelogic.Board;
+import Qwirkle.gamelogic.Coordinate;
+import Qwirkle.gamelogic.Stone;
 
 public class TestTUI {
     PrintWriter out;

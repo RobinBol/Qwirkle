@@ -1,4 +1,4 @@
-package qwirkle.gamelogic;
+package Qwirkle.gamelogic;
 
 import java.util.ArrayList;
 import java.util.List;

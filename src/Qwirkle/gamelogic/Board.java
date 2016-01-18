@@ -1,4 +1,4 @@
-package qwirkle.gamelogic;
+package Qwirkle.gamelogic;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,15 +17,12 @@ public class Board {
         bag = new Bag();
     }
 
-    /* Places a stone if possible.
-     * 
+    /* 
+     * Places a stone on the board. 
+     * Stones are mostly validated before this call.
      */
-    public boolean placeStone(int x, int y, Stone stone) {
-        if (isEmptySpot(x, y)) {
-            board.put(Coordinate.getCoordinateHash(x, y), stone);
-            return true;
-        }
-        return false;
+    public void placeStone(Stone stone) {
+    	board.put(Coordinate.getCoordinateHash(stone.getX(), stone.getY()), stone);
     }
 
     /*
@@ -60,6 +57,13 @@ public class Board {
     }
     
     public boolean makeMove(Stone[] stones) {
+    	if (board.isEmpty()) {
+    		if (isValidMove(stones)) {
+    			for (int i = 0; i < stones.length; i++) {
+    				placeStone(stones[i]);
+				}
+    		}
+    	}
     	return false;
     }
 

@@ -1,4 +1,4 @@
-package qwirkle.gamelogic;
+package Qwirkle.gamelogic;
 
 public class Stone {
 

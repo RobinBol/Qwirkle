@@ -1,6 +1,6 @@
-package qwirkle.tests;
+package Qwirkle.tests;
 
-import qwirkle.gamelogic.Coordinate;
+import Qwirkle.gamelogic.Coordinate;
 
 public class CoordinateTest {
 

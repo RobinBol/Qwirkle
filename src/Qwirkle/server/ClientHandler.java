@@ -1,9 +1,9 @@
-package qwirkle.server;
+package Qwirkle.server;
 
-import qwirkle.gamelogic.Board;
-import qwirkle.gamelogic.Lobby;
-import qwirkle.protocol.Protocol;
-import qwirkle.protocol.ProtocolHandler;
+import Qwirkle.gamelogic.Board;
+import Qwirkle.gamelogic.Lobby;
+import Qwirkle.protocol.Protocol;
+import Qwirkle.protocol.ProtocolHandler;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
