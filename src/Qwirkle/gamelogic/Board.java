@@ -3,10 +3,11 @@ package Qwirkle.gamelogic;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sun.xml.internal.ws.util.pipe.StandalonePipeAssembler;
+
 
 public class Board {
-    //TODO: Dynamisch maken, maar is lastig met TUI omdat het dan heel snel heel erg te veel word in een TUI.
-    public static final int MAXBOARDSIZE = 11;
+    //public static final int MAXBOARDSIZE = 11;
 
     private Bag bag;
     private Map<String, Stone> board;
@@ -17,7 +18,7 @@ public class Board {
         bag = new Bag();
     }
 
-    /* 
+    /** 
      * Places a stone on the board. 
      * Stones are mostly validated before this call.
      */
@@ -57,12 +58,10 @@ public class Board {
     }
     
     public boolean makeMove(Stone[] stones) {
-    	if (board.isEmpty()) {
-    		if (isValidMove(stones)) {
-    			for (int i = 0; i < stones.length; i++) {
-    				placeStone(stones[i]);
-				}
-    		}
+    	if (isValidMove(stones)) {
+    		for (int i = 0; i < stones.length; i++) {
+    			placeStone(stones[i]);
+			}
     	}
     	return false;
     }
@@ -72,7 +71,7 @@ public class Board {
         if (isEmptyBoard()) {
             if (x == 0 && y == 0) {
                 //TODO: Not sure if the new stone might create duplicate cases. Make sure this is addressed in player.
-                placeStone(x, y, new Stone(shape, color, x, y));
+                //placeStone(x, y, new Stone(shape, color, x, y));
             }
             //not the first tile on 0,0;
             //TODO: Announce to player that it is an invalid move for the first turn?
@@ -102,7 +101,11 @@ public class Board {
         if (!areConnected(stones)) return false;
         if (takeOccupiedPlaces(stones)) return false;
         if (!validShapeColorCombination(stones)) return false;
-        if (!areConnectedToBoard(stones)) return false;
+        if (!isEmptyBoard()) {
+            if (!areConnectedToBoard(stones)) return false;
+        } else {
+        	if (!containsZeroZero(stones)) return false;
+        }
 
         return true;
     }
@@ -190,6 +193,13 @@ public class Board {
 				return true;
 			}
 		}    	
+    	return false;
+    }
+    
+    public boolean containsZeroZero(Stone[] stones) {
+    	for (int i = 0; i < stones.length; i++) {
+			if (stones[i].getX() == 0 && stones[i].getY() == 0) return true;
+		}
     	return false;
     }
 
