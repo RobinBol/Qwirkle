@@ -1,4 +1,4 @@
-package Qwirkle.gamelogic;
+package qwirkle.gamelogic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sun.xml.internal.ws.util.pipe.StandalonePipeAssembler;
 
 
 public class Board {
@@ -73,7 +72,7 @@ public class Board {
         }
         return false;
     }
-    
+
     public boolean makeMove(Stone[] stones) {
     	if (isValidMove(stones)) {
     		boolean searchY = false;
@@ -166,7 +165,7 @@ public class Board {
 				done = true;
 			}
 		}
-    	return checkRow;
+    	return checkRow;    
     }
 
     public boolean makeMove(int x, int y, char shape, char color) {
@@ -223,7 +222,7 @@ public class Board {
     }
 
     /*
-	 * Tests if the stones in array (moves) are in connected to each other.
+     * Tests if the stones in array (moves) are in connected to each other.
 	 */
     public boolean areConnected(Stone[] stones) {
         if (!inSameRow(stones)) return false;
@@ -288,24 +287,24 @@ public class Board {
      * returns if a position is next to an already placed stone.
      */
     public boolean isConnected(Stone stone) {
-    	int x = stone.getX();
-    	int y = stone.getY();
-    	if (board.containsKey(Coordinate.getCoordinateHash(x + 1, y))) return true;
-    	if (board.containsKey(Coordinate.getCoordinateHash(x, y + 1))) return true;
-    	if (board.containsKey(Coordinate.getCoordinateHash(x - 1, y))) return true;
-    	if (board.containsKey(Coordinate.getCoordinateHash(x, y - 1))) return true;    	
+        int x = stone.getX();
+        int y = stone.getY();
+        if (board.containsKey(Coordinate.getCoordinateHash(x + 1, y))) return true;
+        if (board.containsKey(Coordinate.getCoordinateHash(x, y + 1))) return true;
+        if (board.containsKey(Coordinate.getCoordinateHash(x - 1, y))) return true;
+        if (board.containsKey(Coordinate.getCoordinateHash(x, y - 1))) return true;
         return false;
     }
-    
+
     public boolean areConnectedToBoard(Stone[] stones) {
-    	System.out.println(board.keySet() + ";;");
-    	for (int i = 0; i < stones.length; i++) {
-			if (isConnected(stones[i])) {
-				System.out.println(isConnected(stones[i]));
-				return true;
-			}
-		}    	
-    	return false;
+        System.out.println(board.keySet() + ";;");
+        for (int i = 0; i < stones.length; i++) {
+            if (isConnected(stones[i])) {
+                System.out.println(isConnected(stones[i]));
+                return true;
+            }
+        }
+        return false;
     }
     
     public boolean containsZeroZero(Stone[] stones) {
@@ -355,5 +354,32 @@ public class Board {
         int height = highestY - lowestY + 1;
 
         return new int[]{width, height};
+    }
+
+    @Override
+    public String toString() {
+
+        String boardString = "";
+        // Calculate boardSize
+        int[] boardSize = this.getBoardWidthHeight();
+        int maxSize = Math.max(boardSize[0], boardSize[1]);
+        int middle = (maxSize / 2) + 4;
+
+        // For loop that will loop over the stones on the board and print them
+        for (int i = 0 - middle; i < maxSize + 11 - middle; i++) {
+            boardString = boardString + "|";
+            for (int j = 0 - middle; j < maxSize + 11 - middle; j++) {
+                Stone stone = this.getBoard().get(Coordinate.getCoordinateHash(j, i));
+                if (stone != null) {
+                    boardString = boardString + stone.getShape() + "" + stone.getColor();
+                } else {
+                    boardString = boardString + "NN";
+                }
+                boardString = boardString + "|";
+            }
+            boardString = boardString + "\n";
+        }
+
+        return boardString;
     }
 }

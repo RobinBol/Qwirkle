@@ -1,7 +1,7 @@
-package Qwirkle.server;
+package qwirkle.server;
 
-import Qwirkle.client.Client;
-import Qwirkle.util.Log;
+import qwirkle.client.Client;
+import qwirkle.util.Log;
 
 import java.util.ArrayList;
 

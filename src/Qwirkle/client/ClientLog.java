@@ -1,6 +1,6 @@
-package Qwirkle.client;
+package qwirkle.client;
 
-import Qwirkle.util.Log;
+import qwirkle.util.Log;
 
 /**
  * This class acts as middleware for the logging of the client.

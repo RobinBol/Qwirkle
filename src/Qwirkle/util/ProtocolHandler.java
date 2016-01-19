@@ -1,8 +1,4 @@
-<<<<<<< HEAD:src/Qwirkle/protocol/ProtocolHandler.java
-package Qwirkle.protocol;
-=======
 package qwirkle.util;
->>>>>>> origin/master:src/Qwirkle/util/ProtocolHandler.java
 
 import java.util.ArrayList;
 import java.util.Scanner;

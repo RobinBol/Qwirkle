@@ -1,13 +1,8 @@
-package Qwirkle.tests;
+package qwirkle.tests;
 
-import java.io.PrintWriter;
-
-import Qwirkle.gamelogic.Board;
-import Qwirkle.gamelogic.Coordinate;
-import Qwirkle.gamelogic.Stone;
+import qwirkle.gamelogic.Board;
 
 public class TestTUI {
-    PrintWriter out;
 
     private Board board;
 
@@ -16,8 +11,9 @@ public class TestTUI {
     }
 
     public static void main(String[] args) {
-        TestTUI tui = new TestTUI(new Board());
+        Board board = new Board();
+        TestTUI tui = new TestTUI(board);
         tui.board.createTestMap();
-        //tui.drawBoard();
+        System.out.println(board);
     }
 }

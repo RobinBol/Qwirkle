@@ -1,8 +1,5 @@
-<<<<<<< HEAD:src/Qwirkle/protocol/Protocol.java
-package Qwirkle.protocol;
-=======
 package qwirkle.util;
->>>>>>> origin/master:src/Qwirkle/util/Protocol.java
+
 
 public class Protocol {
     public static class Client {

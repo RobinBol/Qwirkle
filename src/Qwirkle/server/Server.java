@@ -1,13 +1,11 @@
-<<<<<<< HEAD:src/Qwirkle/server/QwirkleServer.java
-package Qwirkle.server;
-=======
+
 /**
  * TODO Major todo's listed below:
  * - Match features met client
  */
 
 package qwirkle.server;
->>>>>>> origin/master:src/Qwirkle/server/Server.java
+
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -18,15 +16,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
-<<<<<<< HEAD:src/Qwirkle/server/QwirkleServer.java
-import Qwirkle.gamelogic.Board;
-import Qwirkle.gamelogic.Lobby;
-import Qwirkle.protocol.Protocol;
-=======
+
 import qwirkle.client.Client;
 import qwirkle.gamelogic.Lobby;
 import qwirkle.util.Protocol;
->>>>>>> origin/master:src/Qwirkle/server/Server.java
+
 
 /**
  * Class that handles the server. It starts a server,

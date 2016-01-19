@@ -1,5 +1,8 @@
 package Qwirkle.server;
 
+import qwirkle.gamelogic.Board;
+import qwirkle.util.Logger;
+
 import java.util.Observable;
 import java.util.Observer;
 
@@ -21,6 +24,13 @@ public class ServerTUI implements Observer {
      * @param x   Updated data
      */
     public void update(Observable obs, Object x) {
-        System.out.println(x);
+
+        // Draw board
+        if (x instanceof Board) {
+            Logger.print(x);
+        }
+
+        // Log regular message
+        Logger.print(String.valueOf(x));
     }
 }

@@ -21,13 +21,14 @@ public class Game {
      * Game constructor, give clients and lobby as parameters
      * so that the game can create its players and have a reference
      * to the lobby from which it was created.
+     *
      * @param clients
      * @param lobby
      */
     public Game(ArrayList<ClientHandler> clients, Lobby lobby) {
 
         // Let lobby know game started
-        lobby.gameStarted(clients);
+        lobby.gameStarted();
 
         // TODO check if socket connection to all clients in the game still works
         // TODO if not make sure game ends properly
@@ -39,7 +40,7 @@ public class Game {
         // Create players array
         players = new Player[clients.size()];
         for (int i = 0; i < players.length; i++) {
-
+            clients.get(i).setGameState(true);
             // Create player from client
             players[i] = new Player(clients.get(i), board);
         }
@@ -49,6 +50,7 @@ public class Game {
     }
 
     public void startGame() {
+        System.out.println("Game was properly started!");
     }
 
     public void setTurn() {
@@ -65,6 +67,9 @@ public class Game {
     public void terminateGame() {
         for (int i = 0; i < clients.size(); i++) {
 
+            // Mark client as not in game
+            clients.get(i).setGameState(false);
+
             // Create player from client
             clients.get(i).sendGameEnd("DISCONNECT");
         }
@@ -72,6 +77,7 @@ public class Game {
 
     /**
      * Checks wheter the game has a certain player.
+     *
      * @param name Player name to be found
      * @return true if player is present in game
      */
@@ -81,7 +87,7 @@ public class Game {
         for (int i = 0; i < players.length; i++) {
 
             // Create player from client
-            if (players[i].getName().equals(name)){
+            if (players[i].getName().equals(name)) {
                 return true;
             }
         }
