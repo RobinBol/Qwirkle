@@ -11,11 +11,13 @@ public class Board {
 
     private Bag bag;
     private Map<String, Stone> board;
+    private List<Stone> lastMoves; 
 
 
     public Board() {
         board = new HashMap<>();
         bag = new Bag();
+        lastMoves = new ArrayList<>();
     }
 
     /** 
@@ -39,6 +41,23 @@ public class Board {
     	
     	board.put(Coordinate.getCoordinateHash(stone.getX(), stone.getY()), stone);
     }
+    
+    public void removeStone(Stone stone) {
+    	int x = stone.getX();
+    	int y = stone.getY();
+    	stone.down 	= board.get(Coordinate.getCoordinateHash(x, y - 1));
+    	if (stone.down != null) stone.down.up = null;
+    	
+    	stone.left	= board.get(Coordinate.getCoordinateHash(x - 1, y));
+    	if (stone.left != null) stone.left.right = null;
+    	
+    	stone.right = board.get(Coordinate.getCoordinateHash(x + 1, y));
+    	if (stone.right != null) stone.right.left = null;
+    	
+    	stone.up   	= board.get(Coordinate.getCoordinateHash(x, y + 1));
+    	if (stone.up != null) stone.up.down = null;
+    	board.remove(Coordinate.getCoordinateHash(stone.getX(), stone.getY()));
+    }
 
     /*
      * Take stone from the bag.
@@ -57,6 +76,12 @@ public class Board {
 
     public Map<String, Stone> getBoard() {
         return board;
+    }
+    
+    public void undoMoves() {
+    	for (int i = 0; i < lastMoves.size(); i ++) {
+    		removeStone(lastMoves.get(i));
+    	}
     }
 
 
@@ -120,7 +145,11 @@ public class Board {
     			}
     		}
     		System.out.println(score);
+    		
+    		//save last made moves.
+    		lastMoves = moves;
     	}
+    	
     	
     	return true;
     }
