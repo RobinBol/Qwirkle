@@ -1,13 +1,12 @@
-package Qwirkle.tests;
+package qwirkle.tests;
 
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import Qwirkle.gamelogic.Board;
-import Qwirkle.gamelogic.Stone;
-import Qwirkle.util.Log;
+import qwirkle.gamelogic.Board;
+import qwirkle.gamelogic.Stone;
 
 public class BoardTest {
 
@@ -82,7 +81,7 @@ public class BoardTest {
 
         //assertTrue(board.makeMove(valid));
         board.makeMove(valid);
-        Log.drawBoard(board);
+        System.out.println(board.getBoard());
         System.out.println("SMTH");
         
         //assertTrue(board.isValidMove(valid2));

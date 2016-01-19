@@ -1,4 +1,4 @@
-package Qwirkle.server;
+package qwirkle.server;
 
 import qwirkle.gamelogic.Board;
 import qwirkle.util.Logger;

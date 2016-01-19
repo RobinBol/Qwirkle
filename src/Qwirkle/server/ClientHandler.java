@@ -92,7 +92,7 @@ public class ClientHandler extends Thread {
 
                     // Check if properly parsed data is present
                     if (!result.isEmpty()) {
-
+                        System.out.println(result);
                         // Handle incoming packages
                         if (result.get(0).equals(Protocol.Client.ERROR)) {
                             handleIncomingError(result);
@@ -103,6 +103,52 @@ public class ClientHandler extends Thread {
 
                             // Check updated lobby for matches
                             this.getLobby().checkForGame();
+//                            //TODO fix invite below
+//                        } else if (result.get(0).equals(Protocol.Client.INVITE) && result.size() == 2) {
+//                            System.out.println(this + "Set opponent");
+//                            opponent = server.getClientHandler(String.valueOf(result.get(1)));
+//                            server.registerInvite(this, opponent);
+//
+//                            System.out.println(opponent);
+//                            // Check if opponent is challengable
+//                            if (!opponent.isChallengable()) {
+//
+//                                // Create error package
+//                                ArrayList<Object> errorCode = new ArrayList<>();
+//                                errorCode.add(5);
+//
+//                                // Send error package
+//                                sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
+//
+//                            }
+//                            // Check if oponent exists
+//                            else if (opponent != null) {
+//                                opponent.sendMessage(incomingMessage);
+//                            }
+//                            // Does not exist, throw error
+//                            else {
+//
+//                                // Create error package
+//                                ArrayList<Object> errorCode = new ArrayList<>();
+//
+//                                // Send error package
+//                                sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
+//                            }
+//                        } else if (result.get(0).equals(Protocol.Client.ACCEPTINVITE)) {
+//                            opponent = server.getInviter(this);
+//                            System.out.println(this + "Get opponent");
+//
+//                            System.out.println(opponent);
+//                            System.out.println(this.getLobby().equals(opponent.getLobby()));
+//                            if (opponent != null && this.getLobby().equals(opponent.getLobby())) {
+//                                ArrayList<ClientHandler> clients = new ArrayList<>();
+//                                clients.add(this);
+//                                clients.add(opponent);
+//                                this.getLobby().startGame(clients);
+//                                System.out.println("STARTED GAME FROM HANDLER");
+//                            }
+//                        } else if (result.get(0).equals(Protocol.Client.DECLINEINVITE)) {
+//                            sendMessage("Invite was declined...");
                         }
                     }
                 }

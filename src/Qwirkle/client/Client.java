@@ -1,4 +1,3 @@
-
 /**
  * TODO Major todo's listed below:
  * - Match features met server
@@ -9,7 +8,6 @@ package qwirkle.client;
 
 import qwirkle.util.Protocol;
 import qwirkle.util.ProtocolHandler;
-
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.*;

@@ -1,11 +1,9 @@
-
 /**
  * TODO Major todo's listed below:
  * - Match features met client
  */
 
 package qwirkle.server;
-
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -16,11 +14,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
-
 import qwirkle.client.Client;
 import qwirkle.gamelogic.Lobby;
 import qwirkle.util.Protocol;
-
 
 /**
  * Class that handles the server. It starts a server,

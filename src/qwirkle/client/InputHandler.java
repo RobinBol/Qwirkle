@@ -114,7 +114,7 @@ public class InputHandler extends Thread {
      */
     public void getGameType() {
         int gameType = client.askForGameType();
-
+        System.out.println(gameType);
         // Handle making a challenge
         if (gameType == 5) {
 

@@ -1,4 +1,3 @@
-
 /**
  * TODO Major todo's listed below:
  * - check if socket connection to all clients in the game still works
@@ -7,7 +6,6 @@
  */
 
 package qwirkle.gamelogic;
-
 
 import qwirkle.server.ClientHandler;
 
