@@ -157,8 +157,10 @@ public class Board {
     public List<Stone> getRows(boolean searchDirection, Stone current) {
     	boolean done = false;
     	List<Stone> checkRow = new ArrayList<>();
+    	checkRow.add(current);
     	if (searchDirection) { //searchY
 			while (!done) {
+				
 				while (current.up != null) {
 					if (!checkRow.contains(current.up)) {
 						checkRow.add(current.up);
@@ -170,6 +172,7 @@ public class Board {
 						checkRow.add(current.down);
 					}
 					current = current.down;
+
 				}
 				System.out.println(checkRow.toString() + "UPDOWN");
 				done = true;
@@ -356,7 +359,7 @@ public class Board {
             //test purpose only, is not valid according to game rules.
             board.put(Coordinate.getCoordinateHash(i, 0), new Stone(Stone.SHAPES[i+2], Stone.COLORS[i+2], i, 0));
         }
-        board.put(Coordinate.getCoordinateHash(-2, -1), new Stone(Stone.SHAPES[0], Stone.COLORS[4], -2, -1));
+        //board.put(Coordinate.getCoordinateHash(-2, -1), new Stone(Stone.SHAPES[0], Stone.COLORS[4], -2, -1));
     }
 
     public void resetMap() {
