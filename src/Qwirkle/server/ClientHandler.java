@@ -181,7 +181,7 @@ public class ClientHandler extends Thread {
      *
      * @param message Message to send
      */
-    public void sendMessage(String message) {
+    private void sendMessage(String message) {
         try {
             this.out.write(message);
             this.out.newLine();
