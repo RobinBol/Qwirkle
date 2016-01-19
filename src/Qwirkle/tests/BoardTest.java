@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import Qwirkle.gamelogic.Board;
 import Qwirkle.gamelogic.Stone;
+import Qwirkle.util.Log;
 
 public class BoardTest {
 
@@ -66,6 +67,26 @@ public class BoardTest {
         assertTrue(board.isValidMove(valid2));
         assertFalse(board.isValidMove(inValid));
         assertFalse(board.isValidMove(inValid2));
+    }
+    
+    @Test
+    public void makeMoveTest() {
+        board.resetMap();
+        board.createTestMap();
+        System.out.println(board.getBoard().keySet());
+        Stone[] valid = new Stone[]{new Stone('x', 'b', -1, 1), new Stone('d', 'b', 0, 1), new Stone('s', 'b', 1, 1)};
+        //Stone[] valid2 = new Stone[]{new Stone('x', 'b', 1, 1), new Stone('+', 'b', 2, 1), new Stone('*', 'b', 3, 1)};
+        //Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 1), new Stone('x', 'b', 1, 0)};
+        //Stone[] inValid2 = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 1, 1), new Stone('x', 'b', 2, 2)};
+
+        //assertTrue(board.makeMove(valid));
+        board.makeMove(valid);
+        Log.drawBoard(board);
+        System.out.println("SMTH");
+        
+        //assertTrue(board.isValidMove(valid2));
+        //assertFalse(board.isValidMove(inValid));
+        //assertFalse(board.isValidMove(inValid2));
     }
 
     @Test
