@@ -1,3 +1,8 @@
+/**
+ * TODO Major todo's listed below:
+ * - Handle game end, remove game, and update leaderboard
+ */
+
 package qwirkle.gamelogic;
 
 
@@ -19,24 +24,26 @@ import java.util.Map;
  * for a matching game and will start it when found.
  */
 public class Lobby {
+
+    /* Lobby size, if full new lobby has to be created */
     private static final int LOBBYSIZE = 100;
-    private static int id;
+
+    /* List of clients in lobby */
     private List<ClientHandler> lobbyClients;
+
+    /* Server object for communication */
     private Server server;
+
+
     private List<Game> games;
 
-    //TODO add invitation system
-
     /**
-     * Lobby constructor that takes an id to keep
-     * a reference to it, and a server, to communicate
-     * with.
+     * Lobby constructor creates a lobby, and takes
+     * a server object for communication.
      *
-     * @param id
      * @param server
      */
-    public Lobby(int id, Server server) {
-        this.id = id;
+    public Lobby(Server server) {
         this.lobbyClients = new ArrayList<>();
         this.games = new ArrayList<>();
         this.server = server;
@@ -179,6 +186,15 @@ public class Lobby {
     }
 
     /**
+     * After game was terminated, remove it from the lobby.
+     *
+     * @param game
+     */
+    public void endGame(Game game) {
+        games.remove(game);
+    }
+
+    /**
      * Add client to the lobby.
      *
      * @param clientHandler Client to be added
@@ -200,24 +216,21 @@ public class Lobby {
      */
     public void removeClient(ClientHandler clientHandler) {
 
-        System.out.println("REMOVE CLIENT FROM LOBBY");
         // Loop over all existing games
         for (int i = 0; i < games.size(); i++) {
 
-            System.out.println("ITERATE GAMES");
             // If client is in game, end game and remove client
             if (games.get(i).hasPlayer(clientHandler.getClientName())) {
 
-                System.out.println("FOUND GAME WITH CLIENT");
                 // Let client know game has ended
                 clientHandler.sendGameEnd("DISCONNECT");
-                System.out.println("SENDED GAME END");
 
                 // Terminate the game
                 games.get(i).terminateGame();
             }
         }
 
+        // Remove client from lobby
         removeClientFromLobby(clientHandler);
     }
 
@@ -232,6 +245,7 @@ public class Lobby {
         // Remove client from lobbylist
         this.lobbyClients.remove(clientHandler);
 
+        // If empty leaves empty, remove it from the server
         if (isEmpty()) {
             server.removeLobby(this);
         }

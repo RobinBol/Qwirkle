@@ -200,7 +200,7 @@ public class Server extends Observable {
     public Lobby createLobby() {
 
         // Create new lobby with id
-        Lobby lobby = new Lobby(lobbies.size() + 1, this);
+        Lobby lobby = new Lobby(this);
 
         // Add it to internal list
         addLobby(lobby);

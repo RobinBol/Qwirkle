@@ -1,6 +1,15 @@
-package Qwirkle.gamelogic;
 
-import Qwirkle.server.ClientHandler;
+/**
+ * TODO Major todo's listed below:
+ * - check if socket connection to all clients in the game still works
+ * - if not make sure game ends properly
+ * - handle properly when a client disconnects
+ */
+
+package qwirkle.gamelogic;
+
+
+import qwirkle.server.ClientHandler;
 
 import java.util.ArrayList;
 
@@ -11,10 +20,19 @@ import java.util.ArrayList;
  */
 public class Game {
 
+    /* Define maximum amount of stones a player may have in its hand */
     public static final int MAXHANDSIZE = 6;
 
+    /* Lobby from which game was started */
+    private Lobby lobby;
+
+    /* List of clients */
     private ArrayList<ClientHandler> clients;
+
+    /* List of players in the game */
     private Player[] players;
+
+    /* Board on which the game is played */
     private Board board;
 
     /**
@@ -27,20 +45,25 @@ public class Game {
      */
     public Game(ArrayList<ClientHandler> clients, Lobby lobby) {
 
-        // Let lobby know game started
-        lobby.gameStarted();
+        // Store lobby
+        this.lobby = lobby;
 
-        // TODO check if socket connection to all clients in the game still works
-        // TODO if not make sure game ends properly
-        // TODO handle properly when a client disconnects:
+        // Let lobby know game started
+        this.lobby.gameStarted();
+
+        // Store clients
         this.clients = clients;
+
         // Initialize new board
         board = new Board();
 
-        // Create players array
+        // Create players from connected clients
         players = new Player[clients.size()];
         for (int i = 0; i < players.length; i++) {
+
+            // Update game state of client to in game
             clients.get(i).setGameState(true);
+
             // Create player from client
             players[i] = new Player(clients.get(i), board);
         }
@@ -49,15 +72,12 @@ public class Game {
         startGame();
     }
 
+    /**
+     * Starts the game, giving turns to the right player.
+     */
     public void startGame() {
+        // TODO handle starting the game
         System.out.println("Game was properly started!");
-    }
-
-    public void setTurn() {
-    }
-
-    public int getScore(Player player) {
-        return 0;
     }
 
     /**
@@ -65,6 +85,8 @@ public class Game {
      * clients in game.
      */
     public void terminateGame() {
+
+        // Loop over all clients
         for (int i = 0; i < clients.size(); i++) {
 
             // Mark client as not in game
@@ -73,10 +95,13 @@ public class Game {
             // Create player from client
             clients.get(i).sendGameEnd("DISCONNECT");
         }
+
+        // Tell lobby game was terminated
+        lobby.endGame(this);
     }
 
     /**
-     * Checks wheter the game has a certain player.
+     * Checks whether the game has a certain player.
      *
      * @param name Player name to be found
      * @return true if player is present in game
@@ -92,17 +117,7 @@ public class Game {
             }
         }
 
-
         // Not found
         return false;
-    }
-
-    // Players back to lobby
-    public Player getFirstPlayer() {
-        for (int i = 0; i < players.length; i++) {
-
-        }
-
-        return null;
     }
 }
