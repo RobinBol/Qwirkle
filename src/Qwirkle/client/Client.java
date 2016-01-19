@@ -14,6 +14,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Scanner;
 
@@ -40,7 +41,8 @@ public class Client extends Observable implements Runnable {
     private boolean inGame = false;
 
     /* Features variable, holding the features this client supports */
-    private static String[] FEATURES = new String[]{Protocol.Server.Features.SECURITY, Protocol.Server.Features.CHALLENGE};
+    private static String[] FEATURES = new String[]{Protocol.Server.Features.CHALLENGE};
+    private static List<String> COMMON_FEATURES = new ArrayList<>();
 
     /**
      * Client constructor that takes a name, host and port.
@@ -76,12 +78,14 @@ public class Client extends Observable implements Runnable {
             port = askForPort();
         }
 
-        // Try to create SSLSocket
         try {
 
             // Create SSLSocket
-            SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            socket = sslsocketfactory.createSocket(host, port);
+            // SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+            // socket = sslsocketfactory.createSocket(host, port);
+
+            // Use regular socket
+            socket = new Socket(host, port);
 
             // Create in/out for socket
             setupIOStreams(socket);
@@ -108,11 +112,15 @@ public class Client extends Observable implements Runnable {
      * @param message Message to send
      */
     public void sendMessage(String message) {
+        System.out.println("hello");
         try {
+            System.out.println("send message");
+
             out.write(message);
             out.flush();
         } catch (SSLException e) {
 
+            System.out.println("no ssl1");
             // When Client uses SSL socket but server doesn't
             updateObserver(ClientLogger.NO_SSL);
 
@@ -120,9 +128,14 @@ public class Client extends Observable implements Runnable {
             switchToRegularSocket();
 
         } catch (IOException e) {
+            System.out.println("no ssl2");
 
             // When message could not be delivered
             updateObserver(ClientLogger.CLIENT_DISCONNECTED);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            System.out.println("bye");
         }
     }
 
@@ -210,6 +223,56 @@ public class Client extends Observable implements Runnable {
             // Could not setup IO streams
             updateObserver(ClientLogger.SETUP_FAILED);
         }
+    }
+
+    /**
+     * Replaces the current SSLSocket with a
+     * regular socket.
+     */
+    public void switchToSSLSocket() {
+        try {
+            // Close current socket
+            this.socket.close();
+
+            // Create SSLSocket
+            SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+            socket = sslsocketfactory.createSocket(host, port);
+
+            // Setup the new IO streams
+            setupIOStreams(this.socket);
+
+            // Announce client to server
+            this.shakeHand();
+
+            // Start listening for incoming messages
+            // on this new socket
+            startInputStream();
+
+        } catch (IOException e) {
+
+            // Could not setup IO streams
+            updateObserver(ClientLogger.SETUP_FAILED);
+        }
+    }
+
+    /**
+     * Stores matched features with server.
+     */
+    public void saveMatchedFeature(String feature) {
+        this.COMMON_FEATURES.add(feature);
+    }
+
+    /**
+     * Checks if client has certain feature.
+     * @param feature
+     */
+    public boolean hasFeature(String feature) {
+        for (int i = 0; i < this.FEATURES.length; i++) {
+            if(this.FEATURES[i].equals(feature)){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

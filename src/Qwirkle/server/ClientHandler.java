@@ -257,7 +257,7 @@ public class ClientHandler extends Thread {
 
         // Removes client from lobby and game (if applicable)
         Lobby lobby = getLobby();
-        lobby.removeClient(this);
+        if (lobby != null ) lobby.removeClient(this);
 
         // Remove client from server
         server.removeClientHandler(this);

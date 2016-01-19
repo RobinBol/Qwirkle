@@ -55,6 +55,14 @@ public class InputHandler extends Thread {
                     // Handle incoming messages
                     if (result.get(0).equals(Protocol.Client.ERROR)) {
                         handleIncomingError(Integer.valueOf((String) result.get(1)));
+                    } if (result.get(0).equals(Protocol.Server.HALLO)) {
+
+                        // Save all matching features
+                        for (int i = 1; i < result.size(); i++) {
+                            if (client.hasFeature(String.valueOf(result.get(i)))) {
+                                client.saveMatchedFeature(String.valueOf(result.get(i)));
+                            }
+                        }
                     } else if (result.get(0).equals(Protocol.Server.HALLO)) {
                         getGameType();
                     } else if (result.get(0).equals(Protocol.Server.STARTGAME)) {

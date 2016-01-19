@@ -9,9 +9,7 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import java.io.IOException;
-import java.net.BindException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.*;
 
 import qwirkle.client.Client;
@@ -36,7 +34,7 @@ public class Server extends Observable {
     private List<Lobby> lobbies;
 
     /* Keep track of features of the server */
-    private static String[] FEATURES = new String[]{Protocol.Server.Features.SECURITY, Protocol.Server.Features.CHALLENGE};
+    private static String[] FEATURES = new String[]{Protocol.Server.Features.CHALLENGE};
 
     /**
      * Server constructor, sets certificate credentials,
@@ -86,13 +84,15 @@ public class Server extends Observable {
         // Initialize lobbies list
         this.lobbies = new ArrayList<>();
 
-        // Try to create SSLSocket
         try {
-            // Create SSLServerSocket
-            SSLServerSocketFactory sslserversocketfactory =
-                    (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-            SSLServerSocket sslserversocket =
-                    (SSLServerSocket) sslserversocketfactory.createServerSocket(port);
+//            // Create SSLServerSocket
+//            SSLServerSocketFactory sslserversocketfactory =
+//                    (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+//            SSLServerSocket ssocket =
+//                    (SSLServerSocket) sslserversocketfactory.createServerSocket(port);
+
+            // Use regular socket
+            ServerSocket ssocket = new ServerSocket(port);
 
             // Server startup success
             updateObserver(ServerLogger.SERVER_STARTED + port);
@@ -101,11 +101,11 @@ public class Server extends Observable {
             while (true) {
 
                 // Accept incoming
-                SSLSocket sslsocket = (SSLSocket) sslserversocket.accept();
+                Socket socket = ssocket.accept();
 
                 try {
                     // Create clientHandler for incoming client
-                    ClientHandler clientHandler = new ClientHandler(this, sslsocket);
+                    ClientHandler clientHandler = new ClientHandler(this, socket);
                     addClientHandler(clientHandler);
 
                     // Start it on separate thread
