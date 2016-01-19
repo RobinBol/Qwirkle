@@ -29,9 +29,17 @@ public class Board {
     	int x = stone.getX();
     	int y = stone.getY();
     	stone.down 	= board.get(Coordinate.getCoordinateHash(x, y - 1));
+    	if (stone.down != null) stone.down.up = stone;
+    	
     	stone.left	= board.get(Coordinate.getCoordinateHash(x - 1, y));
+    	if (stone.left != null) stone.left.right = stone;
+    	
     	stone.right = board.get(Coordinate.getCoordinateHash(x + 1, y));
+    	if (stone.right != null) stone.right.left = stone;
+    	
     	stone.up   	= board.get(Coordinate.getCoordinateHash(x, y + 1));
+    	if (stone.up != null) stone.up.down = stone;
+    	
     	board.put(Coordinate.getCoordinateHash(stone.getX(), stone.getY()), stone);
     }
 
@@ -82,51 +90,30 @@ public class Board {
     			
     		//after stones are placed go calculate scores and check valid placement.
     		List<Stone> moves = Arrays.asList(stones);
-    		List<Stone> checked = new ArrayList<>(); 
     		List<Stone[]> allRows = new ArrayList<>();
+    		List<Stone> checkRow = new ArrayList<>();
     		
-    		Stone current, start;
+    		Stone current;
     		for (int i = 0; i < stones.length; i++) {
-    			boolean done = false;
     			current = moves.get(i);
-    			start = current;
-    			if (searchY) {
-    				while (!done) {
-    					if (current.up != null && !checkRow.contains(current.up)) {
-    						checkRow.add(current.up);
-    						current = current.up;
-    					} else if (current.down != null && !checkRow.contains(current.down)) {
-    						checkRow.add(current.down);
-    						current = current.down;
-    					}
-    					checkRow.add(start);
-    					System.out.println(checkRow.toString());
-    					done = true;
-    				}
-    			} else {
-    				while (!done) {
-    					if (current.left != null && !checkRow.contains(current.left)) {
-    						checkRow.add(current.left);
-    						current = current.left;
-    					} else if (current.right != null && !checkRow.contains(current.right)) {
-    						checkRow.add(current.right);
-    						current = current.right;
-    					}
-    					checkRow.add(start);    					
-    					done = true;
-    				}
+    			checkRow = getRows(searchY, current);
+    			if (checkRow.size() > 0) {
+    				Stone[] array = checkRow.toArray(new Stone[checkRow.size()]);
+    				allRows.add(array);
     			}
-    			Stone[] array = checkRow.toArray(new Stone[checkRow.size()]);
     			checkRow.clear();
-    			allRows.add(array);
-
     		}
+    		checkRow = getRows(!searchY, stones[0]);
+    		System.out.println(checkRow.toString());
+        	Stone[] array = checkRow.toArray(new Stone[checkRow.size()]);
+        	checkRow.clear();
+        	allRows.add(array);
+    		
     		
     		//check validity moves.
     		int score = 0;
     		for (int i = 0; i < allRows.size(); i ++ ) {
     			System.out.println(Arrays.toString(allRows.get(i)));
-    			System.out.println(areValidStones(allRows.get(i)));
     			if (isValidPlacedMove(allRows.get(i))) {
     				System.out.println(score);
     				score = score + allRows.get(i).length;
@@ -138,36 +125,44 @@ public class Board {
     		System.out.println(score);
     	}
     	
-    	return false;
+    	return true;
     }
     
     public List<Stone> getRows(boolean searchDirection, Stone current) {
     	boolean done = false;
     	List<Stone> checkRow = new ArrayList<>();
-    	Stone start = current;
     	if (searchDirection) { //searchY
 			while (!done) {
-				if (current.up != null && !checkRow.contains(current.up)) {
-					checkRow.add(current.up);
+				while (current.up != null) {
+					if (!checkRow.contains(current.up)) {
+						checkRow.add(current.up);
+					}
 					current = current.up;
-				} else if (current.down != null && !checkRow.contains(current.down)) {
-					checkRow.add(current.down);
+				}					
+				while (current.down != null) {
+					if (!checkRow.contains(current.down)) {
+						checkRow.add(current.down);
+					}
 					current = current.down;
 				}
-				checkRow.add(start);
-				System.out.println(checkRow.toString());
+				System.out.println(checkRow.toString() + "UPDOWN");
 				done = true;
 			}
 		} else {
 			while (!done) {
-				if (current.left != null && !checkRow.contains(current.left)) {
-					checkRow.add(current.left);
+				while (current.left != null) {
+					if (!checkRow.contains(current.left)) {
+						checkRow.add(current.left);
+					}
 					current = current.left;
-				} else if (current.right != null && !checkRow.contains(current.right)) {
-					checkRow.add(current.right);
+				}
+				while (current.right != null) {
+					if (!checkRow.contains(current.right)) {
+						checkRow.add(current.right);
+					}
 					current = current.right;
 				}
-				checkRow.add(start);    					
+				System.out.println(checkRow.toString() + "LEFTRIGHT");
 				done = true;
 			}
 		}
@@ -335,6 +330,7 @@ public class Board {
             //test purpose only, is not valid according to game rules.
             board.put(Coordinate.getCoordinateHash(i, 0), new Stone(Stone.SHAPES[i+2], Stone.COLORS[i+2], i, 0));
         }
+        board.put(Coordinate.getCoordinateHash(-2, -1), new Stone(Stone.SHAPES[0], Stone.COLORS[4], -2, -1));
     }
 
     public void resetMap() {
