@@ -92,7 +92,7 @@ public class ClientHandler extends Thread {
 
                     // Check if properly parsed data is present
                     if (!result.isEmpty()) {
-                        System.out.println(result);
+
                         // Handle incoming packages
                         if (result.get(0).equals(Protocol.Client.ERROR)) {
                             handleIncomingError(result);
@@ -103,7 +103,7 @@ public class ClientHandler extends Thread {
 
                             // Check updated lobby for matches
                             this.getLobby().checkForGame();
-//                            //TODO fix invite below
+                            //TODO fix invite below
 //                        } else if (result.get(0).equals(Protocol.Client.INVITE) && result.size() == 2) {
 //                            System.out.println(this + "Set opponent");
 //                            opponent = server.getClientHandler(String.valueOf(result.get(1)));
