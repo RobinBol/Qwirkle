@@ -74,21 +74,11 @@ public class Server extends Observable {
         updateObserver(ServerLogger.SETUP_STARTED);
 
         // Initialize and set certificate credentials for SSL connection
-        System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir").replace("src", "") + "/certs/key.jks");
-        System.setProperty("javax.net.ssl.keyStorePassword", "password");
+        System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir").replace("src", "") + "/certs/keystore.jks");
+        System.setProperty("javax.net.ssl.keyStorePassword", "SSR0CKS");
 
         // Check port validity, ask for a valid one if needed
         this.port = (port == 0) ? askForPort() : port;
-
-        // Get host address
-        String host = null;
-        try {
-            host = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-
-            // Unknown host, update observer
-            updateObserver(ServerLogger.SETUP_FAILED);
-        }
 
         // Initialize clientHandlers list
         this.clientHandlers = new ArrayList<>();

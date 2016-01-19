@@ -447,8 +447,8 @@ public class Client extends Observable implements Runnable {
     public static void main(String[] args) {
 
         // Set needed trustStore properties in order to connect to SSLSocket
-        System.setProperty("javax.net.ssl.trustStore", System.getProperty("user.dir").replace("src", "") + "/certs/key.jks");
-        System.setProperty("javax.net.ssl.trustStorePassword", "password");
+        System.setProperty("javax.net.ssl.trustStore", System.getProperty("user.dir").replace("src", "") + "/certs/keystore.jks");
+        System.setProperty("javax.net.ssl.trustStorePassword", "SSR0CKS");
 
         // Define default values
         String name = null;
