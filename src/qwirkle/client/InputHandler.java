@@ -1,5 +1,6 @@
 package qwirkle.client;
 
+import qwirkle.util.Input;
 import qwirkle.util.Protocol;
 import qwirkle.util.ProtocolHandler;
 
@@ -63,7 +64,8 @@ public class InputHandler extends Thread {
                                 client.saveMatchedFeature(String.valueOf(result.get(i)));
                             }
                         }
-                    } else if (result.get(0).equals(Protocol.Server.HALLO)) {
+
+                        // Ask for desired game
                         getGameType();
                     } else if (result.get(0).equals(Protocol.Server.STARTGAME)) {
                         client.setInGame(true);
@@ -121,13 +123,13 @@ public class InputHandler extends Thread {
      * send it to the server.
      */
     public void getGameType() {
-        int gameType = client.askForGameType();
-        System.out.println(gameType);
+        int gameType = Input.askForGameType(client);
+
         // Handle making a challenge
         if (gameType == 5) {
 
             // Get desired opponent
-            String opponent = client.askForOpponent();
+            String opponent = Input.askForOpponent(client);
 
             // Update observer, looking for game
             client.updateObserver(ClientLogger.SEARCHING_GAME);
@@ -161,10 +163,10 @@ public class InputHandler extends Thread {
      * @return String yes/no
      */
     public String respondToChallenge() {
-        String answer = client.ask(ClientLogger.ASK_CHALLENGE);
+        String answer = Input.ask(ClientLogger.ASK_CHALLENGE, client);
 
         while (!answer.equalsIgnoreCase("yes") && !answer.equalsIgnoreCase("no")) {
-            answer = client.ask(ClientLogger.ANWSER_INVALID);
+            answer = Input.ask(ClientLogger.ANWSER_INVALID, client);
         }
 
         return answer;
@@ -185,7 +187,7 @@ public class InputHandler extends Thread {
         // Client is not challengable
         else if (errorCode == 5) {
             client.updateObserver(ClientLogger.NOT_CHALLENGABLE);
-            client.askForGameType();
+            Input.askForGameType(client);
         }
     }
 }

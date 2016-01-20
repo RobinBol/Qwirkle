@@ -5,6 +5,7 @@
 
 package qwirkle.server;
 
+import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
@@ -14,7 +15,9 @@ import java.util.*;
 
 import qwirkle.client.Client;
 import qwirkle.gamelogic.Lobby;
+import qwirkle.util.Input;
 import qwirkle.util.Protocol;
+import qwirkle.util.Validation;
 
 /**
  * Class that handles the server. It starts a server,
@@ -35,6 +38,9 @@ public class Server extends Observable {
 
     /* Keep track of features of the server */
     private static String[] FEATURES = new String[]{Protocol.Server.Features.CHALLENGE};
+
+    /* Keep track of outstanding invites */
+    private Map<ClientHandler, ClientHandler> invites = new HashMap<>();
 
     /**
      * Server constructor, sets certificate credentials,
@@ -76,7 +82,7 @@ public class Server extends Observable {
         System.setProperty("javax.net.ssl.keyStorePassword", "SSR0CKS");
 
         // Check port validity, ask for a valid one if needed
-        this.port = (port == 0) ? askForPort() : port;
+        this.port = (port == 0) ? Input.askForPort(this) : port;
 
         // Initialize clientHandlers list
         this.clientHandlers = new ArrayList<>();
@@ -86,16 +92,11 @@ public class Server extends Observable {
 
         try {
 //            // Create SSLServerSocket
-//            SSLServerSocketFactory sslserversocketfactory =
-//                    (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-//            SSLServerSocket ssocket =
-//                    (SSLServerSocket) sslserversocketfactory.createServerSocket(port);
+//            ServerSocketFactory sslserversocketfactory = SSLServerSocketFactory.getDefault();
+//            ServerSocket ssocket = sslserversocketfactory.createServerSocket(port);
 
             // Use regular socket
             ServerSocket ssocket = new ServerSocket(port);
-
-            // Server startup success
-            updateObserver(ServerLogger.SERVER_STARTED + port);
 
             // Keep listening for incoming client connections
             while (true) {
@@ -123,7 +124,7 @@ public class Server extends Observable {
             updateObserver(ServerLogger.PORT_IN_USE);
 
             // Ask for new valid port
-            this.port = askForPort();
+            this.port = Input.askForPort(this);
 
             // Afterwards re-start the server
             this.startServer();
@@ -159,6 +160,53 @@ public class Server extends Observable {
 
         // Remove from clientHandlers
         this.clientHandlers.remove(clientHandler);
+    }
+
+    /**
+     * Return clientHandler registered at a specific
+     * clientname
+     * @param clientName
+     * @return clientHandler
+     */
+    public ClientHandler getClientHandler(String clientName) {
+
+        // Loop all clientHandlers
+        for(int i = 0; i < clientHandlers.size(); i++) {
+
+            // If match was found, return it
+            if(clientHandlers.get(i).getClientName().equals(clientName)){
+                return clientHandlers.get(i);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Register invite from client
+     * @param inviter
+     * @param invitee
+     */
+    public void registerInvite(ClientHandler inviter, ClientHandler invitee) {
+        invites.put(invitee, inviter);
+    }
+
+    /**
+     * Remove invite from internal list, game has started
+     * or invite was aborted
+     * @param inviter
+     * @param invitee
+     */
+    public void removeInvite(ClientHandler inviter, ClientHandler invitee) {
+        invites.remove(invitee, inviter);
+    }
+
+    /**
+     * Get inviter, used to start a game with an oponnent
+     * @param invitee
+     * @return
+     */
+    public ClientHandler getInviter(ClientHandler invitee){
+        return invites.get(invitee);
     }
 
     /**
@@ -281,59 +329,6 @@ public class Server extends Observable {
     }
 
     /**
-     * Handles asking the user on the server for
-     * input.
-     *
-     * @param question Question to ask the user
-     */
-    public String ask(String question) {
-
-        // Print question
-        updateObserver(question);
-
-        // Create new scanner to listen for input
-        Scanner sc = new Scanner(System.in);
-
-        return sc.nextLine();
-    }
-
-    /**
-     * Method that starts asking for a port, if
-     * invalid input is provided it will keep asking
-     * for valid input.
-     *
-     * @return int valid port number
-     */
-    public int askForPort() {
-        return askForPort(null);
-    }
-
-    /**
-     * Methods that starts asking for a port, if
-     * invalid input is provided it will keep asking
-     * for valid input.
-     *
-     * @return int valid port number
-     */
-    public int askForPort(String enteredPort) {
-        // If no provided as argument, ask for it
-        if (enteredPort == null) {
-            enteredPort = ask(ServerLogger.ENTER_PORT);
-        }
-
-        // While incorrect port ask for new one
-        while (!Client.checkForValidPort(enteredPort)) {
-            return Integer.parseInt(String.valueOf(askForPort(ask(ServerLogger.PORT_INVALID_RETRY))));
-        }
-
-        // Print that server is configured and starting
-        updateObserver(ServerLogger.SERVER_STARTED + enteredPort);
-
-        // Return valid port
-        return Integer.parseInt(enteredPort);
-    }
-
-    /**
      * Handles starting the server. Takes a port number as
      * argument, on which the server will be listening for
      * clients.
@@ -347,11 +342,10 @@ public class Server extends Observable {
 
         // If argument provided
         if (args.length > 0) {
-            try {
+            if (Validation.checkPort(args[0])){
                 // Valid port number
                 port = Integer.parseInt(args[0], 10);
-            } catch (NumberFormatException e) {
-
+            } else {
                 // Let user know port is incorrect
                 System.out.println(ServerLogger.PORT_INVALID);
 

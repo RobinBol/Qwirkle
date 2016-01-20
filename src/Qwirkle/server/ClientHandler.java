@@ -103,52 +103,66 @@ public class ClientHandler extends Thread {
 
                             // Check updated lobby for matches
                             this.getLobby().checkForGame();
-                            //TODO fix invite below
-//                        } else if (result.get(0).equals(Protocol.Client.INVITE) && result.size() == 2) {
-//                            System.out.println(this + "Set opponent");
-//                            opponent = server.getClientHandler(String.valueOf(result.get(1)));
-//                            server.registerInvite(this, opponent);
-//
-//                            System.out.println(opponent);
-//                            // Check if opponent is challengable
-//                            if (!opponent.isChallengable()) {
-//
-//                                // Create error package
-//                                ArrayList<Object> errorCode = new ArrayList<>();
-//                                errorCode.add(5);
-//
-//                                // Send error package
-//                                sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
-//
-//                            }
-//                            // Check if oponent exists
-//                            else if (opponent != null) {
-//                                opponent.sendMessage(incomingMessage);
-//                            }
-//                            // Does not exist, throw error
-//                            else {
-//
-//                                // Create error package
-//                                ArrayList<Object> errorCode = new ArrayList<>();
-//
-//                                // Send error package
-//                                sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
-//                            }
-//                        } else if (result.get(0).equals(Protocol.Client.ACCEPTINVITE)) {
-//                            opponent = server.getInviter(this);
-//                            System.out.println(this + "Get opponent");
-//
-//                            System.out.println(opponent);
-//                            System.out.println(this.getLobby().equals(opponent.getLobby()));
-//                            if (opponent != null && this.getLobby().equals(opponent.getLobby())) {
-//                                ArrayList<ClientHandler> clients = new ArrayList<>();
-//                                clients.add(this);
-//                                clients.add(opponent);
-//                                this.getLobby().startGame(clients);
-//                                System.out.println("STARTED GAME FROM HANDLER");
-//                            }
-//                        } else if (result.get(0).equals(Protocol.Client.DECLINEINVITE)) {
-//                            sendMessage("Invite was declined...");
+                        } else if (result.get(0).equals(Protocol.Client.INVITE) && result.size() == 2) {
+
+                            // Get opponent clientHandler
+                            ClientHandler opponent = server.getClientHandler(String.valueOf(result.get(1)));
+
+                            // Check if opponent is challengable
+                            if (!opponent.hasFeature(Protocol.Server.Features.CHALLENGE)) {
+
+                                // Create error package
+                                ArrayList<Object> errorCode = new ArrayList<>();
+                                errorCode.add(5);
+
+                                // Send error package
+                                sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
+                            }
+                            // Check if oponent exists
+                            else if (opponent != null) {
+
+                                // Forward the invite to the proposed opponent
+                                opponent.sendMessage(incomingMessage);
+
+                                // Register it at the server as in invite
+                                server.registerInvite(this, opponent);
+                            }
+                            // Does not exist, throw error
+                            else {
+
+                                // Create error package
+                                ArrayList<Object> errorCode = new ArrayList<>();
+
+                                // Send error package
+                                sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
+                            }
+                        } else if (result.get(0).equals(Protocol.Client.ACCEPTINVITE)) {
+
+                            // Get inviter clientHandler
+                            ClientHandler opponent = server.getInviter(this);
+
+                            // Check if opponent exists and is within same lobby
+                            if (opponent != null && this.getLobby().equals(opponent.getLobby())) {
+
+                                // Create client list with the two clients
+                                ArrayList<ClientHandler> clients = new ArrayList<>();
+                                clients.add(this);
+                                clients.add(opponent);
+
+                                // Start a game with the two clients
+                                this.getLobby().startGame(clients);
+
+                                // Remove registered invite
+                                server.removeInvite(this, opponent);
+                            }
+                        } else if (result.get(0).equals(Protocol.Client.DECLINEINVITE)) {
+                            sendMessage("Invite was declined...");
+
+                            // Get inviter clientHandler
+                            ClientHandler opponent = server.getInviter(this);
+
+                            // Remove registered invite
+                            server.removeInvite(this, opponent);
                         }
                     }
                 }
@@ -405,6 +419,15 @@ public class ClientHandler extends Thread {
      */
     public void setGameState(boolean state) {
         this.inGame = state;
+    }
+
+    public boolean hasFeature(String feature){
+        for (int i = 0; i < FEATURES.size(); i++){
+            if(FEATURES.get(i).equals(feature)){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
