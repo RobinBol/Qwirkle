@@ -120,7 +120,7 @@ public class Board {
                 checkRow = getRows(searchY, current);
                 if (checkRow.size() > 0) {
                     Stone[] array = checkRow.toArray(new Stone[checkRow.size()]);
-                    allRows.add(array);
+                    if (array != null) allRows.add(array);
                 }
                 checkRow.clear();
             }
@@ -128,7 +128,7 @@ public class Board {
             System.out.println(checkRow.toString());
             Stone[] array = checkRow.toArray(new Stone[checkRow.size()]);
             checkRow.clear();
-            allRows.add(array);
+            if (array != null) allRows.add(array);
 
 
             //check validity moves.
