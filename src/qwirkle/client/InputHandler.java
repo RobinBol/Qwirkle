@@ -1,7 +1,9 @@
 package qwirkle.client;
 
 import qwirkle.gamelogic.Player;
+import qwirkle.gamelogic.Stone;
 import qwirkle.util.Input;
+import qwirkle.util.Logger;
 import qwirkle.util.Protocol;
 import qwirkle.util.ProtocolHandler;
 
@@ -91,7 +93,7 @@ public class InputHandler extends Thread {
                             // TODO it is your turn
                             System.out.println("MY TURN!");
                             //TODO print hand
-                            client.getPlayer()
+                            Logger.print(client.getPlayer().getHand());
                             Input.ask("Please enter your turn", client);
                         }
 
@@ -123,6 +125,11 @@ public class InputHandler extends Thread {
 
                             // Send error package
                             client.sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
+                        }
+                    } else if (result.get(0).equals(Protocol.Server.ADDTOHAND)){
+                        for (int i = 1; i < result.size(); i++) {
+                            Stone stone = new Stone(String.valueOf(result.get(i)).charAt(0), String.valueOf(result.get(i)).charAt(1));
+                            client.getPlayer().addStoneToHand(stone);
                         }
                     }
                 }

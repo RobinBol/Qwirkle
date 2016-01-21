@@ -11,7 +11,7 @@ public class Player {
     private String name;
     private Board board;
     public Client client;
-    private Stone[] hand; //stones that are in the hand.
+    private ArrayList<Stone> hand; //stones that are in the hand.
     private boolean hasTurn;
 
     public Player(Client client) {
@@ -19,6 +19,10 @@ public class Player {
         this.client.setPlayer(this);
         this.name = client.getName();
         this.board = new Board();
+    }
+
+    public void addStoneToHand(Stone stone){
+        hand.add(stone);
     }
 
     // TODO implement has Turn functionality
