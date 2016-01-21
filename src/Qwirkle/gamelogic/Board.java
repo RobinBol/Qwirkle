@@ -96,6 +96,10 @@ public class Board {
      * Returns -1 if the move was invalid.
      */
     public int makeMove(Stone[] stones) {
+    	if (isEmptyBoard() && stones[0] != null) {
+    		return 1;
+    	}
+    	
         if (isValidMove(stones)) {
             boolean searchY = false;
             int sameX = 0;
@@ -118,11 +122,12 @@ public class Board {
             for (int i = 0; i < stones.length; i++) {
                 current = moves.get(i);
                 checkRow = getRows(searchY, current);
-                if (checkRow.size() > 0) {
+                if (checkRow != null && checkRow.size() > 0) {
                     Stone[] array = checkRow.toArray(new Stone[checkRow.size()]);
                     if (array != null) allRows.add(array);
+                    checkRow.clear();
                 }
-                checkRow.clear();
+                
             }
             checkRow = getRows(!searchY, stones[0]);
             System.out.println(checkRow.toString());
@@ -155,7 +160,8 @@ public class Board {
         return -1;
     }
 
-    public List<Stone> getRows(boolean searchDirection, Stone current) {
+    public List<Stone> getRows(boolean searchDirection, Stone pCurrent) {
+    	Stone current = pCurrent;
         boolean done = false;
         List<Stone> checkRow = new ArrayList<>();
         checkRow.add(current);
