@@ -6,7 +6,7 @@ public class Stone {
     private int id;
 
     private char shape, color;
-    private int x, y;
+    private Integer x, y;
 
     public Stone up, down, left, right;
 
@@ -15,12 +15,17 @@ public class Stone {
     //Red, Orange, Yellow, Green, Blue, Purple.
     public static final char[] COLORS = {'A', 'B', 'C', 'D', 'E', 'F'};
 
+    public Stone(char shape, char color) {
+        this.shape = shape;
+        this.color = color;
+        //Maybe save the coordinates?
+    }
+    
     public Stone(char shape, char color, int x, int y) {
         this.shape = shape;
         this.color = color;
         this.x = x;
         this.y = y;
-        //Maybe save the coordinates?
     }
 
     //might be unfair distribution due to how type casting works to int.

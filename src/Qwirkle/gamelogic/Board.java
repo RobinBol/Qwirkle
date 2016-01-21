@@ -391,6 +391,7 @@ public class Board {
         for (int i = 0 - middle; i < maxSize + 11 - middle; i++) {
             boardString = boardString + String.format("%3s", ""+ i) + "|";
             for (int j = 0 - middle; j < maxSize + 11 - middle; j++) {
+            	if ( j == 0 ) { System.out.println(String.format("%3s", ""+ j));}
                 Stone stone = this.getBoard().get(Coordinate.getCoordinateHash(j, i));
                 if (stone != null) {
                     boardString = boardString + stone.getShape() + "" + stone.getColor();
