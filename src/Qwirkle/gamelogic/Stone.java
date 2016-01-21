@@ -11,9 +11,9 @@ public class Stone {
     public Stone up, down, left, right;
 
     //Round, X, Diamond, Square, Star, Plus.
-    public static final char[] SHAPES = {'r', 'x', 'd', 's', '*', '+'};
+    public static final char[] SHAPES = {'A', 'B', 'C', 'D', 'E', 'F'};
     //Red, Orange, Yellow, Green, Blue, Purple.
-    public static final char[] COLORS = {'r', 'o', 'y', 'g', 'b', 'p'};
+    public static final char[] COLORS = {'A', 'B', 'C', 'D', 'E', 'F'};
 
     public Stone(char shape, char color, int x, int y) {
         this.shape = shape;
