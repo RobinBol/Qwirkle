@@ -184,33 +184,56 @@ public class Input {
         return ask("Please provide the name of the player you would like to challenge:", asker);
     }
 
-    public static String askForStone(Object asker) {
+    /**
+     * Ask user for a valid stone input.
+     * @param asker
+     * @param handSize
+     * @return
+     */
+    public static String askForStone(Object asker, int handSize) {
 
         // Ask to make a move
         String stone = Input.ask("Please enter the number of the stone you would like to use (or EXIT to end your move)", asker);
 
-        // While no valid input provided, keep asking
-        while (!stone.equals("1") && !stone.equals("2") && !stone.equals("3") && !stone.equals("4") && !stone.equals("5") && !stone.equals("6") && !stone.equalsIgnoreCase("exit")) {
+        // Detect first line of valid input
+        if (stone.equals("1") || stone.equals("2") || stone.equals("3") || stone.equals("4") || stone.equals("5") || stone.equals("6") || stone.equalsIgnoreCase("exit")) {
 
-            // Ask to make a move
-            stone = Input.ask("Invalid input, please re-enter the number of the stone you would like to use (or EXIT to end your move)", asker);
+            // Check for exit input
+            if (!stone.equalsIgnoreCase("exit")) {
 
-            // Keep asking till done
-            if (stone.equalsIgnoreCase("exit")) {
-                break;
+                // While no valid input provided, keep asking
+                while (!(1 <= Integer.parseInt(stone) && Integer.parseInt(stone) <= handSize)) {
+
+                    // Ask to make a move
+                    stone = Input.ask("Invalid input, please re-enter the number of the stone you would like to use (or EXIT to end your move)", asker);
+
+                    // Keep asking till done
+                    if (stone.equalsIgnoreCase("exit")) {
+                        break;
+                    }
+                }
             }
         }
 
         return stone;
     }
 
+    /**
+     * Ask a user for a valid stone position.
+     * @param asker
+     * @return
+     */
     public static String askForStonePosition(Object asker) {
+
+        // Ask for position
         String position = Input.ask("At what position would you like to place this stone? (x, y)", asker);
 
+        // If no delimeter is used, retry
         while (position.indexOf(',') == -1) {
             position = Input.ask("Invalid format, please use x,y as your input format, try again:", asker);
         }
 
+        // Try to parse x position
         boolean invalidPosition = false;
         int x = 0;
         try {
@@ -221,11 +244,13 @@ public class Input {
         }
         int y = 0;
 
-        // No value entered after ,
+        // No value entered after delimeter
         if (position.split(",").length < 1) {
             Logger.print("Invalid y-position entered...");
             invalidPosition = true;
         }
+
+        // Try to parse y position
         try {
             y = Integer.parseInt(position.split(",")[1]);
         } catch (NumberFormatException e) {
@@ -233,11 +258,18 @@ public class Input {
             invalidPosition = true;
         }
 
+        // While user provides invalid position, ask for valid inptu
         while (invalidPosition) {
+
+            // Indicate invalid format, retry
             position = Input.ask("Invalid format, please use x,y as your input format, try again:", asker);
+
+            // While no delimeter is used, retry
             while (position.indexOf(',') == -1) {
                 position = Input.ask("Invalid format, please use x,y as your input format, try again:", asker);
             }
+
+            // Try to parse the x and y position
             boolean tempApprove = false;
             try {
                 x = Integer.parseInt(position.split(",")[0]);
@@ -255,9 +287,16 @@ public class Input {
             }
         }
 
+        // Return x and y position as a string
         return x + "_" + y;
     }
 
+    /**
+     * Asks a user for a valid move. Using the ask for stone,
+     * and ask for stone position methods.
+     * @param client
+     * @return Stone[] with valid stones
+     */
     public static Stone[] askForMove(Client client) {
 
         // Get current hand of the player
@@ -278,7 +317,7 @@ public class Input {
             }
 
             // Ask client to provide valid stone
-            String stone = Input.askForStone(client);
+            String stone = Input.askForStone(client, hand.size());
 
             // Break if input equals exit
             if (stone.equalsIgnoreCase("exit")) break;
@@ -297,11 +336,10 @@ public class Input {
             hand.remove(handStone);
         }
 
-        System.out.println(hand);
-
-        System.out.println(move);
-
+        // Convert to stone array
         Stone[] moveArray = new Stone[move.size()];
+
+        // Return result
         return move.toArray(moveArray);
     }
 }

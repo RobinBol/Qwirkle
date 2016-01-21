@@ -10,6 +10,8 @@ package qwirkle.gamelogic;
 import qwirkle.server.ClientHandler;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class handles everything related to a game. It can be started
@@ -35,6 +37,10 @@ public class Game {
 
     /* Bag used in this game */
     private Bag bag;
+
+    private boolean firstMove = true;
+
+    private Map<ClientHandler, Map<Integer, Stone[]>> firstMoves = new HashMap<>();
 
     /**
      * Game constructor, give clients and lobby as parameters
@@ -80,7 +86,8 @@ public class Game {
             // Give each client its own hand
             clients.get(i).sendAddToHand(getFirstHand());
 
-            clients.get(i).giveTurn(clients.get(i));
+            // Give the turn to all clients, no prev move done
+            clients.get(i).giveTurn(null, clients.get(i), null);
         }
     }
 
@@ -93,6 +100,111 @@ public class Game {
             hand[i] = bag.takeStone();
         }
         return hand;
+    }
+
+    /**
+     * Forwards a make move from a client, to the board.
+     *
+     * @param stones Stone array
+     */
+    public void makeMove(Stone[] stones) {
+        makeMove(stones, null);
+    }
+
+    /**
+     * Forwards a make move from a client, to the board.
+     *
+     * @param stones Stone array
+     */
+    public void makeMove(Stone[] stones, ClientHandler client) {
+
+        // Make move and retrieve score
+        int score = this.board.makeMove(stones);
+        if (firstMove && client != null) {
+
+            // Create map to hold client and stones
+            Map<Integer, Stone[]> playerMove = new HashMap<>();
+            playerMove.put(score, stones);
+
+            // Save score, client and its move
+            firstMoves.put(client, playerMove);
+
+            // Undo it for now, until we know it is highest score
+            this.board.undoMove();
+        }
+
+        // All first moves are in
+        if (firstMoves.size() == clients.size()) {
+
+            // Calculate highest score
+            ClientHandler highestScoreClient = null;
+            ClientHandler secondHighestScoreClient = null;
+            int highestScore = 0;
+            Stone[] highestScoreMove = null;
+
+            // Loop over all first moves
+            for (Map.Entry<ClientHandler, Map<Integer, Stone[]>> move : firstMoves.entrySet()) {
+
+                // Get entry set from a first move
+                Map<Integer, Stone[]> scoreAndMove = move.getValue();
+                for (Map.Entry<Integer, Stone[]> scoreAndMoveEntry : scoreAndMove.entrySet()) {
+
+                    // If this score is higher then prev highscore
+                    if (scoreAndMoveEntry.getKey() > highestScore) {
+
+                        // Second highest was set before, now update
+                        if (highestScore != 0) {
+                            secondHighestScoreClient = highestScoreClient;
+                        }
+
+                        // Set new highscore
+                        highestScore = scoreAndMoveEntry.getKey();
+                        highestScoreClient = move.getKey();
+                        highestScoreMove = move.getValue().get(highestScore);
+
+                    } else {
+                        // Set current second highest, to prev highscore
+                        secondHighestScoreClient = move.getKey();
+                    }
+                }
+            }
+
+            // Make the move on the board
+            this.board.makeMove(highestScoreMove);
+
+            // Give turn to player with second to highest score
+            broadcastNextTurn(highestScoreClient, secondHighestScoreClient, highestScoreMove);
+
+            // Reset firstMove variable, to indicate regular game flow
+            firstMove = false;
+        }
+    }
+
+    /**
+     * Send message to all clients, about who made a move, what move, and who is next
+     *
+     * @param currentClient
+     * @param nextClient
+     * @param move
+     */
+    public void broadcastNextTurn(ClientHandler currentClient, ClientHandler nextClient, Stone[] move) {
+
+        // Give current client as much stones back as he put on the board
+        ArrayList<Stone> newStones = new ArrayList<>();
+        for (int i = 0; i < move.length; i++) {
+            Stone stone = this.bag.takeStone();
+            if (stone != null) newStones.add(stone);
+        }
+
+        // Give currentClient new stones
+        currentClient.sendAddToHand(newStones.toArray(new Stone[newStones.size()]));
+
+        // Loop over all clients
+        for (int j = 0; j < clients.size(); j++) {
+
+            // Send all client give turn message
+            clients.get(j).giveTurn(currentClient, nextClient, move);
+        }
     }
 
     /**
@@ -124,10 +236,10 @@ public class Game {
     public boolean hasPlayer(String name) {
 
         // Loop over all players in the game
-        for (int i = 0; i < players.length; i++) {
+        for (int i = 0; i < clients.size(); i++) {
 
             // Create player from client
-            if (players[i].getName().equals(name)) {
+            if (clients.get(i).getClientName().equalsIgnoreCase(name)) {
                 return true;
             }
         }

@@ -6,8 +6,8 @@
 
 package qwirkle.client;
 
-import qwirkle.gamelogic.Board;
 import qwirkle.gamelogic.Player;
+import qwirkle.gamelogic.Stone;
 import qwirkle.util.Input;
 import qwirkle.util.Protocol;
 import qwirkle.util.ProtocolHandler;
@@ -19,7 +19,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
-import java.util.Scanner;
 
 /**
  * Client class that can work standalone. It can connect
@@ -47,6 +46,7 @@ public class Client extends Observable implements Runnable {
     private static String[] FEATURES = new String[]{Protocol.Server.Features.CHALLENGE};
     private static List<String> COMMON_FEATURES = new ArrayList<>();
 
+    /* If client is within game, it has a player object */
     private Player player;
 
     /**
@@ -120,7 +120,7 @@ public class Client extends Observable implements Runnable {
         try {
             out.write(message);
             out.flush();
-        }  catch (IOException e) {
+        } catch (IOException e) {
 
             // When message could not be delivered
             updateObserver(ClientLogger.CLIENT_DISCONNECTED);
@@ -193,28 +193,42 @@ public class Client extends Observable implements Runnable {
 
     /**
      * Checks if client has certain feature.
+     *
      * @param feature
      */
     public boolean hasFeature(String feature) {
         for (int i = 0; i < this.FEATURES.length; i++) {
-            if(this.FEATURES[i].equals(feature)){
+            if (this.FEATURES[i].equals(feature)) {
                 return true;
             }
         }
         return false;
     }
 
-    public void setPlayer(Player player){
+    /**
+     * Store player object
+     * @param player
+     */
+    public void setPlayer(Player player) {
         this.player = player;
     }
 
+    /**
+     * Return player object
+     * @return
+     */
     public Player getPlayer() {
         return this.player;
     }
 
-    public void startGame(){
+    /**
+     * Start game on client, creates a new player
+     * and stores it internally.
+     */
+    public void startGame() {
         this.setPlayer(new Player(this));
     }
+
     /**
      * Marks client as in game, or out of game.
      *
@@ -241,6 +255,24 @@ public class Client extends Observable implements Runnable {
     public void updateObserver(String message) {
         setChanged();
         notifyObservers(message);
+    }
+
+    /**
+     * Send a move made by the client to the server.
+     */
+    public void sendMove(Stone[] stones) {
+        // Create parameters array
+        ArrayList<Object> parameters = new ArrayList<>();
+
+        // Loop over all stones
+        for (int i = 0; i < stones.length; i++) {
+
+            // Add them properly formatted as parameter
+            parameters.add("" + stones[i].getColor() + stones[i].getShape() + Protocol.Server.Settings.DELIMITER + stones[i].getX() + Protocol.Server.Settings.DELIMITER2 + stones[i].getY());
+        }
+
+        // Send package according to protocol
+        sendMessage(ProtocolHandler.createPackage(Protocol.Client.MAKEMOVE, parameters));
     }
 
     /**

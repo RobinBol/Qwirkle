@@ -6,6 +6,7 @@
 package qwirkle.gamelogic;
 
 
+import qwirkle.client.Client;
 import qwirkle.server.ClientHandler;
 import qwirkle.server.Server;
 import qwirkle.server.ServerLogger;
@@ -108,9 +109,6 @@ public class Lobby {
                 // And remove them from the lobby
                 this.removeClientFromLobby(clients.get(j));
             }
-
-            // Empty gameType list
-            clients.clear();
         }
         // Indicate a client has left
         else {
@@ -124,9 +122,6 @@ public class Lobby {
                 // Also send a message to request a new game
                 clients.get(i).requestGameType();
             }
-
-            // Empty gameType list
-            clients.clear();
         }
     }
 
@@ -189,6 +184,19 @@ public class Lobby {
         games.add(game);
     }
 
+    /**
+     * Getter for game objects, can be fetch by clientHandler.
+     * @param client
+     * @return Game
+     */
+    public Game getGame(ClientHandler client) {
+        for (int i = 0; i < this.games.size(); i++) {
+            if (this.games.get(i).hasPlayer(client.getClientName())){
+                return this.games.get(i);
+            }
+        }
+        return null;
+    }
     /**
      * After game was terminated, remove it from the lobby.
      *

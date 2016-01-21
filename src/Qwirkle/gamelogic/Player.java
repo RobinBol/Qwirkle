@@ -40,7 +40,9 @@ public class Player {
         this.resetHand();
     }
 
+    //TODO Bug in reset hand, hand does not get reset
     public void resetHand() {
+
         if (this.handBackup.size() > 0) this.hand = this.handBackup;
     }
 

@@ -24,6 +24,9 @@ public class InputHandler extends Thread {
     /* Input to listen on */
     private BufferedReader input;
 
+    /* Keep track of whether a move was made */
+    private boolean madeMove = false;
+
     /**
      * Constructor takes a client an input.
      *
@@ -86,8 +89,25 @@ public class InputHandler extends Thread {
                         //TODO ask for new game to play
 
                     } else if (result.get(0).equals(Protocol.Server.MOVE) && result.size() >= 3) {
-                        if (result.get(2).equals(client.getName())) { // You have to make move
+
+                        // You made a move, (initial move?) but it was not used, reset hand
+                        if (this.madeMove && !((String) result.get(1)).equalsIgnoreCase(client.getName())) {
+
+                            // TODO reset hand does not work in undoLastMove below
+
+                            // Undo last move, reset hand and board
+                            client.getPlayer().undoLastMove();
+                        }
+
+                        // Check if client is his turn
+                        if (((String) result.get(2)).equalsIgnoreCase(client.getName())) {
+
+                            // You have to make move
                             makeMove();
+                        } else {
+
+                            // Other clients turn
+                            this.madeMove = false;
                         }
 
                         //TODO handle input from other players
@@ -141,6 +161,9 @@ public class InputHandler extends Thread {
      */
     public void makeMove() {
 
+        // Indicate last move was yours
+        this.madeMove = true;
+
         // Store the hand to be able to reset
         client.getPlayer().saveHand();
 
@@ -153,11 +176,12 @@ public class InputHandler extends Thread {
         // TODO handle cases below
         if (score != -1) {
             // Move is valid on local board, now send to server
-            System.out.println("VALID MOVE SEND TO SERVER");
+            client.sendMove(move);
         } else {
             // Locally placed an invalid move
             Logger.print("Invalid move entered, retry:");
 
+            //TODO hand does not get properly reset
             // Make sure hand and board are reset to prev state
             client.getPlayer().undoLastMove();
 

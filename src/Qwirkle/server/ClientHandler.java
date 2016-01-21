@@ -7,7 +7,9 @@
 
 package qwirkle.server;
 
+import qwirkle.client.Client;
 import qwirkle.gamelogic.Board;
+import qwirkle.gamelogic.Game;
 import qwirkle.gamelogic.Lobby;
 import qwirkle.gamelogic.Stone;
 import qwirkle.util.Protocol;
@@ -20,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Handles all things related to a client that
@@ -107,7 +110,6 @@ public class ClientHandler extends Thread {
                         } else if (result.get(0).equals(Protocol.Client.INVITE) && result.size() == 2) {
 
                             // Get opponent clientHandler
-                            System.out.println(String.valueOf(result.get(1)));
                             ClientHandler opponent = server.getClientHandler(String.valueOf(result.get(1)));
 
                             // Check if opponent is challengable
@@ -168,6 +170,36 @@ public class ClientHandler extends Thread {
 
                             // Remove registered invite
                             server.removeInvite(this, opponent);
+                        } else if (result.get(0).equals(Protocol.Client.MAKEMOVE)) {
+
+                            // Convert result to stone array
+                            ArrayList<Stone> stones = new ArrayList<>();
+                            for (int i = 1; i < result.size(); i++) {
+                                int x = 0;
+                                int y = 0;
+
+                                // If result part is arraylist, it contains the positionts
+                                if (result.get(i + 1) instanceof ArrayList) {
+
+                                    // Parse them into integers
+                                    ArrayList<String> positions = (ArrayList) result.get(i + 1);
+                                    x = Integer.parseInt(positions.get(0));
+                                    y = Integer.parseInt(positions.get(1));
+                                }
+
+                                // Add new stone
+                                stones.add(new Stone(String.valueOf(result.get(i)).charAt(0), String.valueOf(result.get(i)).charAt(1), x, y));
+
+                                // Skip next iteration
+                                i = i + 1;
+                            }
+
+                            // Ask lobby to return game where player is in
+                            Game game = this.getLobby().getGame(this);
+                            Stone[] stoneArray = stones.toArray(new Stone[stones.size()]);
+
+                            // Make the move on the current game
+                            game.makeMove(stoneArray, this);
                         }
                     }
                 }
@@ -192,6 +224,11 @@ public class ClientHandler extends Thread {
         //TODO handle incoming errors
     }
 
+    /**
+     * Sends ADDTOHAND message to client. Takes
+     * a stone array as parameter.
+     * @param stones
+     */
     public void sendAddToHand(Stone[] stones) {
 
         // Create new arraylist with parameters
@@ -208,16 +245,35 @@ public class ClientHandler extends Thread {
         sendMessage(ProtocolHandler.createPackage(Protocol.Server.ADDTOHAND, parameters));
     }
 
-    public void giveTurn(ClientHandler client) {
+    /**
+     * Sends a give turn message to the client, indicating whose turn
+     * it is, whose it was, and what move was made.
+     * @param currentClient
+     * @param nextClient
+     * @param stones
+     */
+    public void giveTurn(ClientHandler currentClient, ClientHandler nextClient, Stone[] stones) {
 
         // Create new arraylist with parameters
         ArrayList<Object> parameters = new ArrayList<>();
 
         // Add non-existing user, as no previous move was made
-        parameters.add("null");
+        if (currentClient == null) parameters.add("null");
+        else parameters.add(currentClient);
 
         // Add this client to give it the turn
-        parameters.add(client.getClientName());
+        parameters.add(nextClient.getClientName());
+
+        // If stones available
+        if (stones != null && stones.length > 0) {
+
+            // Add them as parameters to the package
+            for (int i = 0; i < stones.length; i++) {
+
+                // Create single stone parameter
+                parameters.add("" + stones[i].getColor() + stones[i].getShape() + Protocol.Server.Settings.DELIMITER + stones[i].getX() + Protocol.Server.Settings.DELIMITER2 + stones[i].getY());
+            }
+        }
 
         // Send package to client to give it the turn
         sendMessage(ProtocolHandler.createPackage(Protocol.Server.MOVE, parameters));
