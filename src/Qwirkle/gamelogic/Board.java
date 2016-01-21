@@ -9,20 +9,23 @@ import java.util.Map;
 public class Board {
     //public static final int MAXBOARDSIZE = 11;
 
-    private Bag bag;
+    //private Bag bag;
     private Map<String, Stone> board;
     private List<Stone> lastMoves; 
 
 
     public Board() {
         board = new HashMap<>();
-        bag = new Bag();
+        //bag = new Bag();
         lastMoves = new ArrayList<>();
     }
 
     /** 
      * Places a stone on the board. 
      * Stones are mostly validated before this call.
+     * The stone is connected top top down left right stones if they are available.
+     * 
+     * @param stone takes a Stone and make sure it is placed properly on the board.
      */
     public void placeStone(Stone stone) {
     	int x = stone.getX();
@@ -59,16 +62,6 @@ public class Board {
     	board.remove(Coordinate.getCoordinateHash(stone.getX(), stone.getY()));
     }
 
-    /*
-     * Take stone from the bag.
-	 */
-    public Stone[] getFirstHand() {
-        Stone[] hand = new Stone[Game.MAXHANDSIZE];
-        for (int i = 0; i < Game.MAXHANDSIZE; i++) {
-            hand[i] = bag.takeStone();
-        }
-        return hand;
-    }
 
     public Stone getStone(int x, int y) {
         return board.get(Coordinate.getCoordinateHash(x, y));

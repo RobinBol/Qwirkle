@@ -11,10 +11,10 @@ public class Player {
     public ClientHandler client;
     private Stone[] hand; //stones that are in the hand.
 
-    public Player(ClientHandler clientHandler, Board board) {
+    public Player(ClientHandler clientHandler) {
         this.client = clientHandler;
         this.name = clientHandler.getClientName();
-        this.board = board;
+        this.board = new Board();
         initializeHand();
     }
 

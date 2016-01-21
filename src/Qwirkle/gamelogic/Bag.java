@@ -24,7 +24,7 @@ public class Bag {
         }
     }
     
-    /*
+    /**
      * Trade stones with the bag
      * TODO: Make sure the bag is not empty and so on.
      */
@@ -38,14 +38,14 @@ public class Bag {
         return newStones;
     }
 
-    /*
+    /**
      * Add stones back to the bag.
      */
     public void addStone(Stone s) {
         stones.add(s);
     }
 
-    /*
+    /**
      * Takes a random stone from the bag.
      */
     public Stone takeStone() {

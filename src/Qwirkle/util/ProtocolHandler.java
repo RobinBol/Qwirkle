@@ -97,7 +97,7 @@ public class ProtocolHandler {
 
                     // Scanner to read parts of a parameter
                     Scanner subparameterScanner = new Scanner(value);
-                    subparameterScanner.useDelimiter(Protocol.Server.Settings.DELIMITER2);
+                    subparameterScanner.useDelimiter("\\" + Protocol.Server.Settings.DELIMITER2);
 
                     ArrayList<Object> subResult = new ArrayList<>();
 
