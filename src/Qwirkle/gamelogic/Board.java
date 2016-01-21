@@ -118,11 +118,11 @@ public class Board {
             for (int i = 0; i < stones.length; i++) {
                 current = moves.get(i);
                 checkRow = getRows(searchY, current);
-                if (checkRow.size() > 0) {
+                if (checkRow != null && checkRow.size() > 0) {
                     Stone[] array = checkRow.toArray(new Stone[checkRow.size()]);
                     allRows.add(array);
+                    checkRow.clear();
                 }
-                checkRow.clear();
             }
             checkRow = getRows(!searchY, stones[0]);
             System.out.println(checkRow.toString());

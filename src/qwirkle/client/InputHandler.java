@@ -9,7 +9,6 @@ import qwirkle.util.ProtocolHandler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
@@ -87,53 +86,17 @@ public class InputHandler extends Thread {
                         //TODO ask for new game to play
 
                     } else if (result.get(0).equals(Protocol.Server.MOVE) && result.size() >= 3) {
-                        System.out.println("Incoming move");
-                        System.out.println(result.size());
-                        System.out.println(result);
+                        if (result.get(2).equals(client.getName())) { // You have to make move
 
-                        if (result.get(2).equals(client.getName())) {
-                            ArrayList<Stone> hand;
+                            // Ask user to input move
+                            Stone[] move = Input.askForMove(client);
 
-                            ArrayList<Stone> move = new ArrayList<>();
-                            //TODO get and varify input from client and make the move locally, and send to server
-                            while (true) {
-                                hand = client.getPlayer().getHand();
-                                Logger.print("Your current hand:");
-                                for (int i = 0; i < hand.size(); i++) {
-                                    Logger.print("Stone " + i + ": " + hand.get(i));
-                                }
-                                // Ask to make a move
-                                String stone = Input.ask("Please enter the number of the stone you would like to use (or EXIT to end your move)", client);
+                            // Make the move locally, and get score
+                            int score = client.getPlayer().makeMove(move);
 
-                                // Keep asking till done
-                                if (stone.equalsIgnoreCase("exit")) {
-                                    break;
-                                }
-                                String position = Input.ask("At what position would you like to place this stone? (x, y)", client);
-                                int x = Integer.parseInt(position.split(",")[0]);
-                                int y = Integer.parseInt(position.split(",")[1]);
-                                System.out.println(x + " " + y);
-
-                                // Add stone to move
-                                Stone handStone = hand.get(Integer.valueOf(stone));
-                                Stone moveStone = new Stone(handStone.getShape(), handStone.getColor(), x, y);
-                                move.add(moveStone);
-
-                                // Remove the chosen stone from the hand
-                                hand.remove(hand.get(Integer.valueOf(stone)));
-                            }
-
-                            System.out.println(hand);
-
-                            System.out.println(move);
-
-                            Stone[] moveArray = new Stone[move.size()];
-                            moveArray = move.toArray(moveArray);
-                            int score = client.getPlayer().makeMove(moveArray);
-                            System.out.println(score);
+                            // TODO handle cases below
                             if (score != -1) {
                                 // Move is valid on local board, now send to server
-                                //TODO send move to server
                                 System.out.println("VALID MOVE SEND TO SERVER");
                             } else {
                                 System.out.println("INVALID MOVE");
