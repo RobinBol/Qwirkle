@@ -57,8 +57,8 @@ public class BoardTest {
         board.resetMap();
         board.createTestMap();
         System.out.println(board.getBoard().keySet());
-        Stone[] valid = new Stone[]{new Stone('x', 'b', -1, 1), new Stone('x', 'o', 0, 1), new Stone('x', 'y', 1, 1)};
-        Stone[] valid2 = new Stone[]{new Stone('x', 'b', 1, 1), new Stone('+', 'b', 2, 1), new Stone('*', 'b', 3, 1)};
+        Stone[] valid = new Stone[]{new Stone('A', 'A', -1, 1), new Stone('B', 'A', 0, 1), new Stone('C', 'A', 1, 1)};
+        Stone[] valid2 = new Stone[]{new Stone('A', 'A', 1, 1), new Stone('B', 'A', 2, 1), new Stone('C', 'A', 3, 1)};
         Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 1), new Stone('x', 'b', 1, 0)};
         Stone[] inValid2 = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 1, 1), new Stone('x', 'b', 2, 2)};
 
@@ -73,7 +73,7 @@ public class BoardTest {
         board.resetMap();
         board.createTestMap();
         System.out.println(board.getBoard().keySet());
-        Stone[] valid = new Stone[]{new Stone('x', 'b', -1, -1), new Stone('d', 'b', 0, -1), new Stone('s', 'b', 1, -1)};
+        Stone[] valid = new Stone[]{new Stone('B', 'A', -1, -1), new Stone('C', 'A', 0, -1), new Stone('D', 'A', 1, -1)};
         //Stone[] valid = new Stone[]{new Stone('x', 'b', -1, -1), new Stone('x', 'g', -1, -2), new Stone('x', 'p', -1, -3)};
         //Stone[] valid2 = new Stone[]{new Stone('x', 'y', 0, -3), new Stone('x', 'g', 1, -3), new Stone('x', 'r', 2, -3), new Stone('x', 'o', 3, -3), new Stone('x', 'b', 4, -3)};
         //Stone[] invalid = new Stone[]{new Stone('x', 'y', 0, -3), new Stone('x', 'g', 1, -3), new Stone('x', 'r', 2, -3), new Stone('x', 'o', 3, -3), new Stone('x', 'b', 4, -3), new Stone('x', 'r', 5, -3)};

@@ -87,8 +87,15 @@ public class Board {
         }
         return false;
     }
-
-    public boolean makeMove(Stone[] stones) {
+    /**
+     * Checks move for validity and then returns a score if it is proper.
+     * Saves the last make moves to make sure undo works.
+     * 
+     * @param stones Stone array containing the made moves.
+     * @return Returns a value containing the gained score. 
+     * Returns -1 if the move was invalid.
+     */
+    public int makeMove(Stone[] stones) {
         if (isValidMove(stones)) {
             boolean searchY = false;
             int sameX = 0;
@@ -134,16 +141,18 @@ public class Board {
                     if (allRows.get(i).length == 6) {
                         score = score + 6;
                     }
+                } else {
+                	return -1;
                 }
             }
             System.out.println(score);
 
             //save last made moves.
             lastMoves = moves;
+            
+            return score;
         }
-
-
-        return true;
+        return -1;
     }
 
     public List<Stone> getRows(boolean searchDirection, Stone current) {
@@ -388,10 +397,15 @@ public class Board {
         int middle = (maxSize / 2) + 4;
 
         // For loop that will loop over the stones on the board and print them
+        System.out.print(String.format("%3s", ""));
         for (int i = 0 - middle; i < maxSize + 11 - middle; i++) {
             boardString = boardString + String.format("%3s", ""+ i) + "|";
             for (int j = 0 - middle; j < maxSize + 11 - middle; j++) {
-            	if ( j == 0 ) { System.out.println(String.format("%3s", ""+ j));}
+            	if ( i == 0 ) { 
+            		System.out.print(String.format("%3s", ""+ j));
+            	}
+            	if (i == 1 && j == 0) { System.out.print("\n"); }
+            	
                 Stone stone = this.getBoard().get(Coordinate.getCoordinateHash(j, i));
                 if (stone != null) {
                     boardString = boardString + stone.getShape() + "" + stone.getColor();
