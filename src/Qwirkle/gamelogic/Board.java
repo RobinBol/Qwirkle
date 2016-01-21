@@ -87,6 +87,7 @@ public class Board {
      */
     public int makeMove(Stone[] stones) {
     	if (isEmptyBoard() && stones[0] != null) {
+    		placeStone(stones[0]);
     		return 1;
     	}
     	
@@ -198,24 +199,6 @@ public class Board {
         }
         return checkRow;
     }
-
-    public boolean makeMove(int x, int y, char shape, char color) {
-        //if it is the first move on the board.
-        if (isEmptyBoard()) {
-            if (x == 0 && y == 0) {
-                //TODO: Not sure if the new stone might create duplicate cases. Make sure this is addressed in player.
-                //placeStone(x, y, new Stone(shape, color, x, y));
-            }
-            //not the first tile on 0,0;
-            //TODO: Announce to player that it is an invalid move for the first turn?
-            //Or just do this in the player object.
-
-            //System.out.println("Invalid first move");
-            return false;
-        }
-        return false;
-    }
-
 
     public boolean isEmptyBoard() {
         return board.isEmpty();
@@ -394,13 +377,13 @@ public class Board {
         // Calculate boardSize
         int[] boardSize = this.getBoardWidthHeight();
         int maxSize = Math.max(boardSize[0], boardSize[1]);
-        int middle = (maxSize / 2) + 4;
+        int middle = (maxSize / 2);
 
         // For loop that will loop over the stones on the board and print them
         System.out.print(String.format("%3s", ""));
-        for (int i = 0 - middle; i < maxSize + 11 - middle; i++) {
+        for (int i = 0 - middle - 5; i < maxSize + 6 - middle; i++) {
             boardString = boardString + String.format("%3s", "" + i) + "|";
-            for (int j = 0 - middle; j < maxSize + 11 - middle; j++) {
+            for (int j = 0 - middle - 5; j < maxSize + 6 - middle; j++) {
                 if (i == 0) {
                     System.out.print(String.format("%3s", "" + j));
                 }

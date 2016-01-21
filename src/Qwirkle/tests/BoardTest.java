@@ -74,21 +74,25 @@ public class BoardTest {
         board.createTestMap();
         System.out.println(board.getBoard().keySet());
         Stone[] valid = new Stone[]{new Stone('B', 'A', -1, -1), new Stone('C', 'A', 0, -1), new Stone('D', 'A', 1, -1)};
-        //Stone[] valid = new Stone[]{new Stone('x', 'b', -1, -1), new Stone('x', 'g', -1, -2), new Stone('x', 'p', -1, -3)};
-        //Stone[] valid2 = new Stone[]{new Stone('x', 'y', 0, -3), new Stone('x', 'g', 1, -3), new Stone('x', 'r', 2, -3), new Stone('x', 'o', 3, -3), new Stone('x', 'b', 4, -3)};
-        //Stone[] invalid = new Stone[]{new Stone('x', 'y', 0, -3), new Stone('x', 'g', 1, -3), new Stone('x', 'r', 2, -3), new Stone('x', 'o', 3, -3), new Stone('x', 'b', 4, -3), new Stone('x', 'r', 5, -3)};
-        //Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 1), new Stone('x', 'b', 1, 0)};
-        //Stone[] inValid2 = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 1, 1), new Stone('x', 'b', 2, 2)};
-
-        //assertTrue(board.makeMove(valid));
-        board.makeMove(valid);
+        Stone[] valid2 = new Stone[]{new Stone('B', 'C', -1, -2)};
+        Stone[] valid3 = new Stone[]{
+        		new Stone('B', 'D', -1, -3), 
+        		new Stone('B', 'A',  0, -3),
+        		new Stone('B', 'B',  1, -3), 
+        		new Stone('B', 'C',  2, -3), 
+        		new Stone('B', 'E',  3, -3), 
+        		new Stone('B', 'F',  4, -3)};
+        Stone[] inValid = new Stone[]{new Stone('B', 'G', 5, -3)};
+     
+        assertEquals(9, board.makeMove(valid));
+        assertEquals(3, board.makeMove(valid2));
+        assertEquals(16, board.makeMove(valid3));
+        assertEquals(-1, board.makeMove(inValid));
         System.out.println(board);
-        //board.undoMoves();
-        //board.makeMove(valid2);
-        //System.out.println(board);
-        //assertTrue(board.isValidMove(valid2));
-        //assertFalse(board.isValidMove(inValid));
-        //assertFalse(board.isValidMove(inValid2));
+        
+        board.resetMap();
+        assertEquals(1, board.makeMove(new Stone[] {new Stone('A', 'B',0 ,0)}));
+        System.out.println(board);
     }
 
     @Test

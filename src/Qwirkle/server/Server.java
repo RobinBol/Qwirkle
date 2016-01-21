@@ -201,6 +201,7 @@ public class Server extends Observable {
      */
     public void removeInvite(ClientHandler inviter, ClientHandler invitee) {
         invites.remove(invitee, inviter);
+
     }
 
     /**
