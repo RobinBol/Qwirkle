@@ -196,6 +196,9 @@ public class Board {
                 done = true;
             }
         }
+        if (checkRow.size() < 2) {
+        	return null;
+        }
         return checkRow;
     }
 
