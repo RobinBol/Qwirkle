@@ -1,9 +1,11 @@
 package qwirkle.util;
 
 import qwirkle.client.Client;
+import qwirkle.gamelogic.Stone;
 import qwirkle.server.Server;
 import qwirkle.server.ServerLogger;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Input {
@@ -182,4 +184,125 @@ public class Input {
         return ask("Please provide the name of the player you would like to challenge:", asker);
     }
 
+    public static String askForStone(Object asker) {
+
+        // Ask to make a move
+        String stone = Input.ask("Please enter the number of the stone you would like to use (or EXIT to end your move)", asker);
+
+        // While no valid input provided, keep asking
+        while (!stone.equals("1") && !stone.equals("2") && !stone.equals("3") && !stone.equals("4") && !stone.equals("5") && !stone.equals("6") && !stone.equalsIgnoreCase("exit")) {
+
+            // Ask to make a move
+            stone = Input.ask("Invalid input, please re-enter the number of the stone you would like to use (or EXIT to end your move)", asker);
+
+            // Keep asking till done
+            if (stone.equalsIgnoreCase("exit")) {
+                break;
+            }
+        }
+
+        return stone;
+    }
+
+    public static String askForStonePosition(Object asker) {
+        String position = Input.ask("At what position would you like to place this stone? (x, y)", asker);
+
+        while (position.indexOf(',') == -1) {
+            position = Input.ask("Invalid format, please use x,y as your input format, try again:", asker);
+        }
+
+        boolean invalidPosition = false;
+        int x = 0;
+        try {
+            x = Integer.parseInt(position.split(",")[0]);
+        } catch (NumberFormatException e) {
+            Logger.print("Invalid x-position entered...");
+            invalidPosition = true;
+        }
+        int y = 0;
+
+        // No value entered after ,
+        if (position.split(",").length < 1) {
+            Logger.print("Invalid y-position entered...");
+            invalidPosition = true;
+        }
+        try {
+            y = Integer.parseInt(position.split(",")[1]);
+        } catch (NumberFormatException e) {
+            Logger.print("Invalid y-position entered...");
+            invalidPosition = true;
+        }
+
+        while (invalidPosition) {
+            position = Input.ask("Invalid format, please use x,y as your input format, try again:", asker);
+            while (position.indexOf(',') == -1) {
+                position = Input.ask("Invalid format, please use x,y as your input format, try again:", asker);
+            }
+            boolean tempApprove = false;
+            try {
+                x = Integer.parseInt(position.split(",")[0]);
+                tempApprove = true;
+            } catch (NumberFormatException e) {
+                Logger.print("Invalid x-position entered...");
+                invalidPosition = true;
+            }
+            try {
+                y = Integer.parseInt(position.split(",")[1]);
+                if (tempApprove) invalidPosition = false;
+            } catch (NumberFormatException e) {
+                Logger.print("Invalid y-position entered...");
+                invalidPosition = true;
+            }
+        }
+
+        return x + "_" + y;
+    }
+
+    public static Stone[] askForMove(Client client) {
+
+        // Get current hand of the player
+        ArrayList<Stone> hand;
+
+        // Make move array list, to compose move
+        ArrayList<Stone> move = new ArrayList<>();
+
+        while (true) {
+
+            // Update current hand
+            hand = client.getPlayer().getHand();
+
+            // Print out the hand to read for the player
+            Logger.print("Your current hand:");
+            for (int i = 0; i < hand.size(); i++) {
+                Logger.print("Stone " + (i + 1) + ": " + hand.get(i));
+            }
+
+            // Ask client to provide valid stone
+            String stone = Input.askForStone(client);
+
+            // Break if input equals exit
+            if (stone.equalsIgnoreCase("exit")) break;
+
+            // Valid stone provided, ask for position
+            String position = Input.askForStonePosition(client);
+            int x = Integer.parseInt(position.split("_")[0]);
+            int y = Integer.parseInt(position.split("_")[1]);
+
+            // Add stone to move
+            Stone handStone = hand.get(Integer.valueOf(stone) - 1);
+            Stone moveStone = new Stone(handStone.getShape(), handStone.getColor(), x, y);
+            move.add(moveStone);
+
+            // Remove the chosen stone from the hand
+            hand.remove(handStone);
+        }
+
+        System.out.println(hand);
+
+        System.out.println(move);
+
+        Stone[] moveArray = new Stone[move.size()];
+        return move.toArray(moveArray);
+    }
 }
+

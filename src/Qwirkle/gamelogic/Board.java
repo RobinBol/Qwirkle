@@ -77,22 +77,12 @@ public class Board {
         }
     }
 
-    /* Makes a move.
-     * validates if the move is possible.
-     * then places a stone at given position.
-     */
-    public boolean makeMove(int x, int y, Stone stone) {
-        if (makeMove(x, y, stone.getShape(), stone.getColor())) {
-            return true;
-        }
-        return false;
-    }
     /**
      * Checks move for validity and then returns a score if it is proper.
      * Saves the last make moves to make sure undo works.
-     * 
+     *
      * @param stones Stone array containing the made moves.
-     * @return Returns a value containing the gained score. 
+     * @return Returns a value containing the gained score.
      * Returns -1 if the move was invalid.
      */
     public int makeMove(Stone[] stones) {
@@ -110,6 +100,7 @@ public class Board {
                     sameX++;
                 }
             }
+
             searchY = sameX != stones.length;
             System.out.println(searchY + " " + sameX);
 
@@ -117,6 +108,9 @@ public class Board {
             List<Stone> moves = Arrays.asList(stones);
             List<Stone[]> allRows = new ArrayList<>();
             List<Stone> checkRow = new ArrayList<>();
+
+            //save last made moves.
+            lastMoves = moves;
 
             Stone current;
             for (int i = 0; i < stones.length; i++) {
@@ -133,7 +127,7 @@ public class Board {
             System.out.println(checkRow.toString());
             Stone[] array = checkRow.toArray(new Stone[checkRow.size()]);
             checkRow.clear();
-            if (array != null) allRows.add(array);
+            allRows.add(array);
 
 
             //check validity moves.
@@ -147,14 +141,11 @@ public class Board {
                         score = score + 6;
                     }
                 } else {
-                	return -1;
+                    return -1;
                 }
             }
             System.out.println(score);
 
-            //save last made moves.
-            lastMoves = moves;
-            
             return score;
         }
         return -1;
@@ -203,7 +194,7 @@ public class Board {
             }
         }
         if (checkRow.size() < 2) {
-        	return null;
+            return null;
         }
         return checkRow;
     }
@@ -408,13 +399,15 @@ public class Board {
         // For loop that will loop over the stones on the board and print them
         System.out.print(String.format("%3s", ""));
         for (int i = 0 - middle; i < maxSize + 11 - middle; i++) {
-            boardString = boardString + String.format("%3s", ""+ i) + "|";
+            boardString = boardString + String.format("%3s", "" + i) + "|";
             for (int j = 0 - middle; j < maxSize + 11 - middle; j++) {
-            	if ( i == 0 ) { 
-            		System.out.print(String.format("%3s", ""+ j));
-            	}
-            	if (i == 1 && j == 0) { System.out.print("\n"); }
-            	
+                if (i == 0) {
+                    System.out.print(String.format("%3s", "" + j));
+                }
+                if (i == 1 && j == 0) {
+                    System.out.print("\n");
+                }
+
                 Stone stone = this.getBoard().get(Coordinate.getCoordinateHash(j, i));
                 if (stone != null) {
                     boardString = boardString + stone.getShape() + "" + stone.getColor();
