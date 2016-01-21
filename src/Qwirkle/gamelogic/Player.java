@@ -41,17 +41,11 @@ public class Player {
     }
 
     //boolean in case makeMove didn't execute well.
-    public boolean makeMove() {
-// TODO fix this function
-//        Logger.print("DIT ZIJN JE stenen");
-//        String stones = Input.ask("make a move", client);
-//        // valideer/convert stenen
-//        // doe lokaal die move
-//        Stone[] stones =
-//        board.makeMove(stones);
-//
-//        client.sendMessage(VALIDEERMOVE);
-        return false;
+    public int makeMove(Stone[] stones) {
+    	int score = -1;
+    	score = board.makeMove(stones);
+    	
+        return score;
     }
 
     //only if board is empty.
