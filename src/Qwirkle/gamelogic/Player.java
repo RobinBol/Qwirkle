@@ -44,7 +44,6 @@ public class Player {
     public int makeMove(Stone[] stones) {
     	int score = -1;
     	score = board.makeMove(stones);
-    	
         return score;
     }
 
