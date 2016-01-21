@@ -106,6 +106,7 @@ public class ClientHandler extends Thread {
                         } else if (result.get(0).equals(Protocol.Client.INVITE) && result.size() == 2) {
 
                             // Get opponent clientHandler
+                            System.out.println(String.valueOf(result.get(1)));
                             ClientHandler opponent = server.getClientHandler(String.valueOf(result.get(1)));
 
                             // Check if opponent is challengable
@@ -160,6 +161,9 @@ public class ClientHandler extends Thread {
 
                             // Get inviter clientHandler
                             ClientHandler opponent = server.getInviter(this);
+
+                            // Send message to opponent to decline
+                            opponent.sendMessage(ProtocolHandler.createPackage(Protocol.Client.DECLINEINVITE));
 
                             // Remove registered invite
                             server.removeInvite(this, opponent);

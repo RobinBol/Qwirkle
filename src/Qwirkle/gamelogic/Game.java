@@ -33,6 +33,9 @@ public class Game {
     /* Board on which the game is played */
     private Board board;
 
+    /* Bag used in this game */
+    private Bag bag;
+
     /**
      * Game constructor, give clients and lobby as parameters
      * so that the game can create its players and have a reference
@@ -52,6 +55,16 @@ public class Game {
         // Store clients
         this.clients = clients;
 
+        // Game can be started
+        startGame();
+    }
+
+    /**
+     * Starts the game, giving turns to the right player.
+     */
+    public void startGame() {
+        // TODO handle starting the game
+
         // Initialize new board
         board = new Board();
 
@@ -66,16 +79,10 @@ public class Game {
             players[i] = new Player(clients.get(i), board);
         }
 
-        // Game can be started
-        startGame();
-    }
+        // Create new bag used in this game
+        bag = new Bag();
 
-    /**
-     * Starts the game, giving turns to the right player.
-     */
-    public void startGame() {
-        // TODO handle starting the game
-        System.out.println("Game was properly started!");
+        System.out.println(board);
     }
 
     /**

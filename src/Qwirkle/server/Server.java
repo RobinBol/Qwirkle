@@ -174,7 +174,7 @@ public class Server extends Observable {
         for(int i = 0; i < clientHandlers.size(); i++) {
 
             // If match was found, return it
-            if(clientHandlers.get(i).getClientName().equals(clientName)){
+            if(clientHandlers.get(i).getClientName().equalsIgnoreCase(clientName)){
                 return clientHandlers.get(i);
             }
         }

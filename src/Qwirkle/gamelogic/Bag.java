@@ -9,10 +9,10 @@ public class Bag {
     private List<Stone> stones;
 
     public Bag() {
-        InitializeBag();
+        initializeBag();
     }
 
-    public void InitializeBag() {
+    public void initializeBag() {
         stones = new ArrayList<>();
         //TODO: generate stones for bag;
         for (int i = 0; i < Stone.SHAPES.length; i++) {
