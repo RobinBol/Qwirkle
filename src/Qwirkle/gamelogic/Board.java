@@ -390,7 +390,7 @@ public class Board {
 
         // For loop that will loop over the stones on the board and print them
         for (int i = 0 - middle; i < maxSize + 11 - middle; i++) {
-            boardString = boardString + "|";
+            boardString = boardString + String.format("%3s", ""+ i) + "|";
             for (int j = 0 - middle; j < maxSize + 11 - middle; j++) {
                 Stone stone = this.getBoard().get(Coordinate.getCoordinateHash(j, i));
                 if (stone != null) {
