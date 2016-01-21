@@ -11,7 +11,7 @@ public class Player {
     private String name;
     private Board board;
     public Client client;
-    private ArrayList<Stone> hand; //stones that are in the hand.
+    private ArrayList<Stone> hand = new ArrayList<>(); //stones that are in the hand.
     private boolean hasTurn;
 
     public Player(Client client) {
@@ -73,15 +73,15 @@ public class Player {
         List<Stone> foundShapes = new ArrayList<Stone>();
         List<Stone> foundColors = new ArrayList<Stone>();
 
-        for (int i = 0; i < hand.length; i++) {
-            startingStone = hand[i];
-            for (int j = 0; j < hand.length; j++) {
+        for (int i = 0; i < hand.size(); i++) {
+            startingStone = hand.get(i);
+            for (int j = 0; j < hand.size(); j++) {
                 if (j != i) {
-                    if (startingStone.getColor() == hand[j].getColor() && startingStone.getShape() != hand[j].getShape()) {
-                        foundColors.add(hand[j]);
+                    if (startingStone.getColor() == hand.get(j).getColor() && startingStone.getShape() != hand.get(j).getShape()) {
+                        foundColors.add(hand.get(j));
                     }
-                    if (startingStone.getColor() != hand[j].getColor() && startingStone.getShape() == hand[j].getShape()) {
-                        foundShapes.add(hand[j]);
+                    if (startingStone.getColor() != hand.get(j).getColor() && startingStone.getShape() == hand.get(j).getShape()) {
+                        foundShapes.add(hand.get(j));
                     }
                 }
             }
@@ -89,7 +89,7 @@ public class Player {
         return 0;
     }
 
-    public Stone[] getHand() {
+    public ArrayList<Stone> getHand() {
         return hand;
     }
 }
