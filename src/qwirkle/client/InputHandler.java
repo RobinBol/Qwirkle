@@ -72,6 +72,7 @@ public class InputHandler extends Thread {
                         // Ask for desired game
                         getGameType();
                     } else if (result.get(0).equals(Protocol.Server.STARTGAME)) {
+                        client.startGame();
                         client.setInGame(true);
                     } else if (result.get(0).equals(Protocol.Server.GAME_END)) {
                         client.setInGame(false);
@@ -92,8 +93,9 @@ public class InputHandler extends Thread {
                         if(result.get(2).equals(client.getName())) {
                             // TODO it is your turn
                             System.out.println("MY TURN!");
-                            //TODO print hand
                             Logger.print(client.getPlayer().getHand());
+
+                            //TODO get and varify input from client and make the move locally, and send to server
                             Input.ask("Please enter your turn", client);
                         }
 

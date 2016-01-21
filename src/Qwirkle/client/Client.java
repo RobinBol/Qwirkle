@@ -6,6 +6,7 @@
 
 package qwirkle.client;
 
+import qwirkle.gamelogic.Board;
 import qwirkle.gamelogic.Player;
 import qwirkle.util.Input;
 import qwirkle.util.Protocol;
@@ -211,6 +212,9 @@ public class Client extends Observable implements Runnable {
         return this.player;
     }
 
+    public void startGame(){
+        this.setPlayer(new Player(this));
+    }
     /**
      * Marks client as in game, or out of game.
      *
