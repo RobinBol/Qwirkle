@@ -89,6 +89,13 @@ public class Lobby {
         // If all clients still present
         if (clientsPresent) {
 
+            // Loop over all clients that will play the game
+            for (int j = 0; j < clients.size(); j++) {
+
+                // Send package to client to indicate game started
+                clients.get(j).sendGameStarted(clients);
+            }
+
             // Start game with clients
             Game game = new Game(clients, this);
 
@@ -97,9 +104,6 @@ public class Lobby {
 
             // Loop over all clients in newly created game
             for (int j = 0; j < clients.size(); j++) {
-
-                // Send package to client to indicate game started
-                clients.get(j).sendGameStarted(clients);
 
                 // And remove them from the lobby
                 this.removeClientFromLobby(clients.get(j));

@@ -6,6 +6,7 @@
 
 package qwirkle.client;
 
+import qwirkle.gamelogic.Player;
 import qwirkle.util.Input;
 import qwirkle.util.Protocol;
 import qwirkle.util.ProtocolHandler;
@@ -44,6 +45,8 @@ public class Client extends Observable implements Runnable {
     /* Features variable, holding the features this client supports */
     private static String[] FEATURES = new String[]{Protocol.Server.Features.CHALLENGE};
     private static List<String> COMMON_FEATURES = new ArrayList<>();
+
+    private Player player;
 
     /**
      * Client constructor that takes a name, host and port.
@@ -200,6 +203,14 @@ public class Client extends Observable implements Runnable {
         return false;
     }
 
+    public void setPlayer(Player player){
+        this.player = player;
+    }
+
+    public Player getPlayer() {
+        return this.player;
+    }
+
     /**
      * Marks client as in game, or out of game.
      *
@@ -226,6 +237,13 @@ public class Client extends Observable implements Runnable {
     public void updateObserver(String message) {
         setChanged();
         notifyObservers(message);
+    }
+
+    /**
+     * Gets name of client.
+     */
+    public String getName() {
+        return this.name;
     }
 
     /**
