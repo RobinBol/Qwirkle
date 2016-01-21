@@ -81,6 +81,9 @@ public class Server extends Observable {
         System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir").replace("src", "") + "/certs/keystore.jks");
         System.setProperty("javax.net.ssl.keyStorePassword", "SSR0CKS");
 
+        // If port entered by terminal, log server started
+        if (port != 0) updateObserver(ServerLogger.SERVER_STARTED + port);
+
         // Check port validity, ask for a valid one if needed
         this.port = (port == 0) ? Input.askForPort(this) : port;
 

@@ -13,6 +13,7 @@ public class Player {
     public Client client;
     private ArrayList<Stone> hand = new ArrayList<>(); //stones that are in the hand.
     private boolean hasTurn;
+    private ArrayList<Stone> handBackup;
 
     public Player(Client client) {
         this.client = client;
@@ -21,19 +22,30 @@ public class Player {
         this.board = new Board();
     }
 
-    public void addStoneToHand(Stone stone){
+    public void addStoneToHand(Stone stone) {
         hand.add(stone);
     }
 
     // TODO implement has Turn functionality
-    public boolean hasTurn(){
+    public boolean hasTurn() {
         return this.hasTurn;
     }
-    public void setTurn(){
+
+    public void setTurn() {
         //todo
     }
+
     public void undoLastMove() {
         this.board.undoMove();
+        this.resetHand();
+    }
+
+    public void resetHand() {
+        if (this.handBackup.size() > 0) this.hand = this.handBackup;
+    }
+
+    public void saveHand() {
+        this.handBackup = this.hand;
     }
 
     public String getName() {
@@ -42,8 +54,14 @@ public class Player {
 
     //boolean in case makeMove didn't execute well.
     public int makeMove(Stone[] stones) {
-    	int score = -1;
-    	score = board.makeMove(stones);
+
+        int score = -1;
+        score = board.makeMove(stones);
+
+        // If invalid move, undo last move
+        if (score == -1) {
+            undoLastMove();
+        }
         return score;
     }
 

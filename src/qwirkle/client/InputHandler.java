@@ -87,20 +87,7 @@ public class InputHandler extends Thread {
 
                     } else if (result.get(0).equals(Protocol.Server.MOVE) && result.size() >= 3) {
                         if (result.get(2).equals(client.getName())) { // You have to make move
-
-                            // Ask user to input move
-                            Stone[] move = Input.askForMove(client);
-
-                            // Make the move locally, and get score
-                            int score = client.getPlayer().makeMove(move);
-
-                            // TODO handle cases below
-                            if (score != -1) {
-                                // Move is valid on local board, now send to server
-                                System.out.println("VALID MOVE SEND TO SERVER");
-                            } else {
-                                System.out.println("INVALID MOVE");
-                            }
+                            makeMove();
                         }
 
                         //TODO handle input from other players
@@ -144,6 +131,38 @@ public class InputHandler extends Thread {
 
             // Something went wrong when reading
             client.updateObserver(ClientLogger.SOCKET_ERROR);
+        }
+    }
+
+    /**
+     * Handles making a move, asks for correct
+     * input and validates the move locally,
+     * if move is valid send it to the server.
+     */
+    public void makeMove() {
+
+        // Store the hand to be able to reset
+        client.getPlayer().saveHand();
+
+        // Ask user to input move
+        Stone[] move = Input.askForMove(client);
+
+        // Make the move locally, and get score
+        int score = client.getPlayer().makeMove(move);
+
+        // TODO handle cases below
+        if (score != -1) {
+            // Move is valid on local board, now send to server
+            System.out.println("VALID MOVE SEND TO SERVER");
+        } else {
+            // Locally placed an invalid move
+            Logger.print("Invalid move entered, retry:");
+
+            // Make sure hand and board are reset to prev state
+            client.getPlayer().undoLastMove();
+
+            // Recursively call this method till valid move
+            makeMove();
         }
     }
 
