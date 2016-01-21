@@ -1,6 +1,8 @@
 package qwirkle.gamelogic;
 
-import qwirkle.server.ClientHandler;
+import qwirkle.client.Client;
+import qwirkle.util.Input;
+import qwirkle.util.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,21 +10,26 @@ import java.util.List;
 public class Player {
     private String name;
     private Board board;
-    public ClientHandler client;
+    public Client client;
     private Stone[] hand; //stones that are in the hand.
+    private boolean hasTurn;
 
-    public Player(ClientHandler clientHandler) {
-        this.client = clientHandler;
-        this.name = clientHandler.getClientName();
+    public Player(Client client) {
+        this.client = client;
+        this.client.setPlayer(this);
+        this.name = client.getName();
         this.board = new Board();
-        initializeHand();
     }
 
-    public void doTurn() {
-        this.board.createTestMap();
-
-        // Tell client to log the board, client has a TUI and will handle that
-        this.client.showBoard(board);
+    // TODO implement has Turn functionality
+    public boolean hasTurn(){
+        return this.hasTurn;
+    }
+    public void setTurn(){
+        //todo
+    }
+    public void undoLastMove() {
+        this.board.undoMove();
     }
 
     public String getName() {
@@ -31,13 +38,20 @@ public class Player {
 
     //boolean in case makeMove didn't execute well.
     public boolean makeMove() {
-    	
+// TODO fix this function
+//        Logger.print("DIT ZIJN JE stenen");
+//        String stones = Input.ask("make a move", client);
+//        // valideer/convert stenen
+//        // doe lokaal die move
+//        Stone[] stones =
+//        board.makeMove(stones);
+//
+//        client.sendMessage(VALIDEERMOVE);
         return false;
     }
 
     //only if board is empty.
     public Stone[] tradeStones(Stone[] stones) {
-
         return null;
     }
 
@@ -69,10 +83,6 @@ public class Player {
             }
         }
         return 0;
-    }
-
-    public void initializeHand() {
-        hand = board.getFirstHand();
     }
 
     public Stone[] getHand() {

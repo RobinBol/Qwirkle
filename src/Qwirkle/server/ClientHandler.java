@@ -9,6 +9,7 @@ package qwirkle.server;
 
 import qwirkle.gamelogic.Board;
 import qwirkle.gamelogic.Lobby;
+import qwirkle.gamelogic.Stone;
 import qwirkle.util.Protocol;
 import qwirkle.util.ProtocolHandler;
 
@@ -191,6 +192,37 @@ public class ClientHandler extends Thread {
         //TODO handle incoming errors
     }
 
+    public void sendAddToHand(Stone[] stones) {
+
+        // Create new arraylist with parameters
+        ArrayList<Object> parameters = new ArrayList<>();
+
+        // Add each stone as a parameter
+        for (int i = 0; i < stones.length; i++) {
+
+            // Create single stone parameter
+            parameters.add("" + stones[i].getColor() + stones[i].getShape());
+        }
+
+        // Send package to client to give its initial hand
+        sendMessage(ProtocolHandler.createPackage(Protocol.Server.ADDTOHAND, parameters));
+    }
+
+    public void giveTurn(ClientHandler client) {
+
+        // Create new arraylist with parameters
+        ArrayList<Object> parameters = new ArrayList<>();
+
+        // Add non-existing user, as no previous move was made
+        parameters.add("null");
+
+        // Add this client to give it the turn
+        parameters.add(client.getClientName());
+
+        // Send package to client to give it the turn
+        sendMessage(ProtocolHandler.createPackage(Protocol.Server.MOVE, parameters));
+    }
+
     /**
      * Method that initiates a server broadcast to let
      * all clients know a new client has connected.
@@ -275,7 +307,7 @@ public class ClientHandler extends Thread {
 
         // Removes client from lobby and game (if applicable)
         Lobby lobby = getLobby();
-        if (lobby != null ) lobby.removeClient(this);
+        if (lobby != null) lobby.removeClient(this);
 
         // Remove client from server
         server.removeClientHandler(this);
@@ -425,9 +457,9 @@ public class ClientHandler extends Thread {
         this.inGame = state;
     }
 
-    public boolean hasFeature(String feature){
-        for (int i = 0; i < FEATURES.size(); i++){
-            if(FEATURES.get(i).equals(feature)){
+    public boolean hasFeature(String feature) {
+        for (int i = 0; i < FEATURES.size(); i++) {
+            if (FEATURES.get(i).equals(feature)) {
                 return true;
             }
         }

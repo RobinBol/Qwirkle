@@ -1,5 +1,6 @@
 package qwirkle.client;
 
+import qwirkle.gamelogic.Player;
 import qwirkle.util.Input;
 import qwirkle.util.Protocol;
 import qwirkle.util.ProtocolHandler;
@@ -56,7 +57,8 @@ public class InputHandler extends Thread {
                     // Handle incoming messages
                     if (result.get(0).equals(Protocol.Client.ERROR)) {
                         handleIncomingError(Integer.valueOf((String) result.get(1)));
-                    } if (result.get(0).equals(Protocol.Server.HALLO)) {
+                    }
+                    if (result.get(0).equals(Protocol.Server.HALLO)) {
 
                         // Save all matching features
                         for (int i = 1; i < result.size(); i++) {
@@ -80,6 +82,20 @@ public class InputHandler extends Thread {
 
                         //TODO ask for new game to play
 
+                    } else if (result.get(0).equals(Protocol.Server.MOVE) && result.size() >= 3) {
+                        System.out.println("Incoming move");
+                        System.out.println(result.size());
+                        System.out.println(result);
+
+                        if(result.get(2).equals(client.getName())) {
+                            // TODO it is your turn
+                            System.out.println("MY TURN!");
+                            //TODO print hand
+                            client.getPlayer()
+                            Input.ask("Please enter your turn", client);
+                        }
+
+                        //TODO handle input from other players
                     } else if (result.get(0).equals(Protocol.Client.INVITE) && result.size() == 2) {
 
                         // Only act on invite if client is not in game
@@ -188,6 +204,13 @@ public class InputHandler extends Thread {
         else if (errorCode == 5) {
             client.updateObserver(ClientLogger.NOT_CHALLENGABLE);
             Input.askForGameType(client);
+        } else if (errorCode == 7) {
+            Player player = client.getPlayer();
+            if (player != null) {
+                if (player.hasTurn()){
+                    player.undoLastMove();
+                }
+            }
         }
     }
 }

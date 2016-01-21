@@ -68,21 +68,31 @@ public class Game {
         // Initialize new board
         board = new Board();
 
+        // Create new bag used in this game
+        bag = new Bag();
+
         // Create players from connected clients
-        players = new Player[clients.size()];
-        for (int i = 0; i < players.length; i++) {
+        for (int i = 0; i < clients.size(); i++) {
 
             // Update game state of client to in game
             clients.get(i).setGameState(true);
 
-            // Create player from client
-            players[i] = new Player(clients.get(i), board);
+            // Give each client its own hand
+            clients.get(i).sendAddToHand(getFirstHand());
+
+            clients.get(i).giveTurn(clients.get(i));
         }
+    }
 
-        // Create new bag used in this game
-        bag = new Bag();
-
-        System.out.println(board);
+    /**
+     * Take stone from the bag.
+     */
+    public Stone[] getFirstHand() {
+        Stone[] hand = new Stone[Game.MAXHANDSIZE];
+        for (int i = 0; i < Game.MAXHANDSIZE; i++) {
+            hand[i] = bag.takeStone();
+        }
+        return hand;
     }
 
     /**
