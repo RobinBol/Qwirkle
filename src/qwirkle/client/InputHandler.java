@@ -9,6 +9,7 @@ import qwirkle.util.ProtocolHandler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
@@ -90,21 +91,52 @@ public class InputHandler extends Thread {
                         System.out.println(result.size());
                         System.out.println(result);
 
-                        if(result.get(2).equals(client.getName())) {
-                            // TODO it is your turn
-                            System.out.println("MY TURN!");
-                            Logger.print(client.getPlayer().getHand());
+                        if (result.get(2).equals(client.getName())) {
+                            ArrayList<Stone> hand;
 
+                            ArrayList<Stone> move = new ArrayList<>();
                             //TODO get and varify input from client and make the move locally, and send to server
-                            String input = Input.ask("Please enter your turn", client);
-                            System.out.println(input);
-                            Stone stone = new Stone(input.charAt(0), input.charAt(1));
-                            Stone[] stones = {stone};
-                            int score = client.getPlayer().makeMove(stones);
+                            while (true) {
+                                hand = client.getPlayer().getHand();
+                                Logger.print("Your current hand:");
+                                for (int i = 0; i < hand.size(); i++) {
+                                    Logger.print("Stone " + i + ": " + hand.get(i));
+                                }
+                                // Ask to make a move
+                                String stone = Input.ask("Please enter the number of the stone you would like to use (or EXIT to end your move)", client);
+
+                                // Keep asking till done
+                                if (stone.equalsIgnoreCase("exit")) {
+                                    break;
+                                }
+                                String position = Input.ask("At what position would you like to place this stone? (x, y)", client);
+                                int x = Integer.parseInt(position.split(",")[0]);
+                                int y = Integer.parseInt(position.split(",")[1]);
+                                System.out.println(x + " " + y);
+
+                                // Add stone to move
+                                Stone handStone = hand.get(Integer.valueOf(stone));
+                                Stone moveStone = new Stone(handStone.getShape(), handStone.getColor(), x, y);
+                                move.add(moveStone);
+
+                                // Remove the chosen stone from the hand
+                                hand.remove(hand.get(Integer.valueOf(stone)));
+                            }
+
+                            System.out.println(hand);
+
+                            System.out.println(move);
+
+                            Stone[] moveArray = new Stone[move.size()];
+                            moveArray = move.toArray(moveArray);
+                            int score = client.getPlayer().makeMove(moveArray);
+                            System.out.println(score);
                             if (score != -1) {
                                 // Move is valid on local board, now send to server
                                 //TODO send move to server
                                 System.out.println("VALID MOVE SEND TO SERVER");
+                            } else {
+                                System.out.println("INVALID MOVE");
                             }
                         }
 
@@ -137,7 +169,7 @@ public class InputHandler extends Thread {
                             // Send error package
                             client.sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
                         }
-                    } else if (result.get(0).equals(Protocol.Server.ADDTOHAND)){
+                    } else if (result.get(0).equals(Protocol.Server.ADDTOHAND)) {
                         for (int i = 1; i < result.size(); i++) {
                             Stone stone = new Stone(String.valueOf(result.get(i)).charAt(0), String.valueOf(result.get(i)).charAt(1));
                             client.getPlayer().addStoneToHand(stone);
@@ -225,7 +257,7 @@ public class InputHandler extends Thread {
         } else if (errorCode == 7) {
             Player player = client.getPlayer();
             if (player != null) {
-                if (player.hasTurn()){
+                if (player.hasTurn()) {
                     player.undoLastMove();
                 }
             }
