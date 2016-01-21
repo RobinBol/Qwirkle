@@ -96,7 +96,16 @@ public class InputHandler extends Thread {
                             Logger.print(client.getPlayer().getHand());
 
                             //TODO get and varify input from client and make the move locally, and send to server
-                            Input.ask("Please enter your turn", client);
+                            String input = Input.ask("Please enter your turn", client);
+                            System.out.println(input);
+                            Stone stone = new Stone(input.charAt(0), input.charAt(1));
+                            Stone[] stones = {stone};
+                            int score = client.getPlayer().makeMove(stones);
+                            if (score != -1) {
+                                // Move is valid on local board, now send to server
+                                //TODO send move to server
+                                System.out.println("VALID MOVE SEND TO SERVER");
+                            }
                         }
 
                         //TODO handle input from other players
