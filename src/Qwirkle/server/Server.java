@@ -168,16 +168,17 @@ public class Server extends Observable {
     /**
      * Return clientHandler registered at a specific
      * clientname
+     *
      * @param clientName
      * @return clientHandler
      */
     public ClientHandler getClientHandler(String clientName) {
 
         // Loop all clientHandlers
-        for(int i = 0; i < clientHandlers.size(); i++) {
+        for (int i = 0; i < clientHandlers.size(); i++) {
 
             // If match was found, return it
-            if(clientHandlers.get(i).getClientName().equalsIgnoreCase(clientName)){
+            if (clientHandlers.get(i).getClientName().equalsIgnoreCase(clientName)) {
                 return clientHandlers.get(i);
             }
         }
@@ -186,6 +187,7 @@ public class Server extends Observable {
 
     /**
      * Register invite from client
+     *
      * @param inviter
      * @param invitee
      */
@@ -196,6 +198,7 @@ public class Server extends Observable {
     /**
      * Remove invite from internal list, game has started
      * or invite was aborted
+     *
      * @param inviter
      * @param invitee
      */
@@ -206,10 +209,11 @@ public class Server extends Observable {
 
     /**
      * Get inviter, used to start a game with an oponnent
+     *
      * @param invitee
      * @return
      */
-    public ClientHandler getInviter(ClientHandler invitee){
+    public ClientHandler getInviter(ClientHandler invitee) {
         return invites.get(invitee);
     }
 
@@ -346,7 +350,7 @@ public class Server extends Observable {
 
         // If argument provided
         if (args.length > 0) {
-            if (Validation.checkPort(args[0])){
+            if (Validation.checkPort(args[0])) {
                 // Valid port number
                 port = Integer.parseInt(args[0], 10);
             } else {

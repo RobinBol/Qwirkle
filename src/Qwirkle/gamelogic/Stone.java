@@ -20,7 +20,7 @@ public class Stone {
         this.color = color;
         //Maybe save the coordinates?
     }
-    
+
     public Stone(char shape, char color, int x, int y) {
         this.shape = shape;
         this.color = color;

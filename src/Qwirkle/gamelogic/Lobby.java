@@ -186,17 +186,19 @@ public class Lobby {
 
     /**
      * Getter for game objects, can be fetch by clientHandler.
+     *
      * @param client
      * @return Game
      */
     public Game getGame(ClientHandler client) {
         for (int i = 0; i < this.games.size(); i++) {
-            if (this.games.get(i).hasPlayer(client.getClientName())){
+            if (this.games.get(i).hasPlayer(client.getClientName())) {
                 return this.games.get(i);
             }
         }
         return null;
     }
+
     /**
      * After game was terminated, remove it from the lobby.
      *

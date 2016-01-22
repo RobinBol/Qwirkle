@@ -35,6 +35,10 @@ public class Player {
         //todo
     }
 
+    public Board getBoard() {
+        return this.board;
+    }
+
     public void undoLastMove() {
         this.board.undoMove();
         this.resetHand();
@@ -42,12 +46,12 @@ public class Player {
 
     //TODO Bug in reset hand, hand does not get reset
     public void resetHand() {
-
-        if (this.handBackup.size() > 0) this.hand = this.handBackup;
+        if (this.handBackup.size() > 0) this.hand = new ArrayList<Stone>(this.handBackup);
     }
 
     public void saveHand() {
-        this.handBackup = this.hand;
+        this.handBackup = new ArrayList<Stone>(this.hand);
+        ;
     }
 
     public String getName() {

@@ -23,7 +23,7 @@ public class Bag {
             }
         }
     }
-    
+
     /**
      * Trade stones with the bag
      * TODO: Make sure the bag is not empty and so on.
@@ -50,7 +50,7 @@ public class Bag {
      */
     public Stone takeStone() {
         Random random = new Random();
-        if(stones.size() > 0) return stones.get(random.nextInt(stones.size() - 1));
+        if (stones.size() > 0) return stones.get(random.nextInt(stones.size() - 1));
         else return null;
     }
 

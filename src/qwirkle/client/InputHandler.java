@@ -181,7 +181,6 @@ public class InputHandler extends Thread {
             // Locally placed an invalid move
             Logger.print("Invalid move entered, retry:");
 
-            //TODO hand does not get properly reset
             // Make sure hand and board are reset to prev state
             client.getPlayer().undoLastMove();
 

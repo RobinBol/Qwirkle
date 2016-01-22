@@ -116,7 +116,7 @@ public class Game {
      *
      * @param stones Stone array
      */
-    public void makeMove(Stone[] stones, ClientHandler client) {
+    public int makeMove(Stone[] stones, ClientHandler client) {
 
         // Make move and retrieve score
         int score = this.board.makeMove(stones);
@@ -178,6 +178,9 @@ public class Game {
             // Reset firstMove variable, to indicate regular game flow
             firstMove = false;
         }
+
+        // Return score to see if valid move
+        return score;
     }
 
     /**

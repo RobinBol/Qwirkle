@@ -2,7 +2,7 @@ package qwirkle.util;
 
 /**
  * <!-- Versie 1.3.1
- *
+ * <p>
  * -------------
  * - CHANGELOG -
  * -------------
@@ -10,18 +10,18 @@ package qwirkle.util;
  * + hallo commando overbodige tekst verwijderd
  * + error messages functionaliteit toegevoegd
  * + OKwaitfor functionaliteit uitgelegd
- *
+ * <p>
  * Versie 1.2
- * 	+ Chat commando updated
- * 		+ CHAT_playerName_message --peter verzijl
- *  + Defined stone
- *  	+ elke kleur en vorm hebben nu een char toegewezen gekregen -- peter verzijl
+ * + Chat commando updated
+ * + CHAT_playerName_message --peter verzijl
+ * + Defined stone
+ * + elke kleur en vorm hebben nu een char toegewezen gekregen -- peter verzijl
  * Versie 1.1
- *
- *  + consistentie voor de content
- *  + verschillende spelfouten weggewerkt
+ * <p>
+ * + consistentie voor de content
+ * + verschillende spelfouten weggewerkt
  * Versie 0.042
- *
+ * <p>
  * + Eerste versie protocol
  * -->
  */
@@ -289,7 +289,7 @@ public class Protocol {
          *     Name: <code>LEADERBOARD</code> <br>
          *     Descriptie: Vraag het leaderboard aan <br>
          *     Content: <code>GETLEADERBOARD\n\n<code>
-         *     		 */
+         *             */
         public static final String GETLEADERBOARD = "GETLEADERBOARD";
         /**
          * <p>GETSTONESINBAG<br>
@@ -300,7 +300,6 @@ public class Protocol {
          */
 
         public static final String GETSTONESINBAG = "GETSTONESINBAG";
-
 
 
         /**
@@ -449,7 +448,6 @@ public class Protocol {
         public static final String LEADERBOARD = "LEADERBOARD";
 
 
-
         public static class Features {
 
             /**
@@ -462,7 +460,6 @@ public class Protocol {
             public static final String SECURITY = "SECURITY";
             public static final String CHALLENGE = "CHALLENGE"; // Deze functie wordt nog niet verwacht wordt dat SSLsocket gebruikt gaat worden
         }
-
 
 
         /**

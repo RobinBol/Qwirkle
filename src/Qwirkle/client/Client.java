@@ -207,6 +207,7 @@ public class Client extends Observable implements Runnable {
 
     /**
      * Store player object
+     *
      * @param player
      */
     public void setPlayer(Player player) {
@@ -215,6 +216,7 @@ public class Client extends Observable implements Runnable {
 
     /**
      * Return player object
+     *
      * @return
      */
     public Player getPlayer() {

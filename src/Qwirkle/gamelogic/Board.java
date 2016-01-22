@@ -86,11 +86,11 @@ public class Board {
      * Returns -1 if the move was invalid.
      */
     public int makeMove(Stone[] stones) {
-    	if (isEmptyBoard() && stones[0] != null) {
-    		placeStone(stones[0]);
-    		return 1;
-    	}
-    	
+        if (isEmptyBoard() && stones[0] != null) {
+            placeStone(stones[0]);
+            return 1;
+        }
+
         if (isValidMove(stones)) {
             boolean searchY = false;
             int sameX = 0;
@@ -122,7 +122,7 @@ public class Board {
                     if (array != null) allRows.add(array);
                     checkRow.clear();
                 }
-                
+
             }
             checkRow = getRows(!searchY, stones[0]);
             System.out.println(checkRow.toString());
@@ -153,7 +153,7 @@ public class Board {
     }
 
     public List<Stone> getRows(boolean searchDirection, Stone pCurrent) {
-    	Stone current = pCurrent;
+        Stone current = pCurrent;
         boolean done = false;
         List<Stone> checkRow = new ArrayList<>();
         checkRow.add(current);

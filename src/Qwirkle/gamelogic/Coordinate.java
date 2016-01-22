@@ -20,10 +20,9 @@ public final class Coordinate {
      * Usage hashmap.get(GameLogic.Coordinate.getCoordinateHash(x, y)).
      * Will return the value<GameLogic.Stone>.
      * .
+     *
      * @param x The x coordinate of the stone you want to request.
      * @param y The y coordinate of the stone you want to request.
-     * 
-     * 
      */
     public static String getCoordinateHash(int x, int y) {
         String string = "";

@@ -1,6 +1,7 @@
 package qwirkle.util;
 
 import qwirkle.client.Client;
+import qwirkle.gamelogic.Board;
 import qwirkle.gamelogic.Stone;
 import qwirkle.server.Server;
 import qwirkle.server.ServerLogger;
@@ -186,6 +187,7 @@ public class Input {
 
     /**
      * Ask user for a valid stone input.
+     *
      * @param asker
      * @param handSize
      * @return
@@ -220,6 +222,7 @@ public class Input {
 
     /**
      * Ask a user for a valid stone position.
+     *
      * @param asker
      * @return
      */
@@ -294,6 +297,7 @@ public class Input {
     /**
      * Asks a user for a valid move. Using the ask for stone,
      * and ask for stone position methods.
+     *
      * @param client
      * @return Stone[] with valid stones
      */
@@ -309,6 +313,10 @@ public class Input {
 
             // Update current hand
             hand = client.getPlayer().getHand();
+
+            // Log the board to let the player fill it in
+            Logger.print("The current board:");
+            Logger.print("\n" + client.getPlayer().getBoard());
 
             // Print out the hand to read for the player
             Logger.print("Your current hand:");

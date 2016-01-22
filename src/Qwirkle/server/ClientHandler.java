@@ -134,11 +134,9 @@ public class ClientHandler extends Thread {
                             // Does not exist, throw error
                             else {
 
-                                // Create error package
-                                ArrayList<Object> errorCode = new ArrayList<>();
-
+                                //TODO specify precise error?
                                 // Send error package
-                                sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
+                                sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR));
                             }
                         } else if (result.get(0).equals(Protocol.Client.ACCEPTINVITE)) {
 
@@ -199,7 +197,18 @@ public class ClientHandler extends Thread {
                             Stone[] stoneArray = stones.toArray(new Stone[stones.size()]);
 
                             // Make the move on the current game
-                            game.makeMove(stoneArray, this);
+                            int score = game.makeMove(stoneArray, this);
+
+                            // Server says invalid move, send that to the client.
+                            if (score == -1) {
+
+                                // Create error package
+                                ArrayList<Object> errorCode = new ArrayList<>();
+                                errorCode.add(7);
+
+                                // Send error package
+                                sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR));
+                            }
                         }
                     }
                 }
@@ -227,6 +236,7 @@ public class ClientHandler extends Thread {
     /**
      * Sends ADDTOHAND message to client. Takes
      * a stone array as parameter.
+     *
      * @param stones
      */
     public void sendAddToHand(Stone[] stones) {
@@ -248,6 +258,7 @@ public class ClientHandler extends Thread {
     /**
      * Sends a give turn message to the client, indicating whose turn
      * it is, whose it was, and what move was made.
+     *
      * @param currentClient
      * @param nextClient
      * @param stones
