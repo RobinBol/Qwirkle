@@ -170,22 +170,28 @@ public class InputHandler extends Thread {
         // Ask user to input move
         Stone[] move = Input.askForMove(client);
 
-        // Make the move locally, and get score
-        int score = client.getPlayer().makeMove(move);
+        if (move.length != 0) {
 
-        // TODO handle cases below
-        if (score != -1) {
-            // Move is valid on local board, now send to server
-            client.sendMove(move);
+            // Make the move locally, and get score
+            int score = client.getPlayer().makeMove(move);
+
+            // TODO handle cases below
+            if (score != -1) {
+                // Move is valid on local board, now send to server
+                client.sendMove(move);
+            } else {
+                // Locally placed an invalid move
+                Logger.print("Invalid move entered, retry:");
+
+                // Make sure hand and board are reset to prev state
+                client.getPlayer().undoLastMove();
+
+                // Recursively call this method till valid move
+                makeMove();
+            }
         } else {
-            // Locally placed an invalid move
-            Logger.print("Invalid move entered, retry:");
-
-            // Make sure hand and board are reset to prev state
-            client.getPlayer().undoLastMove();
-
-            // Recursively call this method till valid move
-            makeMove();
+            // No move made, skip turn
+            client.sendMove(move);
         }
     }
 
