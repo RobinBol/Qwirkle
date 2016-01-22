@@ -270,7 +270,7 @@ public class Client extends Observable implements Runnable {
         for (int i = 0; i < stones.length; i++) {
 
             // Add them properly formatted as parameter
-            parameters.add("" + stones[i].getColor() + stones[i].getShape() + Protocol.Server.Settings.DELIMITER + stones[i].getX() + Protocol.Server.Settings.DELIMITER2 + stones[i].getY());
+            parameters.add("" + stones[i].getColor() + stones[i].getShape() + Protocol.Server.Settings.DELIMITER2 + stones[i].getX() + Protocol.Server.Settings.DELIMITER2 + stones[i].getY());
         }
 
         // Send package according to protocol
