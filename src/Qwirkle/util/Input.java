@@ -231,6 +231,7 @@ public class Input {
         // Ask for position
         String position = Input.ask("At what position would you like to place this stone? (x, y)", asker);
 
+        if (position.equalsIgnoreCase("exit")) return position;
         // If no delimeter is used, retry
         while (position.indexOf(',') == -1) {
             position = Input.ask("Invalid format, please use x,y as your input format, try again:", asker);
@@ -332,6 +333,11 @@ public class Input {
 
             // Valid stone provided, ask for position
             String position = Input.askForStonePosition(client);
+
+            // Detect break
+            if (position.equalsIgnoreCase("exit")) break;
+
+            // Store positions
             int x = Integer.parseInt(position.split("_")[0]);
             int y = Integer.parseInt(position.split("_")[1]);
 
