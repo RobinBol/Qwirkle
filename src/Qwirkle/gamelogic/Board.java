@@ -86,7 +86,8 @@ public class Board {
      * Returns -1 if the move was invalid.
      */
     public int makeMove(Stone[] stones) {
-        if (isEmptyBoard() && stones[0] != null) {
+    	if (stones == null || stones.length == 0) { return -1; }
+        if (isEmptyBoard() && stones.length == 1 && stones[0] != null && containsZeroZero(stones)) {
             placeStone(stones[0]);
             return 1;
         }

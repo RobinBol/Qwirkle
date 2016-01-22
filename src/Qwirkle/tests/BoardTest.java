@@ -93,6 +93,9 @@ public class BoardTest {
         board.resetMap();
         assertEquals(1, board.makeMove(new Stone[]{new Stone('A', 'B', 0, 0)}));
         System.out.println(board);
+        board.resetMap();
+        assertEquals(-1, board.makeMove(inValid));
+        System.out.println(board);
     }
 
     @Test
