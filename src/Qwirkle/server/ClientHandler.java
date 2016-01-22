@@ -196,18 +196,25 @@ public class ClientHandler extends Thread {
                             Game game = this.getLobby().getGame(this);
                             Stone[] stoneArray = stones.toArray(new Stone[stones.size()]);
 
-                            // Make the move on the current game
-                            int score = game.makeMove(stoneArray, this);
+                            // Check if move provided, or skip move
+                            if (stoneArray.length != 0) {
 
-                            // Server says invalid move, send that to the client.
-                            if (score == -1) {
+                                // Make the move on the current game
+                                int score = game.makeMove(stoneArray, this);
 
-                                // Create error package
-                                ArrayList<Object> errorCode = new ArrayList<>();
-                                errorCode.add(7);
+                                // Server says invalid move, send that to the client.
+                                if (score == -1) {
 
-                                // Send error package
-                                sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR));
+                                    // Create error package
+                                    ArrayList<Object> errorCode = new ArrayList<>();
+                                    errorCode.add(7);
+
+                                    // Send error package
+                                    sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
+                                }
+                            } else {
+                                // Skip this player
+                                game.skipTurn();
                             }
                         }
                     }

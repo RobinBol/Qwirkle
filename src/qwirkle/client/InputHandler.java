@@ -61,7 +61,12 @@ public class InputHandler extends Thread {
 
                     // Handle incoming messages
                     if (result.get(0).equals(Protocol.Client.ERROR)) {
-                        handleIncomingError(Integer.valueOf((String) result.get(1)));
+
+                        if( result.size() > 1) {
+                            handleIncomingError(Integer.valueOf((String) result.get(1)));
+                        } else {
+                            handleIncomingError();
+                        }
                     }
                     if (result.get(0).equals(Protocol.Server.HALLO)) {
 
@@ -248,7 +253,14 @@ public class InputHandler extends Thread {
 
         return answer;
     }
-
+    /**
+     * This method handles all incoming errors
+     *
+     * @param errorCode specific error code of error
+     */
+    public void handleIncomingError() {
+        handleIncomingError(-1);
+    }
     /**
      * This method handles all incoming errors
      *
@@ -272,6 +284,8 @@ public class InputHandler extends Thread {
                     player.undoLastMove();
                 }
             }
+        } else if (errorCode == -1) {
+            System.out.println("Undefined error incoming");
         }
     }
 }
