@@ -1,13 +1,14 @@
 package qwirkle.util;
 
 import qwirkle.client.Client;
-import qwirkle.gamelogic.Board;
 import qwirkle.gamelogic.Stone;
 import qwirkle.server.Server;
 import qwirkle.server.ServerLogger;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Input {
 
@@ -134,9 +135,17 @@ public class Input {
             enteredUsername = ask("Please enter your username:", asker);
         }
 
+        // Make sure no special characters are used
+        Pattern p = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(enteredUsername);
+        boolean b = m.find();
+
         // While input is too long, ask for smaller input
-        while (enteredUsername.length() > 15) {
-            enteredUsername = askForUsername(asker, ask("Please use 15 characters or less, try again:", asker));
+        while (enteredUsername.length() > 15 || b) {
+            enteredUsername = askForUsername(asker, ask("Please use 15 characters or less and no special characters, try again:", asker));
+            p = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+            m = p.matcher(enteredUsername);
+            b = m.find();
         }
 
         // Correct input provided, return it
@@ -165,8 +174,8 @@ public class Input {
             enteredGameType = ask("Please request a game type by typing the number of your choice:\n[0] I don't care...\n[1] Versus AI\n[2] Versus one other player\n[3] Versus two other players\n[4] Versus three other players\n[5] I want to challenge someone\n[6] Wait for incoming invitation", asker);
         }
 
-        // While the input is not correct, keep asking for correct input
-        if (!enteredGameType.trim().equals("0") && !enteredGameType.trim().equals("1") && !enteredGameType.trim().equals("2")
+        // If the input is not correct, keep asking for correct input
+        while (!enteredGameType.trim().equals("0") && !enteredGameType.trim().equals("1") && !enteredGameType.trim().equals("2")
                 && !enteredGameType.trim().equals("3") && !enteredGameType.trim().equals("4") && !enteredGameType.trim().equals("5")
                 && !enteredGameType.trim().equals("6")) {
             enteredGameType = ask("Invalid option, please try again (type number of your choice:", asker);
@@ -197,24 +206,40 @@ public class Input {
         // Ask to make a move
         String stone = Input.ask("Please enter the number of the stone you would like to use (or EXIT to end your move)", asker);
 
+        // Check for exit input
+        if (stone.equalsIgnoreCase("exit")) {
+            return "exit";
+        }
+
         // Detect first line of valid input
-        if (stone.equals("1") || stone.equals("2") || stone.equals("3") || stone.equals("4") || stone.equals("5") || stone.equals("6") || stone.equalsIgnoreCase("exit")) {
+        if (!stone.equals("1") && !stone.equals("2") && !stone.equals("3") && !stone.equals("4") && !stone.equals("5") && !stone.equals("6") && !stone.equalsIgnoreCase("exit")) {
 
-            // Check for exit input
-            if (!stone.equalsIgnoreCase("exit")) {
+            int stoneNumber = 0;
+            try {
+                stoneNumber = Integer.parseInt(stone);
+            } catch (NumberFormatException e) {
+                stoneNumber = 0;
+            }
 
-                // While no valid input provided, keep asking
-                while (!(1 <= Integer.parseInt(stone) && Integer.parseInt(stone) <= handSize)) {
+            // While no valid input provided, keep asking
+            while (!(1 <= stoneNumber && stoneNumber <= handSize)) {
 
-                    // Ask to make a move
-                    stone = Input.ask("Invalid input, please re-enter the number of the stone you would like to use (or EXIT to end your move)", asker);
+                // Ask to make a move
+                stone = Input.ask("Invalid input, please re-enter the number of the stone you would like to use (or EXIT to end your move)", asker);
 
-                    // Keep asking till done
-                    if (stone.equalsIgnoreCase("exit")) {
-                        break;
-                    }
+                // Try to format an integer from the input
+                try {
+                    stoneNumber = Integer.parseInt(stone);
+                } catch (NumberFormatException e) {
+                    stoneNumber = 0;
+                }
+
+                // Keep asking till done
+                if (stone.equalsIgnoreCase("exit")) {
+                    break;
                 }
             }
+
         }
 
         return stone;

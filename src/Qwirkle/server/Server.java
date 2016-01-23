@@ -17,6 +17,7 @@ import qwirkle.client.Client;
 import qwirkle.gamelogic.Lobby;
 import qwirkle.util.Input;
 import qwirkle.util.Protocol;
+import qwirkle.util.ProtocolHandler;
 import qwirkle.util.Validation;
 
 /**
@@ -41,6 +42,8 @@ public class Server extends Observable {
 
     /* Keep track of outstanding invites */
     private Map<ClientHandler, ClientHandler> invites = new HashMap<>();
+
+    private Map<Timer, Map<ClientHandler, ClientHandler>> inviteTimeouts = new HashMap<>();
 
     /**
      * Server constructor, sets certificate credentials,
@@ -205,6 +208,67 @@ public class Server extends Observable {
     public void removeInvite(ClientHandler inviter, ClientHandler invitee) {
         invites.remove(invitee, inviter);
 
+    }
+
+    /**
+     * Makes sure that invite gets cancelled and removed after
+     * a set amount of time of no reaction.
+     *
+     * @param inviter
+     * @param invitee
+     */
+    public void setTimeoutForInvite(ClientHandler inviter, ClientHandler invitee) {
+
+        // Create timer
+        Timer timer = new java.util.Timer();
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                // your code her
+                removeInvite(inviter, invitee);
+
+                // Get inviter clientHandler
+                ClientHandler opponent = getInviter(inviter);
+
+                // Send message to opponent to decline
+                inviter.sendDeclineInvite();
+            }
+        };
+        timer.schedule(timerTask, 15000);
+        Map<ClientHandler, ClientHandler> clients = new HashMap<>();
+        clients.put(inviter, invitee);
+        inviteTimeouts.put(timer, clients);
+    }
+
+    /**
+     * When a client responses to an invite, reset the timeout,
+     * to prevent duplicate method calls.
+     *
+     * @param inviter
+     * @param invitee
+     */
+    public void resetInviteTimeout(ClientHandler inviter, ClientHandler invitee) {
+        Map<ClientHandler, ClientHandler> compareMap = new HashMap<>();
+        compareMap.put(inviter, invitee);
+        for (int i = 0; i < inviteTimeouts.size(); i++) {
+            if (inviteTimeouts.get(i) != null) {
+                inviteTimeouts.get(i).equals(compareMap);
+                Timer timer = (Timer) getKeyFromValue(inviteTimeouts, compareMap);
+                if (timer != null) {
+                    timer.cancel();
+                    timer.purge();
+                }
+            }
+        }
+    }
+
+    public static Object getKeyFromValue(Map hm, Object value) {
+        for (Object o : hm.keySet()) {
+            if (hm.get(o).equals(value)) {
+                return o;
+            }
+        }
+        return null;
     }
 
     /**

@@ -12,6 +12,7 @@ import qwirkle.gamelogic.Board;
 import qwirkle.gamelogic.Game;
 import qwirkle.gamelogic.Lobby;
 import qwirkle.gamelogic.Stone;
+import qwirkle.util.Logger;
 import qwirkle.util.Protocol;
 import qwirkle.util.ProtocolHandler;
 
@@ -113,7 +114,7 @@ public class ClientHandler extends Thread {
                             ClientHandler opponent = server.getClientHandler(String.valueOf(result.get(1)));
 
                             // Check if opponent is challengable
-                            if (!opponent.hasFeature(Protocol.Server.Features.CHALLENGE)) {
+                            if (opponent == null || !opponent.hasFeature(Protocol.Server.Features.CHALLENGE)) {
 
                                 // Create error package
                                 ArrayList<Object> errorCode = new ArrayList<>();
@@ -128,8 +129,11 @@ public class ClientHandler extends Thread {
                                 // Forward the invite to the proposed opponent
                                 opponent.sendMessage(incomingMessage);
 
-                                // Register it at the server as in invite
+                                // Register it at the server as an invite
                                 server.registerInvite(this, opponent);
+
+                                // Set a timeout, to decline after 15 seconds
+                                server.setTimeoutForInvite(this, opponent);
                             }
                             // Does not exist, throw error
                             else {
@@ -157,6 +161,9 @@ public class ClientHandler extends Thread {
                                 // Remove registered invite
                                 server.removeInvite(this, opponent);
                             }
+
+                            // Make sure to reset timer
+                            server.resetInviteTimeout(this, opponent);
                         } else if (result.get(0).equals(Protocol.Client.DECLINEINVITE)) {
                             sendMessage("Invite was declined...");
 
@@ -164,32 +171,35 @@ public class ClientHandler extends Thread {
                             ClientHandler opponent = server.getInviter(this);
 
                             // Send message to opponent to decline
-                            opponent.sendMessage(ProtocolHandler.createPackage(Protocol.Client.DECLINEINVITE));
+                            if(opponent != null) {
+                                opponent.sendMessage(ProtocolHandler.createPackage(Protocol.Client.DECLINEINVITE));
 
-                            // Remove registered invite
-                            server.removeInvite(this, opponent);
+                                // Remove registered invite
+                                server.removeInvite(this, opponent);
+
+                                // Make sure to reset timer
+                                server.resetInviteTimeout(this, opponent);
+                            }
+
                         } else if (result.get(0).equals(Protocol.Client.MAKEMOVE)) {
 
                             // Convert result to stone array
                             ArrayList<Stone> stones = new ArrayList<>();
                             for (int i = 1; i < result.size(); i++) {
-                                int x = 0;
-                                int y = 0;
 
-                                // If result part is arraylist, it contains the positionts
-                                if (result.get(i + 1) instanceof ArrayList) {
+                                // Get single stone item
+                                ArrayList<String> stone = (ArrayList) result.get(i);
+
+                                // Check if stone provided
+                                if (stone != null) {
 
                                     // Parse them into integers
-                                    ArrayList<String> positions = (ArrayList) result.get(i + 1);
-                                    x = Integer.parseInt(positions.get(0));
-                                    y = Integer.parseInt(positions.get(1));
+                                    int x = Integer.parseInt(stone.get(1));
+                                    int y = Integer.parseInt(stone.get(2));
+
+                                    // Add new stone
+                                    stones.add(new Stone(String.valueOf(stone.get(0)).charAt(0), String.valueOf(stone.get(0)).charAt(1), x, y));
                                 }
-
-                                // Add new stone
-                                stones.add(new Stone(String.valueOf(result.get(i)).charAt(0), String.valueOf(result.get(i)).charAt(1), x, y));
-
-                                // Skip next iteration
-                                i = i + 1;
                             }
 
                             // Ask lobby to return game where player is in
@@ -214,7 +224,7 @@ public class ClientHandler extends Thread {
                                 }
                             } else {
                                 // Skip this player
-                                game.skipTurn();
+                                game.skipTurn(this);
                             }
                         }
                     }
@@ -260,6 +270,13 @@ public class ClientHandler extends Thread {
 
         // Send package to client to give its initial hand
         sendMessage(ProtocolHandler.createPackage(Protocol.Server.ADDTOHAND, parameters));
+    }
+
+    /**
+     * Sends to the client that invite was declined.
+     */
+    public void sendDeclineInvite(){
+        sendMessage(ProtocolHandler.createPackage(Protocol.Client.DECLINEINVITE));
     }
 
     /**
@@ -339,6 +356,9 @@ public class ClientHandler extends Thread {
 
                 // Save clientname
                 this.clientName = name;
+
+                // Log client connected
+                Logger.print(name + " connected");
 
                 // Client is ready to be added to the lobby
                 server.addClientToLobby(this);

@@ -11,6 +11,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Class that assists the Client in parsing and acting upon
@@ -62,7 +64,7 @@ public class InputHandler extends Thread {
                     // Handle incoming messages
                     if (result.get(0).equals(Protocol.Client.ERROR)) {
 
-                        if( result.size() > 1) {
+                        if (result.size() > 1) {
                             handleIncomingError(Integer.valueOf((String) result.get(1)));
                         } else {
                             handleIncomingError();
@@ -91,14 +93,13 @@ public class InputHandler extends Thread {
                             client.updateObserver(ClientLogger.GAME_ENDED);
                         }
 
-                        //TODO ask for new game to play
+                        // Ask for a new game
+                        getGameType();
 
                     } else if (result.get(0).equals(Protocol.Server.MOVE) && result.size() >= 3) {
 
                         // You made a move, (initial move?) but it was not used, reset hand
                         if (this.madeMove && !((String) result.get(1)).equalsIgnoreCase(client.getName())) {
-
-                            // TODO reset hand does not work in undoLastMove below
 
                             // Undo last move, reset hand and board
                             client.getPlayer().undoLastMove();
@@ -121,29 +122,48 @@ public class InputHandler extends Thread {
                         // Only act on invite if client is not in game
                         if (!client.inGame()) {
 
+                            int timeout = 14000;
+                            // Create timer
+                            Timer timer = new java.util.Timer();
+                            TimerTask timerTask = new TimerTask() {
+                                @Override
+                                public void run() {
+                                    Logger.print("Timeout expired, automatically declined. Please type 'exit' to continue...");
+                                }
+                            };
+                            timer.schedule(timerTask, timeout);
+
                             // Incoming invite
                             String answer = respondToChallenge();
 
                             // Check answer, yes or no
                             if (answer.equalsIgnoreCase("yes")) {
 
+                                // Reset timer
+                                timer.cancel();
+                                timer.purge();
+
                                 // Send accept invite to server
                                 client.sendMessage(ProtocolHandler.createPackage(Protocol.Client.ACCEPTINVITE));
 
                             } else {
+                                // Reset timer
+                                timer.cancel();
+                                timer.purge();
 
                                 // Send decline invite to server
                                 client.sendMessage(ProtocolHandler.createPackage(Protocol.Client.DECLINEINVITE));
+
+                                // Ask for new game
+                                getGameType();
                             }
-                        } else {
+                        } else { // In game, decline
 
-                            // Create error package
-                            ArrayList<Object> errorCode = new ArrayList<>();
-                            errorCode.add(5);
-
-                            // Send error package
-                            client.sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
+                            // Send decline invite to server
+                            client.sendMessage(ProtocolHandler.createPackage(Protocol.Client.DECLINEINVITE));
                         }
+                    } else if (result.get(0).equals(Protocol.Client.DECLINEINVITE)) {
+                        getGameType();
                     } else if (result.get(0).equals(Protocol.Server.ADDTOHAND)) {
                         for (int i = 1; i < result.size(); i++) {
                             Stone stone = new Stone(String.valueOf(result.get(i)).charAt(0), String.valueOf(result.get(i)).charAt(1));
@@ -220,7 +240,6 @@ public class InputHandler extends Thread {
             ArrayList<Object> parameters = new ArrayList<>();
             parameters.add(opponent);
             client.sendMessage(ProtocolHandler.createPackage(Protocol.Client.INVITE, parameters));
-
         }
         // Handle waiting for invite
         else if (gameType == 6) {
@@ -247,20 +266,20 @@ public class InputHandler extends Thread {
     public String respondToChallenge() {
         String answer = Input.ask(ClientLogger.ASK_CHALLENGE, client);
 
-        while (!answer.equalsIgnoreCase("yes") && !answer.equalsIgnoreCase("no")) {
-            answer = Input.ask(ClientLogger.ANWSER_INVALID, client);
+        while (!answer.equalsIgnoreCase("yes") && !answer.equalsIgnoreCase("no") && !answer.equalsIgnoreCase("exit")) {
+            answer = Input.ask(ClientLogger.ANSWER_INVALID, client);
         }
 
         return answer;
     }
+
     /**
      * This method handles all incoming errors
-     *
-     * @param errorCode specific error code of error
      */
     public void handleIncomingError() {
         handleIncomingError(-1);
     }
+
     /**
      * This method handles all incoming errors
      *
@@ -275,9 +294,16 @@ public class InputHandler extends Thread {
         }
         // Client is not challengable
         else if (errorCode == 5) {
+
+            // Log that opponent is not challengable
             client.updateObserver(ClientLogger.NOT_CHALLENGABLE);
-            Input.askForGameType(client);
+
+            // Ask for new game
+            getGameType();
+
         } else if (errorCode == 7) {
+
+            // Invalid move, try to undo
             Player player = client.getPlayer();
             if (player != null) {
                 if (player.hasTurn()) {

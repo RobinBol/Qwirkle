@@ -41,7 +41,7 @@ public class Validation {
             int parsedPort = Integer.parseInt(port, 10);
 
             // Port can not be 0
-            if (parsedPort != 0) {
+            if ( 0 < parsedPort && parsedPort < 65535) {
                 return true;
             } else {
                 return false;

@@ -7,6 +7,7 @@
 
 package qwirkle.gamelogic;
 
+import qwirkle.client.Client;
 import qwirkle.server.ClientHandler;
 
 import java.util.ArrayList;
@@ -135,8 +136,7 @@ public class Game {
 
             // Undo it for now, until we know it is highest score
             this.board.undoMove();
-        }
-        else if (client != null) { // Make regular move
+        } else if (client != null) { // Make regular move
 
             // Check if stones are present
             if (stones.length > 0) {
@@ -149,7 +149,7 @@ public class Game {
 
                     // Get next client
                     nextClient++;
-                    
+
                     // Hit end of list, go to first
                     if (nextClient == moveOrder.size()) {
                         nextClient = 0;
@@ -162,6 +162,8 @@ public class Game {
                 // Broadcast next turn
                 broadcastNextTurn(client, moveOrder.get(nextClient), stones);
             } else {
+
+                // No stones provided, return empty score
                 return -1;
             }
         }
@@ -212,8 +214,8 @@ public class Game {
             moveOrder.add(highestScoreClient);
             moveOrder.add(secondHighestScoreClient);
             for (int i = 0; i < clients.size(); i++) {
-                if(!clients.get(i).getClientName().equalsIgnoreCase(highestScoreClient.getClientName())
-                        && !clients.get(i).getClientName().equalsIgnoreCase(secondHighestScoreClient.getClientName())){
+                if (!clients.get(i).getClientName().equalsIgnoreCase(highestScoreClient.getClientName())
+                        && !clients.get(i).getClientName().equalsIgnoreCase(secondHighestScoreClient.getClientName())) {
                     // Do not re add highest score client and second highest score client
                     moveOrder.add(clients.get(i));
                 }
@@ -230,9 +232,45 @@ public class Game {
         return score;
     }
 
-    public void skipTurn() {
-        broadcastNextTurn(moveOrder.get(currentMove), moveOrder.get(currentMove + 1), null);
+    /**
+     * Takes a client as parameter, and skips the turn
+     * for this client. Gives the turn to the next
+     * player in the row.
+     * @param client
+     */
+    public void skipTurn(ClientHandler client) {
+
+        if (firstMove) {
+            // Create map to hold client and stones
+            Map<Integer, Stone[]> playerMove = new HashMap<>();
+            playerMove.put(0, new Stone[0]);
+
+            // Save score, client and its move
+            firstMoves.put(client, playerMove);
+        } else {
+            // Get index of current client
+            int nextClient = moveOrder.indexOf(client);
+
+            // If client was found in list (which has to be)
+            if (nextClient > -1) {
+
+                // Get next client
+                nextClient++;
+
+                // Hit end of list, go to first
+                if (nextClient == moveOrder.size()) {
+                    nextClient = 0;
+                }
+
+                // Store new current move
+                currentMove = nextClient;
+            }
+
+            // Broadcast new turn
+            broadcastNextTurn(moveOrder.get(currentMove), moveOrder.get(nextClient), null);
+        }
     }
+
     /**
      * Send message to all clients, about who made a move, what move, and who is next
      *

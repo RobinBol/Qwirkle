@@ -27,5 +27,5 @@ public class ClientLogger extends Logger {
     public static final String GAME_ENDED_BECAUSE = "Game has ended because of ";
     public static final String SOCKET_ERROR = "Something went wrong reading or writing the socket";
     public static final String ASK_CHALLENGE = "You are being challenged, type YES to accept or NO to decline:";
-    public static final String ANWSER_INVALID = "Please provide a valid answer, yes or no:";
+    public static final String ANSWER_INVALID = "Please provide a valid answer, yes or no:";
 }
