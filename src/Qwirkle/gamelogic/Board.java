@@ -6,16 +6,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.validator.PublicClassValidator;
+
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
+import com.sun.xml.internal.ws.wsdl.writer.document.Types;
+
 public class Board {
     //public static final int MAXBOARDSIZE = 11;
 
     private Bag bag;
     private Map<String, Stone> board;
+    private Map<String, Suggestion> suggestions;
     private List<Stone> lastMoves;
 
 
     public Board() {
         board = new HashMap<>();
+        suggestions = new HashMap<>();
 //        bag = new Bag();
         lastMoves = new ArrayList<>();
     }
@@ -43,6 +50,7 @@ public class Board {
         if (stone.up != null) stone.up.down = stone;
 
         board.put(Coordinate.getCoordinateHash(stone.getX(), stone.getY()), stone);
+        suggestions.remove(Coordinate.getCoordinateHash(stone.getX(), stone.getY()));
     }
 
     public void removeStone(Stone stone) {
@@ -60,6 +68,132 @@ public class Board {
         stone.up = board.get(Coordinate.getCoordinateHash(x, y + 1));
         if (stone.up != null) stone.up.down = null;
         board.remove(Coordinate.getCoordinateHash(stone.getX(), stone.getY()));
+    }
+    
+    //TODO: fix that suggestions on other side of the row are also adjusted.
+    /**
+     * Creates new suggestions for hinting and AI.
+     * 
+     * @param stone the stone which is placed at the board.
+     * 
+     * @return whether or not assigning succeeded.
+     */
+    public boolean createSuggestions(Stone stone) {
+    	//List<StoneType> suggestionTypes = new ArrayList<>();
+    	Stone current = stone;
+    	Stone start = stone;
+    	if (start.up == null) {
+    		Suggestion suggestion;
+    		String cordHash = Coordinate.getCoordinateHash(stone.getX(), stone.getY() + 1);
+    		if (suggestions.containsKey(cordHash)) {
+    			suggestion = suggestions.get(cordHash);
+    		} else {
+    			suggestion = new Suggestion(stone.getX(), stone.getY() + 1);
+    		}
+    		int scoreValue = 1;
+    		List<StoneType> encounteredTypes = new ArrayList<>();
+    		encounteredTypes.add(new StoneType(current.getColor(), current.getShape()));
+    		while (current.down != null) {
+    			//this assumes that placed stones are already validated.
+    			scoreValue++;
+    			encounteredTypes.add(new StoneType(current.getColor(), stone.getShape()));
+    			current = current.down;
+    		}
+    		List<StoneType> placable = getPlacableTypes(encounteredTypes);
+    		suggestion.addType(placable, scoreValue);
+    		suggestions.put(cordHash, suggestion);
+    		if (suggestions.containsKey(Coordinate.getCoordinateHash(current.getX(), current.getY() - 1))) {
+    			suggestion = suggestions.get(cordHash);
+    		} else {
+    			suggestion = new Suggestion(current.getX(), current.getY() - 1);
+    		}
+    		suggestion.addType(placable, scoreValue);
+    		
+    	}    	
+    	if (start.down == null) {
+    		Suggestion suggestion;
+    		String cordHash = Coordinate.getCoordinateHash(stone.getX(), stone.getY() - 1);
+    		if (suggestions.containsKey(cordHash)) {
+    			suggestion = suggestions.get(cordHash);
+    		} else {
+    			suggestion = new Suggestion(stone.getX(), stone.getY() - 1);
+    		}
+    		int scoreValue = 1;
+    		List<StoneType> encounteredTypes = new ArrayList<>();
+    		encounteredTypes.add(new StoneType(current.getColor(), current.getShape()));
+    		while (current.up != null) {
+    			//this assumes that placed stones are already validated.
+    			scoreValue++;
+    			encounteredTypes.add(new StoneType(current.getColor(), stone.getShape()));
+    			current = current.up;
+    		}
+    		List<StoneType> placable = getPlacableTypes(encounteredTypes);
+    		suggestion.addType(placable, scoreValue);
+    		suggestions.put(cordHash, suggestion);
+    	}
+    	if (start.right == null) {
+    		Suggestion suggestion;
+    		String cordHash = Coordinate.getCoordinateHash(stone.getX() + 1, stone.getY());
+    		if (suggestions.containsKey(cordHash)) {
+    			suggestion = suggestions.get(cordHash);
+    		} else {
+    			suggestion = new Suggestion(stone.getX() + 1, stone.getY());
+    		}
+    		int scoreValue = 1;
+    		List<StoneType> encounteredTypes = new ArrayList<>();
+    		encounteredTypes.add(new StoneType(current.getColor(), current.getShape()));
+    		while (current.left != null) {
+    			//this assumes that placed stones are already validated.
+    			scoreValue++;
+    			encounteredTypes.add(new StoneType(current.getColor(), stone.getShape()));
+    			current = current.left;
+    		}
+    		List<StoneType> placable = getPlacableTypes(encounteredTypes);
+    		suggestion.addType(placable, scoreValue);
+    		suggestions.put(cordHash, suggestion);
+    	}
+    	if (start.left == null) {
+    		Suggestion suggestion;
+    		String cordHash = Coordinate.getCoordinateHash(stone.getX() - 1, stone.getY());
+    		if (suggestions.containsKey(cordHash)) {
+    			suggestion = suggestions.get(cordHash);
+    		} else {
+    			suggestion = new Suggestion(stone.getX() - 1, stone.getY());
+    		}
+    		int scoreValue = 1;
+    		List<StoneType> encounteredTypes = new ArrayList<>();
+    		encounteredTypes.add(new StoneType(current.getColor(), current.getShape()));
+    		while (current.right != null) {
+    			//this assumes that placed stones are already validated.
+    			scoreValue++;
+    			encounteredTypes.add(new StoneType(current.getColor(), stone.getShape()));
+    			current = current.right;
+    		}
+    		List<StoneType> placable = getPlacableTypes(encounteredTypes);
+    		suggestion.addType(placable, scoreValue);
+    		suggestions.put(cordHash, suggestion);
+    	}
+    	return false;
+    }
+    
+    public void removeSuggestion(Stone stone) {
+    	suggestions.remove(Coordinate.getCoordinateHash(stone.getX(), stone.getY()));
+    }
+    
+    public List<StoneType> getPlacableTypes(List<StoneType> encountered) {
+    	List<StoneType> placable = new ArrayList<>();
+    	StoneType first = encountered.get(0);
+    	if (isSameShape(encountered) == 1) {
+    		for (int i = 0; i < 6; i++) {
+    			placable.add(new StoneType(Stone.COLORS[i], first.getShape()));
+    		}    		
+    		for (StoneType type : encountered) {
+    			if (placable.contains(type)) {
+    				placable.remove(type);    				
+    			}
+    		}
+    	}    	
+    	return placable;
     }
 
 
@@ -275,6 +409,28 @@ public class Board {
         }
         return (amountSameX == stones.length || amountSameY == stones.length);
     }
+    
+    /**
+     * Function for checking if a row is same color or shape.
+     * @param stones
+     * @return
+     */
+    
+    public int isSameShape(List<StoneType> stones) {
+    	if (stones == null || stones.isEmpty()) return -1;
+    	char start = stones.get(0).getShape();
+    	int count = 0;
+    	for (StoneType stone : stones) {
+    		if (stone.getShape() == start) {
+    			count++;
+    		}
+    	}
+    	if (stones.size() == count) {
+    		return 1;
+    	} else {
+    		return 0;
+    	}
+    }
 
     public boolean validShapeColorCombination(Stone[] stones) {
         int amountSameShape = 0;
@@ -339,36 +495,37 @@ public class Board {
         return false;
     }
 
-    public void createTestMap() {
+    public int[] getBoardWidthHeight() {
+	    if (isEmptyBoard()) return new int[]{0, 0};
+	    int lowestX = 0;
+	    int lowestY = 0;
+	    int highestX = 0;
+	    int highestY = 0;
+	    int[] testCoord;
+	    for (String coordinate : board.keySet()) {
+	        testCoord = Coordinate.getCoordinates(coordinate);
+	        if (testCoord[0] < lowestX) lowestX = testCoord[0];
+	        if (testCoord[1] < lowestY) lowestY = testCoord[1];
+	        if (testCoord[0] > highestX) highestX = testCoord[0];
+	        if (testCoord[1] > highestY) highestY = testCoord[1];
+	    }
+	    int width = highestX - lowestX + 1;
+	    int height = highestY - lowestY + 1;
+	
+	    return new int[]{width, height};
+	}
+
+	public void createTestMap() {
         for (int i = -2; i < 4; i++) {
             //test purpose only, is not valid according to game rules.
-            board.put(Coordinate.getCoordinateHash(i, 0), new Stone(Stone.SHAPES[i + 2], Stone.COLORS[i + 2], i, 0));
+            placeStone(new Stone(Stone.SHAPES[0], Stone.COLORS[i + 2], i, 0));
+            createSuggestions(board.get(Coordinate.getCoordinateHash(i, 0)));
         }
         //board.put(Coordinate.getCoordinateHash(-2, -1), new Stone(Stone.SHAPES[0], Stone.COLORS[4], -2, -1));
     }
 
     public void resetMap() {
         board.clear();
-    }
-
-    public int[] getBoardWidthHeight() {
-        if (isEmptyBoard()) return new int[]{0, 0};
-        int lowestX = 0;
-        int lowestY = 0;
-        int highestX = 0;
-        int highestY = 0;
-        int[] testCoord;
-        for (String coordinate : board.keySet()) {
-            testCoord = Coordinate.getCoordinates(coordinate);
-            if (testCoord[0] < lowestX) lowestX = testCoord[0];
-            if (testCoord[1] < lowestY) lowestY = testCoord[1];
-            if (testCoord[0] > highestX) highestX = testCoord[0];
-            if (testCoord[1] > highestY) highestY = testCoord[1];
-        }
-        int width = highestX - lowestX + 1;
-        int height = highestY - lowestY + 1;
-
-        return new int[]{width, height};
     }
 
     @Override
@@ -386,17 +543,24 @@ public class Board {
             boardString = boardString + String.format("%3s", "" + i) + "|";
             for (int j = 0 - middle - 5; j < maxSize + 6 - middle; j++) {
                 if (i == 0) {
-                    System.out.print(String.format("%3s", "" + j));
+                    System.out.print(String.format("%4s", "" + j));
                 }
                 if (i == 1 && j == 0) {
                     System.out.print("\n");
                 }
 
                 Stone stone = this.getBoard().get(Coordinate.getCoordinateHash(j, i));
-                if (stone != null) {
-                    boardString = boardString + stone.getShape() + "" + stone.getColor();
-                } else {
-                    boardString = boardString + "NN";
+                
+                Suggestion suggestion = suggestions.get(Coordinate.getCoordinateHash(j, i));
+                if (stone != null || suggestion != null) {
+                	System.out.println(stone + " " + suggestion + ":");
+                }   
+                if (stone != null && suggestion == null) {
+                    boardString = boardString + stone.getShape() + " " + stone.getColor();
+                } else if(suggestion != null && stone == null) {
+                	boardString = boardString + " S ";
+                } else {          
+                    boardString = boardString + "NNN";
                 }
                 boardString = boardString + "|";
             }
