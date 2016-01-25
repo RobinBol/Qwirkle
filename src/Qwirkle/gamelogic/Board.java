@@ -92,6 +92,7 @@ public class Board {
      */
     public boolean createSuggestions(Stone stone) {
     	//List<StoneType> suggestionTypes = new ArrayList<>();
+    	if (stone == null) return false;
     	Stone current = stone;
     	Stone start = stone;
     	List<StoneType> encounteredTypes = new ArrayList<>();
@@ -105,7 +106,7 @@ public class Board {
     		} else {
     			suggestion = new Suggestion(stone.getX(), stone.getY() + 1);
     		}
-    		int scoreValue = 1;
+    		int scoreValue = 2;
     		
     		encounteredTypes.add(new StoneType(current.getColor(), current.getShape()));
     		while (current.down != null) {
@@ -139,7 +140,7 @@ public class Board {
     		} else {
     			suggestion = new Suggestion(stone.getX(), stone.getY() - 1);
     		}
-    		int scoreValue = 1;
+    		int scoreValue = 2;
     		encounteredTypes.add(new StoneType(current.getColor(), current.getShape()));
     		while (current.up != null) {
     			//this assumes that placed stones are already validated.
@@ -162,7 +163,7 @@ public class Board {
     		} else {
     			suggestion = new Suggestion(stone.getX() + 1, stone.getY());
     		}
-    		int scoreValue = 1;
+    		int scoreValue = 2;
     		encounteredTypes.add(new StoneType(current.getColor(), current.getShape()));
     		while (current.left != null) {
     			//this assumes that placed stones are already validated.
@@ -186,7 +187,7 @@ public class Board {
     		} else {
     			suggestion = new Suggestion(stone.getX() - 1, stone.getY());
     		}
-    		int scoreValue = 1;
+    		int scoreValue = 2;
     		encounteredTypes.add(new StoneType(current.getColor(), current.getShape()));
     		while (current.right != null) {
     			//this assumes that placed stones are already validated.
@@ -198,7 +199,7 @@ public class Board {
     		suggestion.addType(placable, scoreValue);
     		suggestions.put(cordHash, suggestion);
     	}
-    	return false;
+    	return true;
     }
 
     public void removeSuggestion(Stone stone) {
@@ -607,8 +608,8 @@ public class Board {
         for (int i = 0; i <= 3; i++) {
             //test purpose only, is not valid according to game rules.
             placeStone(new Stone(Stone.SHAPES[0], Stone.COLORS[i + 2], i, 0));
-           
         }
+        placeStone(new Stone('B', 'B',-1 ,-1 ));
         //board.put(Coordinate.getCoordinateHash(-2, -1),
         // new Stone(Stone.SHAPES[0], Stone.COLORS[4], -2, -1));
     }
