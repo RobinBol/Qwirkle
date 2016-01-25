@@ -31,7 +31,6 @@ public class Suggestion {
 			}
 			this.score = this.score + score;
 		} else {
-			List<StoneType> iterationList = possiblePlacements; 
 			Iterator<StoneType> iterator = possiblePlacements.listIterator();
 			while (iterator.hasNext()){
 				if (!types.contains(iterator.next())) {
@@ -39,12 +38,19 @@ public class Suggestion {
 				} 
 			}
 			this.score = this.score + score;
+			if (possiblePlacements.isEmpty()) {
+				this.score = 0;
+			}
 		}
 		
 	}
 	
 	public String toString() {
 		return possiblePlacements.toString() + " score: " + score;
+	}
+	
+	public boolean hasMoves() {
+		return !possiblePlacements.isEmpty();
 	}
 
 }
