@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.validator.PublicClassValidator;
 
@@ -82,7 +83,10 @@ public class Board {
     	//List<StoneType> suggestionTypes = new ArrayList<>();
     	Stone current = stone;
     	Stone start = stone;
+    	List<StoneType> encounteredTypes = new ArrayList<>();
+    	encounteredTypes.clear();
     	if (start.up == null) {
+    		encounteredTypes.add(new StoneType(start.getColor(), start.getShape()));
     		Suggestion suggestion;
     		String cordHash = Coordinate.getCoordinateHash(stone.getX(), stone.getY() + 1);
     		if (suggestions.containsKey(cordHash)) {
@@ -91,26 +95,32 @@ public class Board {
     			suggestion = new Suggestion(stone.getX(), stone.getY() + 1);
     		}
     		int scoreValue = 1;
-    		List<StoneType> encounteredTypes = new ArrayList<>();
+    		
     		encounteredTypes.add(new StoneType(current.getColor(), current.getShape()));
     		while (current.down != null) {
     			//this assumes that placed stones are already validated.
+    			current = current.down;
     			scoreValue++;
     			encounteredTypes.add(new StoneType(current.getColor(), stone.getShape()));
-    			current = current.down;
+    			
     		}
     		List<StoneType> placable = getPlacableTypes(encounteredTypes);
     		suggestion.addType(placable, scoreValue);
     		suggestions.put(cordHash, suggestion);
+    		/*
     		if (suggestions.containsKey(Coordinate.getCoordinateHash(current.getX(), current.getY() - 1))) {
     			suggestion = suggestions.get(cordHash);
     		} else {
     			suggestion = new Suggestion(current.getX(), current.getY() - 1);
     		}
     		suggestion.addType(placable, scoreValue);
+    		*/
     		
     	}    	
+    	encounteredTypes.clear();
+
     	if (start.down == null) {
+    		encounteredTypes.add(new StoneType(start.getColor(), start.getShape()));
     		Suggestion suggestion;
     		String cordHash = Coordinate.getCoordinateHash(stone.getX(), stone.getY() - 1);
     		if (suggestions.containsKey(cordHash)) {
@@ -119,7 +129,6 @@ public class Board {
     			suggestion = new Suggestion(stone.getX(), stone.getY() - 1);
     		}
     		int scoreValue = 1;
-    		List<StoneType> encounteredTypes = new ArrayList<>();
     		encounteredTypes.add(new StoneType(current.getColor(), current.getShape()));
     		while (current.up != null) {
     			//this assumes that placed stones are already validated.
@@ -131,7 +140,10 @@ public class Board {
     		suggestion.addType(placable, scoreValue);
     		suggestions.put(cordHash, suggestion);
     	}
+    	encounteredTypes.clear();
+
     	if (start.right == null) {
+    		encounteredTypes.add(new StoneType(start.getColor(), start.getShape()));
     		Suggestion suggestion;
     		String cordHash = Coordinate.getCoordinateHash(stone.getX() + 1, stone.getY());
     		if (suggestions.containsKey(cordHash)) {
@@ -140,19 +152,22 @@ public class Board {
     			suggestion = new Suggestion(stone.getX() + 1, stone.getY());
     		}
     		int scoreValue = 1;
-    		List<StoneType> encounteredTypes = new ArrayList<>();
     		encounteredTypes.add(new StoneType(current.getColor(), current.getShape()));
     		while (current.left != null) {
     			//this assumes that placed stones are already validated.
+    			current = current.left;
     			scoreValue++;
     			encounteredTypes.add(new StoneType(current.getColor(), stone.getShape()));
-    			current = current.left;
+    			
     		}
     		List<StoneType> placable = getPlacableTypes(encounteredTypes);
     		suggestion.addType(placable, scoreValue);
     		suggestions.put(cordHash, suggestion);
     	}
+    	encounteredTypes.clear();
+
     	if (start.left == null) {
+    		encounteredTypes.add(new StoneType(start.getColor(), start.getShape()));
     		Suggestion suggestion;
     		String cordHash = Coordinate.getCoordinateHash(stone.getX() - 1, stone.getY());
     		if (suggestions.containsKey(cordHash)) {
@@ -161,13 +176,12 @@ public class Board {
     			suggestion = new Suggestion(stone.getX() - 1, stone.getY());
     		}
     		int scoreValue = 1;
-    		List<StoneType> encounteredTypes = new ArrayList<>();
     		encounteredTypes.add(new StoneType(current.getColor(), current.getShape()));
     		while (current.right != null) {
     			//this assumes that placed stones are already validated.
+    			current = current.right;
     			scoreValue++;
     			encounteredTypes.add(new StoneType(current.getColor(), stone.getShape()));
-    			current = current.right;
     		}
     		List<StoneType> placable = getPlacableTypes(encounteredTypes);
     		suggestion.addType(placable, scoreValue);
@@ -192,7 +206,16 @@ public class Board {
     				placable.remove(type);    				
     			}
     		}
-    	}    	
+    	} else if (isSameShape(encountered) == 0) {
+        	for (int i = 0; i < 6; i++) {
+        		placable.add(new StoneType(first.getColor(), Stone.SHAPES[i]));
+        	}    		
+        	for (StoneType type : encountered) {
+        		if (placable.contains(type)) {
+        			placable.remove(type);    				
+        		}
+        	}
+        }
     	return placable;
     }
 
@@ -516,13 +539,28 @@ public class Board {
 	}
 
 	public void createTestMap() {
-        for (int i = -2; i < 4; i++) {
+        for (int i = -2; i < 3; i++) {
             //test purpose only, is not valid according to game rules.
             placeStone(new Stone(Stone.SHAPES[0], Stone.COLORS[i + 2], i, 0));
-            createSuggestions(board.get(Coordinate.getCoordinateHash(i, 0)));
+           
         }
         //board.put(Coordinate.getCoordinateHash(-2, -1), new Stone(Stone.SHAPES[0], Stone.COLORS[4], -2, -1));
     }
+	
+	public void createTestMap2() {
+        for (int i = 0; i <= 3; i++) {
+            //test purpose only, is not valid according to game rules.
+            placeStone(new Stone(Stone.SHAPES[0], Stone.COLORS[i + 2], i, 0));
+           
+        }
+        //board.put(Coordinate.getCoordinateHash(-2, -1), new Stone(Stone.SHAPES[0], Stone.COLORS[4], -2, -1));
+    }
+	
+	public void buildSuggestionMap() {
+		for (Stone stone : board.values()) {
+			createSuggestions(stone);
+		}
+	}
 
     public void resetMap() {
         board.clear();
@@ -546,7 +584,7 @@ public class Board {
                     System.out.print(String.format("%4s", "" + j));
                 }
                 if (i == 1 && j == 0) {
-                    System.out.print("\n");
+                    System.out.print("\n"); 
                 }
 
                 Stone stone = this.getBoard().get(Coordinate.getCoordinateHash(j, i));

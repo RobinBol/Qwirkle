@@ -20,6 +20,10 @@ public class Suggestion {
 		return score;
 	}
 	
+	public void setScore(int s) {
+		score = s;
+	}
+	
 	public void addType(List<StoneType> types , int score) {
 		if (possiblePlacements.isEmpty()) {
 			for (StoneType type : types){	

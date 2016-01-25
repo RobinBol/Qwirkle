@@ -35,7 +35,6 @@ public class SuggestionTest {
 	public void addTypesTest() {
 		List<StoneType> types = new ArrayList<>();
 		types.add(new StoneType('A', 'A'));
-		System.out.println(new StoneType('A', 'A'));
 		s.addType(types, 1);
 		
 		assertEquals(5, s.getScore());
@@ -45,7 +44,8 @@ public class SuggestionTest {
 	
 	@Test
 	public void addSuggestionsTest() {
-		board.createTestMap();
+		board.createTestMap2();
+		board.buildSuggestionMap();
 		System.out.println(board);
 		
 	}
