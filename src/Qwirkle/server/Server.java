@@ -5,19 +5,13 @@
 
 package qwirkle.server;
 
-import javax.net.ServerSocketFactory;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSocket;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
 
-import qwirkle.client.Client;
 import qwirkle.gamelogic.Lobby;
 import qwirkle.util.Input;
 import qwirkle.util.Protocol;
-import qwirkle.util.ProtocolHandler;
 import qwirkle.util.Validation;
 
 /**
@@ -38,7 +32,7 @@ public class Server extends Observable {
     private List<Lobby> lobbies;
 
     /* Keep track of features of the server */
-    private static String[] FEATURES = new String[]{Protocol.Server.Features.CHALLENGE};
+    private static String[] features = new String[]{Protocol.Server.Features.CHALLENGE};
 
     /* Keep track of outstanding invites */
     private Map<ClientHandler, ClientHandler> invites = new HashMap<>();
@@ -81,11 +75,14 @@ public class Server extends Observable {
         updateObserver(ServerLogger.SETUP_STARTED);
 
         // Initialize and set certificate credentials for SSL connection
-        System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir").replace("src", "") + "/certs/keystore.jks");
+        System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir").replace(
+            "src", "") + "/certs/keystore.jks");
         System.setProperty("javax.net.ssl.keyStorePassword", "SSR0CKS");
 
         // If port entered by terminal, log server started
-        if (port != 0) updateObserver(ServerLogger.SERVER_STARTED + port);
+        if (port != 0) {
+            updateObserver(ServerLogger.SERVER_STARTED + port);
+        }
 
         // Check port validity, ask for a valid one if needed
         this.port = (port == 0) ? Input.askForPort(this) : port;
@@ -170,7 +167,7 @@ public class Server extends Observable {
 
     /**
      * Return clientHandler registered at a specific
-     * clientname
+     * clientname.
      *
      * @param clientName
      * @return clientHandler
@@ -189,7 +186,7 @@ public class Server extends Observable {
     }
 
     /**
-     * Register invite from client
+     * Register invite from client.
      *
      * @param inviter
      * @param invitee
@@ -200,7 +197,7 @@ public class Server extends Observable {
 
     /**
      * Remove invite from internal list, game has started
-     * or invite was aborted
+     * or invite was aborted.
      *
      * @param inviter
      * @param invitee
@@ -226,9 +223,6 @@ public class Server extends Observable {
             public void run() {
                 // your code her
                 removeInvite(inviter, invitee);
-
-                // Get inviter clientHandler
-                ClientHandler opponent = getInviter(inviter);
 
                 // Send message to opponent to decline
                 inviter.sendDeclineInvite();
@@ -272,7 +266,7 @@ public class Server extends Observable {
     }
 
     /**
-     * Get inviter, used to start a game with an oponnent
+     * Get inviter, used to start a game with an oponnent.
      *
      * @param invitee
      * @return
@@ -332,7 +326,7 @@ public class Server extends Observable {
     }
 
     /**
-     * Removes client from lobby
+     * Removes client from lobby.
      *
      * @param client ClientHandler to remove
      */
@@ -355,7 +349,7 @@ public class Server extends Observable {
 
     /**
      * Adds a client to a lobby, if no lobby available
-     * or lobby is full it will create a new lobby
+     * or lobby is full it will create a new lobby.
      *
      * @param client ClientHandler to be added
      */
@@ -397,7 +391,7 @@ public class Server extends Observable {
      * @return String array holding the features
      */
     public String[] getFeatures() {
-        return this.FEATURES;
+        return this.features;
     }
 
     /**

@@ -20,10 +20,14 @@ public class BoardTest {
 
     @Test
     public void sameRowTest() {
-        Stone[] valid = new Stone[]{new Stone('x', 'b', 0, 1), new Stone('x', 'b', 0, 2), new Stone('x', 'b', 0, 7)};
-        Stone[] valid2 = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 1, 0), new Stone('x', 'b', 2, 0)};
-        Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 1), new Stone('x', 'b', 0, 2), new Stone('x', 'b', 1, 2)};
-        Stone[] inValid2 = new Stone[]{new Stone('x', 'b', 0, 1), new Stone('x', 'b', 0, 2), new Stone('x', 'b', 1, 7)};
+        Stone[] valid = new Stone[]{new Stone('x', 'b', 0, 1), new Stone('x', 'b', 0, 2), new
+            Stone('x', 'b', 0, 7)};
+        Stone[] valid2 = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 1, 0), new
+            Stone('x', 'b', 2, 0)};
+        Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 1), new Stone('x', 'b', 0, 2), new
+            Stone('x', 'b', 1, 2)};
+        Stone[] inValid2 = new Stone[]{new Stone('x', 'b', 0, 1), new Stone('x', 'b', 0, 2), new
+            Stone('x', 'b', 1, 7)};
 
         assertTrue(board.inSameRow(valid));
         assertTrue(board.inSameRow(valid2));
@@ -34,8 +38,10 @@ public class BoardTest {
     @Test
     public void occupiedPlacesTest() {
         board.createTestMap();
-        Stone[] valid = new Stone[]{new Stone('x', 'b', 1, 1), new Stone('x', 'b', 2, 2), new Stone('x', 'b', 3, 3)};
-        Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 2), new Stone('x', 'b', 1, 2)};
+        Stone[] valid = new Stone[]{new Stone('x', 'b', 1, 1), new Stone('x', 'b', 2, 2), new
+            Stone('x', 'b', 3, 3)};
+        Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 2), new
+            Stone('x', 'b', 1, 2)};
         //TestTUI tui = new TestTUI(board);
         //tui.drawBoard();
         assertFalse(board.takeOccupiedPlaces(valid));
@@ -44,8 +50,10 @@ public class BoardTest {
 
     @Test
     public void connectedTest() {
-        Stone[] valid = new Stone[]{new Stone('x', 'b', 1, 1), new Stone('x', 'b', 2, 1), new Stone('x', 'b', 3, 1)};
-        Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 2), new Stone('x', 'b', 1, 2)};
+        Stone[] valid = new Stone[]{new Stone('x', 'b', 1, 1), new Stone('x', 'b', 2, 1), new
+            Stone('x', 'b', 3, 1)};
+        Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 2), new
+            Stone('x', 'b', 1, 2)};
         //TestTUI tui = new TestTUI(board);
         //tui.drawBoard();
         assertTrue(board.areConnected(valid));
@@ -57,10 +65,14 @@ public class BoardTest {
         board.resetMap();
         board.createTestMap();
         System.out.println(board.getBoard().keySet());
-        Stone[] valid = new Stone[]{new Stone('A', 'A', -1, 1), new Stone('B', 'A', 0, 1), new Stone('C', 'A', 1, 1)};
-        Stone[] valid2 = new Stone[]{new Stone('A', 'A', 1, 1), new Stone('B', 'A', 2, 1), new Stone('C', 'A', 3, 1)};
-        Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 1), new Stone('x', 'b', 1, 0)};
-        Stone[] inValid2 = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 1, 1), new Stone('x', 'b', 2, 2)};
+        Stone[] valid = new Stone[]{new Stone('A', 'A', -1, 1), new Stone('B', 'A', 0, 1), new
+            Stone('C', 'A', 1, 1)};
+        Stone[] valid2 = new Stone[]{new Stone('A', 'A', 1, 1), new Stone('B', 'A', 2, 1), new
+            Stone('C', 'A', 3, 1)};
+        Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 1), new
+            Stone('x', 'b', 1, 0)};
+        Stone[] inValid2 = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 1, 1), new
+            Stone('x', 'b', 2, 2)};
 
         assertTrue(board.isValidMove(valid));
         assertTrue(board.isValidMove(valid2));
@@ -73,15 +85,16 @@ public class BoardTest {
         board.resetMap();
         board.createTestMap();
         System.out.println(board.getBoard().keySet());
-        Stone[] valid = new Stone[]{new Stone('B', 'A', -1, -1), new Stone('C', 'A', 0, -1), new Stone('D', 'A', 1, -1)};
+        Stone[] valid = new Stone[]{new Stone('B', 'A', -1, -1), new Stone('C', 'A', 0, -1), new
+            Stone('D', 'A', 1, -1)};
         Stone[] valid2 = new Stone[]{new Stone('B', 'C', -1, -2)};
         Stone[] valid3 = new Stone[]{
-                new Stone('B', 'D', -1, -3),
-                new Stone('B', 'A', 0, -3),
-                new Stone('B', 'B', 1, -3),
-                new Stone('B', 'C', 2, -3),
-                new Stone('B', 'E', 3, -3),
-                new Stone('B', 'F', 4, -3)};
+            new Stone('B', 'D', -1, -3),
+            new Stone('B', 'A', 0, -3),
+            new Stone('B', 'B', 1, -3),
+            new Stone('B', 'C', 2, -3),
+            new Stone('B', 'E', 3, -3),
+            new Stone('B', 'F', 4, -3)};
         Stone[] inValid = new Stone[]{new Stone('B', 'G', 5, -3)};
 
         assertEquals(9, board.makeMove(valid));
@@ -100,10 +113,14 @@ public class BoardTest {
 
     @Test
     public void shapeColorTest() {
-        Stone[] valid = new Stone[]{new Stone('x', 'b', -1, 1), new Stone('x', 'o', 0, 1), new Stone('x', 'y', 1, 1)};
-        Stone[] valid2 = new Stone[]{new Stone('x', 'b', 1, 0), new Stone('+', 'b', 2, 0), new Stone('*', 'b', 3, 0)};
-        Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 1), new Stone('x', 'b', 1, 0)};
-        Stone[] inValid2 = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'c', 1, 1), new Stone('r', 'c', 2, 2)};
+        Stone[] valid = new Stone[]{new Stone('x', 'b', -1, 1), new Stone('x', 'o', 0, 1), new
+            Stone('x', 'y', 1, 1)};
+        Stone[] valid2 = new Stone[]{new Stone('x', 'b', 1, 0), new Stone('+', 'b', 2, 0), new
+            Stone('*', 'b', 3, 0)};
+        Stone[] inValid = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'b', 0, 1), new
+            Stone('x', 'b', 1, 0)};
+        Stone[] inValid2 = new Stone[]{new Stone('x', 'b', 0, 0), new Stone('x', 'c', 1, 1), new
+            Stone('r', 'c', 2, 2)};
 
         assertTrue(board.validShapeColorCombination(valid));
         assertTrue(board.validShapeColorCombination(valid2));

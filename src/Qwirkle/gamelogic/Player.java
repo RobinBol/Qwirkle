@@ -1,8 +1,6 @@
 package qwirkle.gamelogic;
 
 import qwirkle.client.Client;
-import qwirkle.util.Input;
-import qwirkle.util.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,21 +42,20 @@ public class Player {
         this.resetHand();
     }
 
-    //TODO Bug in reset hand, hand does not get reset
     public void resetHand() {
-        if (this.handBackup.size() > 0) this.hand = new ArrayList<Stone>(this.handBackup);
+        if (this.handBackup.size() > 0) {
+            this.hand = new ArrayList<Stone>(this.handBackup);
+        }
     }
 
     public void saveHand() {
         this.handBackup = new ArrayList<Stone>(this.hand);
-        ;
     }
 
     public String getName() {
         return this.name;
     }
 
-    //boolean in case makeMove didn't execute well.
     public int makeMove(Stone[] stones) {
 
         int score = -1;
@@ -94,10 +91,12 @@ public class Player {
             startingStone = hand.get(i);
             for (int j = 0; j < hand.size(); j++) {
                 if (j != i) {
-                    if (startingStone.getColor() == hand.get(j).getColor() && startingStone.getShape() != hand.get(j).getShape()) {
+                    if (startingStone.getColor() == hand.get(j).getColor()
+                        && startingStone.getShape() != hand.get(j).getShape()) {
                         foundColors.add(hand.get(j));
                     }
-                    if (startingStone.getColor() != hand.get(j).getColor() && startingStone.getShape() == hand.get(j).getShape()) {
+                    if (startingStone.getColor() != hand.get(j).getColor()
+                        && startingStone.getShape() == hand.get(j).getShape()) {
                         foundShapes.add(hand.get(j));
                     }
                 }

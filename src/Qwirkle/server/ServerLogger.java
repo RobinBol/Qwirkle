@@ -14,7 +14,8 @@ public class ServerLogger extends Logger {
     public static final String GAME_STARTED = "Game was started";
     public static final String PORT_IN_USE = "The port you entered is already in use";
     public static final String PORT_INVALID = "The port you entered is invalid, terminating...";
-    public static final String PORT_INVALID_RETRY = "The port you entered is invalid, please try again:";
+    public static final String PORT_INVALID_RETRY = "The port you entered is invalid, please try " +
+        "again:";
     public static final String ENTER_PORT = "Please enter a port number:";
     public static final String INCOMING_MESSAGE = "Incoming message: ";
 }

@@ -7,7 +7,6 @@
 
 package qwirkle.gamelogic;
 
-import qwirkle.client.Client;
 import qwirkle.server.ClientHandler;
 
 import java.util.ArrayList;
@@ -214,8 +213,10 @@ public class Game {
             moveOrder.add(highestScoreClient);
             moveOrder.add(secondHighestScoreClient);
             for (int i = 0; i < clients.size(); i++) {
-                if (!clients.get(i).getClientName().equalsIgnoreCase(highestScoreClient.getClientName())
-                        && !clients.get(i).getClientName().equalsIgnoreCase(secondHighestScoreClient.getClientName())) {
+                if (!clients.get(i).getClientName().equalsIgnoreCase(
+                        highestScoreClient.getClientName())
+                        && !clients.get(i).getClientName().equalsIgnoreCase(
+                        secondHighestScoreClient.getClientName())) {
                     // Do not re add highest score client and second highest score client
                     moveOrder.add(clients.get(i));
                 }
@@ -236,6 +237,7 @@ public class Game {
      * Takes a client as parameter, and skips the turn
      * for this client. Gives the turn to the next
      * player in the row.
+     *
      * @param client
      */
     public void skipTurn(ClientHandler client) {
@@ -272,13 +274,14 @@ public class Game {
     }
 
     /**
-     * Send message to all clients, about who made a move, what move, and who is next
+     * Send message to all clients, about who made a move, what move, and who is next.
      *
      * @param currentClient
      * @param nextClient
      * @param move
      */
-    public void broadcastNextTurn(ClientHandler currentClient, ClientHandler nextClient, Stone[] move) {
+    public void broadcastNextTurn(ClientHandler currentClient,
+                                  ClientHandler nextClient, Stone[] move) {
 
         // Prevent looping over stones if user skips turn (no stones)
         if (move != null) {
@@ -287,7 +290,9 @@ public class Game {
             ArrayList<Stone> newStones = new ArrayList<>();
             for (int i = 0; i < move.length; i++) {
                 Stone stone = this.bag.takeStone();
-                if (stone != null) newStones.add(stone);
+                if (stone != null) {
+                    newStones.add(stone);
+                }
             }
 
             // Give currentClient new stones

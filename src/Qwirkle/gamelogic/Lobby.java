@@ -5,8 +5,6 @@
 
 package qwirkle.gamelogic;
 
-
-import qwirkle.client.Client;
 import qwirkle.server.ClientHandler;
 import qwirkle.server.Server;
 import qwirkle.server.ServerLogger;
@@ -57,21 +55,6 @@ public class Lobby {
      */
     public void startGame(ArrayList<ClientHandler> clients) {
 
-//        Code below can be commented out if we want to wait some time
-//        before starting the game, to give players a chance to
-//        disconnect/decline.
-
-//        for (int i = 0; i < clients.size(); i++) {
-//            clients.get(i).sendMessage("Game was found, players: " + clients + " game will start in 10 seconds. If you don't want to play this game, please disconnect.");
-//        }
-//
-//        // Wait for 12 seconds
-//        try {
-//            Thread.sleep(12000);
-//        } catch(InterruptedException ex) {
-//            Thread.currentThread().interrupt();
-//        }
-
         // Check if clients are still present
         boolean clientsPresent = true;
 
@@ -109,9 +92,7 @@ public class Lobby {
                 // And remove them from the lobby
                 this.removeClientFromLobby(clients.get(j));
             }
-        }
-        // Indicate a client has left
-        else {
+        } else {
 
             // Client left
             for (int i = 0; i < clients.size(); i++) {
@@ -298,7 +279,7 @@ public class Lobby {
     }
 
     /**
-     * Check if lobby is empty
+     * Check if lobby is empty.
      *
      * @return true if empty
      */

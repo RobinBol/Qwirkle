@@ -50,10 +50,16 @@ public class InputHandler extends Thread {
         try {
 
             // While there are messages to be read
-            while ((incomingValue = input.readLine()) != null && incomingValue != "" && incomingValue != "\\n" && incomingValue != "\\n\\n") {
+            incomingValue = input.readLine();
+            while (incomingValue != null
+                && incomingValue != ""
+                && incomingValue != "\\n"
+                && incomingValue != "\\n\\n") {
 
                 // Log message if present
-                if (!incomingValue.isEmpty()) client.updateObserver(ClientLogger.INCOMING_MESSAGE + incomingValue);
+                if (!incomingValue.isEmpty()) {
+                    client.updateObserver(ClientLogger.INCOMING_MESSAGE + incomingValue);
+                }
 
                 // Read to package to a useable ArrayList
                 ArrayList<Object> result = ProtocolHandler.readPackage(incomingValue);
@@ -88,7 +94,8 @@ public class InputHandler extends Thread {
                         client.setInGame(false);
 
                         if (result.size() >= 1) {
-                            client.updateObserver(ClientLogger.GAME_ENDED_BECAUSE + String.valueOf(result.get(1)));
+                            client.updateObserver(ClientLogger.GAME_ENDED_BECAUSE +
+                                String.valueOf(result.get(1)));
                         } else {
                             client.updateObserver(ClientLogger.GAME_ENDED);
                         }
@@ -99,10 +106,35 @@ public class InputHandler extends Thread {
                     } else if (result.get(0).equals(Protocol.Server.MOVE) && result.size() >= 3) {
 
                         // You made a move, (initial move?) but it was not used, reset hand
-                        if (this.madeMove && !((String) result.get(1)).equalsIgnoreCase(client.getName())) {
+                        if (this.madeMove
+                            && !((String) result.get(1)).equalsIgnoreCase(client.getName())) {
 
                             // Undo last move, reset hand and board
                             client.getPlayer().undoLastMove();
+                        } else if (!((String) result.get(1)).equalsIgnoreCase(client.getName())
+                            && !((String) result.get(1)).equalsIgnoreCase("null")) {
+
+                            ArrayList<Stone> stones = new ArrayList<>();
+                            // Loop over all stones
+                            for (int i = 3; i < result.size(); i = i + 2) {
+
+                                // Fetch positions
+                                String positions = String.valueOf(result.get(i + 1));
+                                int x = Integer.parseInt(
+                                    positions.split("\\" + Protocol.Server.Settings.DELIMITER2)[0]
+                                );
+                                int y = Integer.parseInt(
+                                    positions.split("\\" + Protocol.Server.Settings.DELIMITER2)[1]
+                                );
+
+                                // Add to arraylist
+                                stones.add(new Stone(String.valueOf(result.get(i)).charAt(1),
+                                    String.valueOf(result.get(i)).charAt(0), x, y));
+                            }
+
+                            // Other player made a move, add it to your board
+                            int score = client.getPlayer().makeMove(
+                                stones.toArray(new Stone[stones.size()]));
                         }
 
                         // Check if client is his turn
@@ -128,7 +160,8 @@ public class InputHandler extends Thread {
                             TimerTask timerTask = new TimerTask() {
                                 @Override
                                 public void run() {
-                                    Logger.print("Timeout expired, automatically declined. Please type 'exit' to continue...");
+                                    Logger.print("Timeout expired, automatically declined. " +
+                                        "Please type 'exit' to continue...");
                                 }
                             };
                             timer.schedule(timerTask, timeout);
@@ -144,7 +177,8 @@ public class InputHandler extends Thread {
                                 timer.purge();
 
                                 // Send accept invite to server
-                                client.sendMessage(ProtocolHandler.createPackage(Protocol.Client.ACCEPTINVITE));
+                                client.sendMessage(ProtocolHandler.createPackage(
+                                    Protocol.Client.ACCEPTINVITE));
 
                             } else {
                                 // Reset timer
@@ -152,7 +186,8 @@ public class InputHandler extends Thread {
                                 timer.purge();
 
                                 // Send decline invite to server
-                                client.sendMessage(ProtocolHandler.createPackage(Protocol.Client.DECLINEINVITE));
+                                client.sendMessage(ProtocolHandler.createPackage(
+                                    Protocol.Client.DECLINEINVITE));
 
                                 // Ask for new game
                                 getGameType();
@@ -160,17 +195,23 @@ public class InputHandler extends Thread {
                         } else { // In game, decline
 
                             // Send decline invite to server
-                            client.sendMessage(ProtocolHandler.createPackage(Protocol.Client.DECLINEINVITE));
+                            client.sendMessage(ProtocolHandler.createPackage(
+                                Protocol.Client.DECLINEINVITE));
                         }
-                    } else if (result.get(0).equals(Protocol.Client.DECLINEINVITE)) {
+                    } else if (result.get(0).equals(Protocol.Client.DECLINEINVITE)
+                        && !client.inGame()) {
                         getGameType();
                     } else if (result.get(0).equals(Protocol.Server.ADDTOHAND)) {
                         for (int i = 1; i < result.size(); i++) {
-                            Stone stone = new Stone(String.valueOf(result.get(i)).charAt(0), String.valueOf(result.get(i)).charAt(1));
+                            Stone stone = new Stone(String.valueOf(result.get(i)).charAt(1),
+                                String.valueOf(result.get(i)).charAt(0));
                             client.getPlayer().addStoneToHand(stone);
                         }
                     }
                 }
+
+                // Read new input
+                incomingValue = input.readLine();
             }
         } catch (IOException | NoSuchElementException e) {
 
@@ -240,13 +281,9 @@ public class InputHandler extends Thread {
             ArrayList<Object> parameters = new ArrayList<>();
             parameters.add(opponent);
             client.sendMessage(ProtocolHandler.createPackage(Protocol.Client.INVITE, parameters));
-        }
-        // Handle waiting for invite
-        else if (gameType == 6) {
+        } else if (gameType == 6) {
             client.updateObserver(ClientLogger.WAITING);
-        }
-        // Handle searching a regular game
-        else {
+        } else {
 
             // Update observer, looking for game
             client.updateObserver(ClientLogger.SEARCHING_GAME);
@@ -254,7 +291,8 @@ public class InputHandler extends Thread {
             // Create and send package to request a game at the server, of this game type
             ArrayList<Object> parameters = new ArrayList<>();
             parameters.add(String.valueOf(gameType));
-            client.sendMessage(ProtocolHandler.createPackage(Protocol.Client.REQUESTGAME, parameters));
+            client.sendMessage(ProtocolHandler.createPackage(
+                Protocol.Client.REQUESTGAME, parameters));
         }
     }
 
@@ -266,7 +304,8 @@ public class InputHandler extends Thread {
     public String respondToChallenge() {
         String answer = Input.ask(ClientLogger.ASK_CHALLENGE, client);
 
-        while (!answer.equalsIgnoreCase("yes") && !answer.equalsIgnoreCase("no") && !answer.equalsIgnoreCase("exit")) {
+        while (!answer.equalsIgnoreCase("yes") && !answer.equalsIgnoreCase("no")
+            && !answer.equalsIgnoreCase("exit")) {
             answer = Input.ask(ClientLogger.ANSWER_INVALID, client);
         }
 
@@ -274,14 +313,14 @@ public class InputHandler extends Thread {
     }
 
     /**
-     * This method handles all incoming errors
+     * This method handles all incoming errors.
      */
     public void handleIncomingError() {
         handleIncomingError(-1);
     }
 
     /**
-     * This method handles all incoming errors
+     * This method handles all incoming errors.
      *
      * @param errorCode specific error code of error
      */
@@ -291,9 +330,7 @@ public class InputHandler extends Thread {
         if (errorCode == 4) {
             client.updateObserver(ClientLogger.USERNAME_EXISTS);
             System.exit(0);
-        }
-        // Client is not challengable
-        else if (errorCode == 5) {
+        } else if (errorCode == 5) {
 
             // Log that opponent is not challengable
             client.updateObserver(ClientLogger.NOT_CHALLENGABLE);

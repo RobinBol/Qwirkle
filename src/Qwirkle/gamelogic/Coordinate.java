@@ -15,7 +15,8 @@ public final class Coordinate {
     }
 
     /**
-     * Returns an String to pas into the hashmap the contains the keys to tiles that may or may not contain a stone.
+     * Returns an String to pas into the hashmap the contains,
+     * the keys to tiles that may or may not contain a stone.
      * The format is N:123:P:353 N mean its negative P means its positive.
      * Usage hashmap.get(GameLogic.Coordinate.getCoordinateHash(x, y)).
      * Will return the value<GameLogic.Stone>.

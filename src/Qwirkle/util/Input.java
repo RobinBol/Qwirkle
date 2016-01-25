@@ -58,29 +58,35 @@ public class Input {
      * @return int valid port number
      */
     public static int askForPort(Object asker, String enteredPort) {
-
+        String port = enteredPort;
         // If no provided as argument, ask for it
-        if (enteredPort == null) {
-            if (asker instanceof Server) enteredPort = ask(ServerLogger.ENTER_PORT, asker);
-            else enteredPort = ask("Please enter the server port:", asker);
+        if (port == null) {
+            if (asker instanceof Server) {
+                port = ask(ServerLogger.ENTER_PORT, asker);
+            } else {
+                port = ask("Please enter the server port:", asker);
+            }
         }
 
         // While incorrect port ask for new one
-        while (!Validation.checkPort(enteredPort)) {
-            if (asker instanceof Server)
-                return Integer.parseInt(String.valueOf(askForPort(asker, ask(ServerLogger.PORT_INVALID_RETRY, asker))));
-            else
-                enteredPort = String.valueOf(askForPort(asker, ask("Invalid port provided, please try again:", asker)));
+        while (!Validation.checkPort(port)) {
+            if (asker instanceof Server) {
+                return Integer.parseInt(String.valueOf(askForPort(asker, ask(ServerLogger
+                    .PORT_INVALID_RETRY, asker))));
+            } else {
+                port = String.valueOf(askForPort(asker, ask("Invalid port provided, please" +
+                    " try again:", asker)));
+            }
         }
 
         // Print that server is configured and starting
         if (asker instanceof Server) {
             Server server = (Server) asker;
-            server.updateObserver(ServerLogger.SERVER_STARTED + enteredPort);
+            server.updateObserver(ServerLogger.SERVER_STARTED + port);
         }
 
         // Return valid port
-        return Integer.parseInt(enteredPort);
+        return Integer.parseInt(port);
     }
 
     /**
@@ -98,19 +104,21 @@ public class Input {
      * @return String valid host address
      */
     public static String askForHostAddress(Object asker, String enteredAddress) {
+        String address = enteredAddress;
 
         // If not provided as argument, ask for it
-        if (enteredAddress == null) {
-            enteredAddress = ask("Please enter the server host IP address:", asker);
+        if (address == null) {
+            address = ask("Please enter the server host IP address:", asker);
         }
 
         // While entered address is not valid ask for valid input
-        while (!Validation.checkIP(enteredAddress)) {
-            enteredAddress = askForHostAddress(asker, ask("Invalid hostname/ipaddress provided, please try again:", asker));
+        while (!Validation.checkIP(address)) {
+            address = askForHostAddress(asker, ask("Invalid hostname/ipaddress provided, " +
+                "please try again:", asker));
         }
 
         // Valid input provided, return it
-        return enteredAddress;
+        return address;
     }
 
 
@@ -129,27 +137,29 @@ public class Input {
      * @return String valid username
      */
     public static String askForUsername(Object asker, String enteredUsername) {
+        String username = enteredUsername;
 
         // If not provided as argument, ask for it
-        if (enteredUsername == null) {
-            enteredUsername = ask("Please enter your username:", asker);
+        if (username == null) {
+            username = ask("Please enter your username:", asker);
         }
 
         // Make sure no special characters are used
         Pattern p = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
-        Matcher m = p.matcher(enteredUsername);
+        Matcher m = p.matcher(username);
         boolean b = m.find();
 
         // While input is too long, ask for smaller input
-        while (enteredUsername.length() > 15 || b) {
-            enteredUsername = askForUsername(asker, ask("Please use 15 characters or less and no special characters, try again:", asker));
+        while (username.length() > 15 || b) {
+            username = askForUsername(asker, ask("Please use 15 characters or less and no " +
+                "special characters, try again:", asker));
             p = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
-            m = p.matcher(enteredUsername);
+            m = p.matcher(username);
             b = m.find();
         }
 
         // Correct input provided, return it
-        return enteredUsername;
+        return username;
     }
 
     /**
@@ -168,21 +178,28 @@ public class Input {
      * @return int gameType
      */
     public static int askForGameType(Object asker, String enteredGameType) {
+        String gameType = enteredGameType;
 
         // If not used recursively, ask first for input
-        if (enteredGameType == null) {
-            enteredGameType = ask("Please request a game type by typing the number of your choice:\n[0] I don't care...\n[1] Versus AI\n[2] Versus one other player\n[3] Versus two other players\n[4] Versus three other players\n[5] I want to challenge someone\n[6] Wait for incoming invitation", asker);
+        if (gameType == null) {
+            gameType = ask("Please request a game type by typing the number of your " +
+                "choice:\n[0] I don't care...\n[1] Versus AI\n[2] Versus one other " +
+                "player\n[3] Versus two other players\n[4] Versus three other players\n[5] I " +
+                "want to challenge someone\n[6] Wait for incoming invitation", asker);
         }
 
         // If the input is not correct, keep asking for correct input
-        while (!enteredGameType.trim().equals("0") && !enteredGameType.trim().equals("1") && !enteredGameType.trim().equals("2")
-                && !enteredGameType.trim().equals("3") && !enteredGameType.trim().equals("4") && !enteredGameType.trim().equals("5")
-                && !enteredGameType.trim().equals("6")) {
-            enteredGameType = ask("Invalid option, please try again (type number of your choice:", asker);
+        while (!gameType.trim().equals("0") && !gameType.trim().equals("1") &&
+            !gameType.trim().equals("2")
+            && !gameType.trim().equals("3") && !gameType.trim().equals("4") &&
+            !gameType.trim().equals("5")
+            && !gameType.trim().equals("6")) {
+            gameType = ask("Invalid option, please try again (type number of your " +
+                "choice:", asker);
         }
 
         // Correct input was provided, return it
-        return Integer.parseInt(enteredGameType);
+        return Integer.parseInt(gameType);
     }
 
     /**
@@ -204,7 +221,8 @@ public class Input {
     public static String askForStone(Object asker, int handSize) {
 
         // Ask to make a move
-        String stone = Input.ask("Please enter the number of the stone you would like to use (or EXIT to end your move)", asker);
+        String stone = Input.ask("Please enter the number of the stone you would like to use (or " +
+            "EXIT to end your move)", asker);
 
         // Check for exit input
         if (stone.equalsIgnoreCase("exit")) {
@@ -212,7 +230,8 @@ public class Input {
         }
 
         // Detect first line of valid input
-        if (!stone.equals("1") && !stone.equals("2") && !stone.equals("3") && !stone.equals("4") && !stone.equals("5") && !stone.equals("6") && !stone.equalsIgnoreCase("exit")) {
+        if (!stone.equals("1") && !stone.equals("2") && !stone.equals("3") && !stone.equals("4")
+            && !stone.equals("5") && !stone.equals("6") && !stone.equalsIgnoreCase("exit")) {
 
             int stoneNumber = 0;
             try {
@@ -225,7 +244,8 @@ public class Input {
             while (!(1 <= stoneNumber && stoneNumber <= handSize)) {
 
                 // Ask to make a move
-                stone = Input.ask("Invalid input, please re-enter the number of the stone you would like to use (or EXIT to end your move)", asker);
+                stone = Input.ask("Invalid input, please re-enter the number of the stone you " +
+                    "would like to use (or EXIT to end your move)", asker);
 
                 // Try to format an integer from the input
                 try {
@@ -254,12 +274,16 @@ public class Input {
     public static String askForStonePosition(Object asker) {
 
         // Ask for position
-        String position = Input.ask("At what position would you like to place this stone? (x, y)", asker);
+        String position = Input.ask("At what position would you like to place this stone? (x, y)" +
+            "", asker);
 
-        if (position.equalsIgnoreCase("exit")) return position;
+        if (position.equalsIgnoreCase("exit")) {
+            return position;
+        }
         // If no delimeter is used, retry
         while (position.indexOf(',') == -1) {
-            position = Input.ask("Invalid format, please use x,y as your input format, try again:", asker);
+            position = Input.ask("Invalid format, please use x,y as your input format, try " +
+                "again:", asker);
         }
 
         // Try to parse x position
@@ -291,11 +315,13 @@ public class Input {
         while (invalidPosition) {
 
             // Indicate invalid format, retry
-            position = Input.ask("Invalid format, please use x,y as your input format, try again:", asker);
+            position = Input.ask("Invalid format, please use x,y as your input format, try " +
+                "again:", asker);
 
             // While no delimeter is used, retry
             while (position.indexOf(',') == -1) {
-                position = Input.ask("Invalid format, please use x,y as your input format, try again:", asker);
+                position = Input.ask("Invalid format, please use x,y as your input format, try " +
+                    "again:", asker);
             }
 
             // Try to parse the x and y position
@@ -309,7 +335,9 @@ public class Input {
             }
             try {
                 y = Integer.parseInt(position.split(",")[1]);
-                if (tempApprove) invalidPosition = false;
+                if (tempApprove) {
+                    invalidPosition = false;
+                }
             } catch (NumberFormatException e) {
                 Logger.print("Invalid y-position entered...");
                 invalidPosition = true;
@@ -354,13 +382,17 @@ public class Input {
             String stone = Input.askForStone(client, hand.size());
 
             // Break if input equals exit
-            if (stone.equalsIgnoreCase("exit")) break;
+            if (stone.equalsIgnoreCase("exit")) {
+                break;
+            }
 
             // Valid stone provided, ask for position
             String position = Input.askForStonePosition(client);
 
             // Detect break
-            if (position.equalsIgnoreCase("exit")) break;
+            if (position.equalsIgnoreCase("exit")) {
+                break;
+            }
 
             // Store positions
             int x = Integer.parseInt(position.split("_")[0]);

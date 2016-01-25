@@ -43,8 +43,8 @@ public class Client extends Observable implements Runnable {
     private boolean inGame = false;
 
     /* Features variable, holding the features this client supports */
-    private static String[] FEATURES = new String[]{Protocol.Server.Features.CHALLENGE};
-    private static List<String> COMMON_FEATURES = new ArrayList<>();
+    private static String[] features = new String[]{Protocol.Server.Features.CHALLENGE};
+    private static List<String> commonFeatures = new ArrayList<>();
 
     /* If client is within game, it has a player object */
     private Player player;
@@ -59,9 +59,15 @@ public class Client extends Observable implements Runnable {
     public Client(String name, InetAddress host, int port) {
 
         // If variables provided as parameters use them
-        if (name != null) this.name = name;
-        if (host != null) this.host = host.getHostAddress();
-        if (port != 0) this.port = port;
+        if (name != null) {
+            this.name = name;
+        }
+        if (host != null) {
+            this.host = host.getHostAddress();
+        }
+        if (port != 0) {
+            this.port = port;
+        }
     }
 
     /**
@@ -140,10 +146,10 @@ public class Client extends Observable implements Runnable {
         parameters.add(this.name);
 
         // Loop over all features this client supports
-        for (int i = 0; i < this.FEATURES.length; i++) {
+        for (int i = 0; i < this.features.length; i++) {
 
             // Add them to the parameters
-            parameters.add(this.FEATURES[i]);
+            parameters.add(this.features[i]);
         }
 
         // Send package according to protocol
@@ -161,8 +167,10 @@ public class Client extends Observable implements Runnable {
         try {
 
             // Setup input and output streams
-            InputStreamReader inputstreamreader = new InputStreamReader(socket.getInputStream());
-            OutputStreamWriter outputstreamwriter = new OutputStreamWriter(socket.getOutputStream());
+            InputStreamReader inputstreamreader =
+                    new InputStreamReader(socket.getInputStream());
+            OutputStreamWriter outputstreamwriter =
+                    new OutputStreamWriter(socket.getOutputStream());
 
             // Store them to be used by instance
             this.in = new BufferedReader(inputstreamreader);
@@ -188,7 +196,7 @@ public class Client extends Observable implements Runnable {
      * Stores matched features with server.
      */
     public void saveMatchedFeature(String feature) {
-        this.COMMON_FEATURES.add(feature);
+        this.commonFeatures.add(feature);
     }
 
     /**
@@ -197,8 +205,8 @@ public class Client extends Observable implements Runnable {
      * @param feature
      */
     public boolean hasFeature(String feature) {
-        for (int i = 0; i < this.FEATURES.length; i++) {
-            if (this.FEATURES[i].equals(feature)) {
+        for (int i = 0; i < this.features.length; i++) {
+            if (this.features[i].equals(feature)) {
                 return true;
             }
         }
@@ -206,7 +214,7 @@ public class Client extends Observable implements Runnable {
     }
 
     /**
-     * Store player object
+     * Store player object.
      *
      * @param player
      */
@@ -215,7 +223,7 @@ public class Client extends Observable implements Runnable {
     }
 
     /**
-     * Return player object
+     * Return player object.
      *
      * @return
      */
@@ -270,7 +278,9 @@ public class Client extends Observable implements Runnable {
         for (int i = 0; i < stones.length; i++) {
 
             // Add them properly formatted as parameter
-            parameters.add("" + stones[i].getColor() + stones[i].getShape() + Protocol.Server.Settings.DELIMITER2 + stones[i].getX() + Protocol.Server.Settings.DELIMITER2 + stones[i].getY());
+            parameters.add("" + stones[i].getColor() + stones[i].getShape()
+                    + Protocol.Server.Settings.DELIMITER2 + stones[i].getX()
+                    + Protocol.Server.Settings.DELIMITER2 + stones[i].getY());
         }
 
         // Send package according to protocol
@@ -294,7 +304,8 @@ public class Client extends Observable implements Runnable {
     public static void main(String[] args) {
 
         // Set needed trustStore properties in order to connect to SSLSocket
-        System.setProperty("javax.net.ssl.trustStore", System.getProperty("user.dir").replace("src", "") + "/certs/keystore.jks");
+        String projectDir = System.getProperty("user.dir").replace("src", "");
+        System.setProperty("javax.net.ssl.trustStore", projectDir + "/certs/keystore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "SSR0CKS");
 
         // Define default values
