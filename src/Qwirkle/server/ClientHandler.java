@@ -1,4 +1,3 @@
-
 /**
  * TODO Major todo's listed below:
  * - Fix niet arriverende END_GAME
@@ -7,7 +6,6 @@
 
 package qwirkle.server;
 
-import qwirkle.client.Client;
 import qwirkle.gamelogic.Board;
 import qwirkle.gamelogic.Game;
 import qwirkle.gamelogic.Lobby;
@@ -23,7 +21,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
+
+import static qwirkle.util.Protocol.Client.DECLINEINVITE;
 
 /**
  * Handles all things related to a client that
@@ -50,7 +49,7 @@ public class ClientHandler extends Thread {
     private boolean disconnected = false;
 
     /* Internal reference to clients features */
-    private ArrayList<String> FEATURES = new ArrayList<>();
+    private ArrayList<String> features = new ArrayList<>();
 
     /* Keep track of in game mode */
     private boolean inGame = false;
@@ -61,7 +60,7 @@ public class ClientHandler extends Thread {
      *
      * @param server QwirkleServer on which the client connects
      * @param sock   Socket used to read from/write to client
-     * @throws IOException
+     * @throws IOException if something failes regarding the socket
      */
     public ClientHandler(Server server, Socket sock) throws IOException {
         this.server = server;
@@ -101,30 +100,33 @@ public class ClientHandler extends Thread {
                         // Handle incoming packages
                         if (result.get(0).equals(Protocol.Client.ERROR)) {
                             handleIncomingError(result);
-                        } else if (result.get(0).equals(Protocol.Client.REQUESTGAME) && result.size() == 2) {
+                        } else if (result.get(0).equals(Protocol.Client.REQUESTGAME) && result
+                            .size() == 2) {
 
                             // Client requested a gameType
                             this.requestsGameType = Integer.valueOf((String) result.get(1));
 
                             // Check updated lobby for matches
                             this.getLobby().checkForGame();
-                        } else if (result.get(0).equals(Protocol.Client.INVITE) && result.size() == 2) {
+                        } else if (result.get(0).equals(Protocol.Client.INVITE) && result.size()
+                            == 2) {
 
                             // Get opponent clientHandler
-                            ClientHandler opponent = server.getClientHandler(String.valueOf(result.get(1)));
+                            ClientHandler opponent = server.getClientHandler(String.valueOf(
+                                result.get(1)));
 
                             // Check if opponent is challengable
-                            if (opponent == null || !opponent.hasFeature(Protocol.Server.Features.CHALLENGE)) {
+                            if (opponent == null || !opponent.hasFeature(Protocol.Server.Features
+                                .CHALLENGE)) {
 
                                 // Create error package
                                 ArrayList<Object> errorCode = new ArrayList<>();
                                 errorCode.add(5);
 
                                 // Send error package
-                                sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
-                            }
-                            // Check if oponent exists
-                            else if (opponent != null) {
+                                sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR,
+                                    errorCode));
+                            } else if (opponent != null) {
 
                                 // Forward the invite to the proposed opponent
                                 opponent.sendMessage(incomingMessage);
@@ -134,9 +136,7 @@ public class ClientHandler extends Thread {
 
                                 // Set a timeout, to decline after 15 seconds
                                 server.setTimeoutForInvite(this, opponent);
-                            }
-                            // Does not exist, throw error
-                            else {
+                            } else {
 
                                 //TODO specify precise error?
                                 // Send error package
@@ -164,15 +164,15 @@ public class ClientHandler extends Thread {
 
                             // Make sure to reset timer
                             server.resetInviteTimeout(this, opponent);
-                        } else if (result.get(0).equals(Protocol.Client.DECLINEINVITE)) {
+                        } else if (result.get(0).equals(DECLINEINVITE)) {
                             sendMessage("Invite was declined...");
 
                             // Get inviter clientHandler
                             ClientHandler opponent = server.getInviter(this);
 
                             // Send message to opponent to decline
-                            if(opponent != null) {
-                                opponent.sendMessage(ProtocolHandler.createPackage(Protocol.Client.DECLINEINVITE));
+                            if (opponent != null) {
+                                opponent.sendMessage(ProtocolHandler.createPackage(DECLINEINVITE));
 
                                 // Remove registered invite
                                 server.removeInvite(this, opponent);
@@ -198,7 +198,8 @@ public class ClientHandler extends Thread {
                                     int y = Integer.parseInt(stone.get(2));
 
                                     // Add new stone
-                                    stones.add(new Stone(String.valueOf(stone.get(0)).charAt(0), String.valueOf(stone.get(0)).charAt(1), x, y));
+                                    stones.add(new Stone(String.valueOf(stone.get(0)).charAt(0),
+                                        String.valueOf(stone.get(0)).charAt(1), x, y));
                                 }
                             }
 
@@ -220,7 +221,8 @@ public class ClientHandler extends Thread {
                                     errorCode.add(7);
 
                                     // Send error package
-                                    sendMessage(ProtocolHandler.createPackage(Protocol.Client.ERROR, errorCode));
+                                    sendMessage(ProtocolHandler.createPackage(Protocol.Client
+                                        .ERROR, errorCode));
                                 }
                             } else {
                                 // Skip this player
@@ -232,12 +234,16 @@ public class ClientHandler extends Thread {
             }
 
             // Handle disconnecting client from server, game and lobby
-            if (!disconnected) disconnectClient();
+            if (!disconnected) {
+                disconnectClient();
+            }
 
         } catch (IOException e) {
 
             // Remove client from game, lobby and server
-            if (!disconnected) disconnectClient();
+            if (!disconnected) {
+                disconnectClient();
+            }
         }
     }
 
@@ -254,7 +260,7 @@ public class ClientHandler extends Thread {
      * Sends ADDTOHAND message to client. Takes
      * a stone array as parameter.
      *
-     * @param stones
+     * @param stones Stone array holding all stones need to be send to the hand
      */
     public void sendAddToHand(Stone[] stones) {
 
@@ -275,17 +281,17 @@ public class ClientHandler extends Thread {
     /**
      * Sends to the client that invite was declined.
      */
-    public void sendDeclineInvite(){
-        sendMessage(ProtocolHandler.createPackage(Protocol.Client.DECLINEINVITE));
+    public void sendDeclineInvite() {
+        sendMessage(ProtocolHandler.createPackage(DECLINEINVITE));
     }
 
     /**
      * Sends a give turn message to the client, indicating whose turn
      * it is, whose it was, and what move was made.
      *
-     * @param currentClient
-     * @param nextClient
-     * @param stones
+     * @param currentClient Client that performed a move
+     * @param nextClient    Client that gets the turn
+     * @param stones        Move that was made by the currentClient
      */
     public void giveTurn(ClientHandler currentClient, ClientHandler nextClient, Stone[] stones) {
 
@@ -293,8 +299,11 @@ public class ClientHandler extends Thread {
         ArrayList<Object> parameters = new ArrayList<>();
 
         // Add non-existing user, as no previous move was made
-        if (currentClient == null) parameters.add("null");
-        else parameters.add(currentClient);
+        if (currentClient == null) {
+            parameters.add("null");
+        } else {
+            parameters.add(currentClient);
+        }
 
         // Add this client to give it the turn
         parameters.add(nextClient.getClientName());
@@ -306,7 +315,9 @@ public class ClientHandler extends Thread {
             for (int i = 0; i < stones.length; i++) {
 
                 // Create single stone parameter
-                parameters.add("" + stones[i].getColor() + stones[i].getShape() + Protocol.Server.Settings.DELIMITER + stones[i].getX() + Protocol.Server.Settings.DELIMITER2 + stones[i].getY());
+                parameters.add("" + stones[i].getColor() + stones[i].getShape() + Protocol.Server
+                    .Settings.DELIMITER + stones[i].getX() + Protocol.Server.Settings
+                    .DELIMITER2 + stones[i].getY());
             }
         }
 
@@ -318,7 +329,7 @@ public class ClientHandler extends Thread {
      * Method that initiates a server broadcast to let
      * all clients know a new client has connected.
      *
-     * @throws IOException
+     * @throws IOException when sending fails
      */
     public void waitForHandshake() throws IOException {
 
@@ -326,7 +337,8 @@ public class ClientHandler extends Thread {
         ArrayList<Object> incomingPackage = ProtocolHandler.readPackage(in.readLine());
 
         // Check if initial handshake occurs, and if valid name provided
-        if (incomingPackage.get(0).equals(Protocol.Client.HALLO) && incomingPackage.get(1) != null) {
+        if (incomingPackage.get(0).equals(Protocol.Client.HALLO) && incomingPackage.get(1) !=
+            null) {
 
             // Get name from incoming package
             String name = (String) incomingPackage.get(1);
@@ -351,7 +363,7 @@ public class ClientHandler extends Thread {
 
                 // Add all features of the client
                 for (int i = 2; i < incomingPackage.size(); i++) {
-                    this.FEATURES.add(String.valueOf(incomingPackage.get(i)));
+                    this.features.add(String.valueOf(incomingPackage.get(i)));
                 }
 
                 // Save clientname
@@ -380,7 +392,9 @@ public class ClientHandler extends Thread {
         } catch (IOException e) {
 
             // Remove client from game, lobby and server
-            if (!disconnected) disconnectClient();
+            if (!disconnected) {
+                disconnectClient();
+            }
         }
     }
 
@@ -394,14 +408,17 @@ public class ClientHandler extends Thread {
         this.disconnected = true;
 
         // If user is disconnected before handshake happened
-        String clientIdentifier = ((this.clientName != null) ? this.clientName : "Unidentified client");
+        String clientIdentifier = (this.clientName != null) ? this.clientName : "Unidentified " +
+            "client";
 
         // Log client disconnected
         server.updateObserver(clientIdentifier + ServerLogger.CLIENT_DISCONNECTED);
 
         // Removes client from lobby and game (if applicable)
         Lobby lobby = getLobby();
-        if (lobby != null) lobby.removeClient(this);
+        if (lobby != null) {
+            lobby.removeClient(this);
+        }
 
         // Remove client from server
         server.removeClientHandler(this);
@@ -420,7 +437,7 @@ public class ClientHandler extends Thread {
      * Add lobby to this clientHandler to keep
      * track of the lobby a client is in.
      *
-     * @param lobby
+     * @param lobby Lobby object to be saved as this.lobby
      */
     public void setLobby(Lobby lobby) {
         this.lobby = lobby;
@@ -430,7 +447,7 @@ public class ClientHandler extends Thread {
      * Send message to client that game has ended, indicate
      * how the game has ended by giving the type parameter.
      *
-     * @param type
+     * @param type Description of how game ended
      */
     public void sendGameEnd(String type) {
 
@@ -444,8 +461,8 @@ public class ClientHandler extends Thread {
      * if end is caused by a winner, also send the name of
      * the winner along.
      *
-     * @param type
-     * @param winner
+     * @param type   Description of how game ended
+     * @param winner If game ended by winning, send the winner
      */
     public void sendGameEnd(String type, String winner) {
 
@@ -456,7 +473,9 @@ public class ClientHandler extends Thread {
         parameters.add(type);
 
         // Add winner if applicable
-        if (type == "WIN" && winner != null) parameters.add(winner);
+        if (type == "WIN" && winner != null) {
+            parameters.add(winner);
+        }
 
         // Send confirming handshake to client
         String p = ProtocolHandler.createPackage(Protocol.Server.GAME_END, parameters);
@@ -489,16 +508,16 @@ public class ClientHandler extends Thread {
      * Ask client to return desired game type.
      */
     public void requestGameType() {
-        String[] FEATURES = server.getFeatures();
+        String[] features = server.getFeatures();
 
         // Create parameters list
         ArrayList<Object> parameters = new ArrayList<>();
 
         // Loop over all features this client supports
-        for (int i = 0; i < FEATURES.length; i++) {
+        for (int i = 0; i < features.length; i++) {
 
             // Add them to the parameters
-            parameters.add(FEATURES[i]);
+            parameters.add(features[i]);
         }
 
         // Send confirming handshake to client
@@ -506,7 +525,7 @@ public class ClientHandler extends Thread {
     }
 
     /**
-     * Getter for requestsGameType
+     * Getter for requestsGameType.
      *
      * @return int gameType
      */
@@ -515,7 +534,7 @@ public class ClientHandler extends Thread {
     }
 
     /**
-     * Getter for the clientName
+     * Getter for the clientName.
      *
      * @return String clientName
      */
@@ -527,19 +546,11 @@ public class ClientHandler extends Thread {
      * Return a different string representation
      * of a client than default, use the clientName.
      *
-     * @return
+     * @return clients clientName
      */
     @Override
     public String toString() {
         return getClientName();
-    }
-
-    /**
-     * Method that forwards a request from Player
-     * to log the board to the console.
-     */
-    public void showBoard(Board board) {
-        server.updateObserver(board);
     }
 
     /**
@@ -552,8 +563,8 @@ public class ClientHandler extends Thread {
     }
 
     public boolean hasFeature(String feature) {
-        for (int i = 0; i < FEATURES.size(); i++) {
-            if (FEATURES.get(i).equals(feature)) {
+        for (int i = 0; i < features.size(); i++) {
+            if (features.get(i).equals(feature)) {
                 return true;
             }
         }
@@ -561,7 +572,7 @@ public class ClientHandler extends Thread {
     }
 
     /**
-     * Closes the client properly
+     * Closes the client properly.
      */
     public void closeClient() {
         try {

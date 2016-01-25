@@ -1,11 +1,11 @@
 package qwirkle.gamelogic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 public class Suggestion {
+
 	int x, y;
 	int score = 0;
 	List<StoneType> possiblePlacements;
@@ -46,4 +46,5 @@ public class Suggestion {
 	public String toString() {
 		return possiblePlacements.toString() + " score: " + score;
 	}
+
 }

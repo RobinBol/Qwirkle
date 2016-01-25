@@ -8,8 +8,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sun.org.apache.xml.internal.resolver.helpers.Debug;
-
 import qwirkle.gamelogic.Board;
 import qwirkle.gamelogic.StoneType;
 import qwirkle.gamelogic.Suggestion;

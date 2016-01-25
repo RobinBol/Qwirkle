@@ -5,19 +5,13 @@
 
 package qwirkle.server;
 
-import javax.net.ServerSocketFactory;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSocket;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
 
-import qwirkle.client.Client;
 import qwirkle.gamelogic.Lobby;
 import qwirkle.util.Input;
 import qwirkle.util.Protocol;
-import qwirkle.util.ProtocolHandler;
 import qwirkle.util.Validation;
 
 /**
@@ -38,7 +32,7 @@ public class Server extends Observable {
     private List<Lobby> lobbies;
 
     /* Keep track of features of the server */
-    private static String[] FEATURES = new String[]{Protocol.Server.Features.CHALLENGE};
+    private static String[] features = new String[]{Protocol.Server.Features.CHALLENGE};
 
     /* Keep track of outstanding invites */
     private Map<ClientHandler, ClientHandler> invites = new HashMap<>();
@@ -72,8 +66,6 @@ public class Server extends Observable {
     /**
      * Method that starts the Server and creates an SSL connection,
      * for potential clients. Returns the success value.
-     *
-     * @return success (of server startup)
      */
     public void startServer() {
 
@@ -81,11 +73,14 @@ public class Server extends Observable {
         updateObserver(ServerLogger.SETUP_STARTED);
 
         // Initialize and set certificate credentials for SSL connection
-        System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir").replace("src", "") + "/certs/keystore.jks");
+        System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir").replace(
+            "src", "") + "/certs/keystore.jks");
         System.setProperty("javax.net.ssl.keyStorePassword", "SSR0CKS");
 
         // If port entered by terminal, log server started
-        if (port != 0) updateObserver(ServerLogger.SERVER_STARTED + port);
+        if (port != 0) {
+            updateObserver(ServerLogger.SERVER_STARTED + port);
+        }
 
         // Check port validity, ask for a valid one if needed
         this.port = (port == 0) ? Input.askForPort(this) : port;
@@ -145,7 +140,7 @@ public class Server extends Observable {
     /**
      * Add clientHandler to internal list of handlers.
      *
-     * @param clientHandler
+     * @param clientHandler clientHandler to be added
      */
     public void addClientHandler(ClientHandler clientHandler) {
         this.clientHandlers.add(clientHandler);
@@ -154,7 +149,7 @@ public class Server extends Observable {
     /**
      * Remove clientHandler and disconnect remaining socket.
      *
-     * @param clientHandler
+     * @param clientHandler clientHandler to be removed
      */
     public void removeClientHandler(ClientHandler clientHandler) {
 
@@ -170,10 +165,10 @@ public class Server extends Observable {
 
     /**
      * Return clientHandler registered at a specific
-     * clientname
+     * clientname.
      *
-     * @param clientName
-     * @return clientHandler
+     * @param clientName Name of to be created clientHandler
+     * @return clientHandler The created clientHandler
      */
     public ClientHandler getClientHandler(String clientName) {
 
@@ -189,10 +184,10 @@ public class Server extends Observable {
     }
 
     /**
-     * Register invite from client
+     * Register invite from client.
      *
-     * @param inviter
-     * @param invitee
+     * @param inviter clientHandler that invites
+     * @param invitee clientHandler that gets invited
      */
     public void registerInvite(ClientHandler inviter, ClientHandler invitee) {
         invites.put(invitee, inviter);
@@ -200,10 +195,10 @@ public class Server extends Observable {
 
     /**
      * Remove invite from internal list, game has started
-     * or invite was aborted
+     * or invite was aborted.
      *
-     * @param inviter
-     * @param invitee
+     * @param inviter clientHandler that invites
+     * @param invitee clientHandler that gets invited
      */
     public void removeInvite(ClientHandler inviter, ClientHandler invitee) {
         invites.remove(invitee, inviter);
@@ -214,8 +209,8 @@ public class Server extends Observable {
      * Makes sure that invite gets cancelled and removed after
      * a set amount of time of no reaction.
      *
-     * @param inviter
-     * @param invitee
+     * @param inviter clientHandler that invites
+     * @param invitee clientHandler that gets invited
      */
     public void setTimeoutForInvite(ClientHandler inviter, ClientHandler invitee) {
 
@@ -226,9 +221,6 @@ public class Server extends Observable {
             public void run() {
                 // your code her
                 removeInvite(inviter, invitee);
-
-                // Get inviter clientHandler
-                ClientHandler opponent = getInviter(inviter);
 
                 // Send message to opponent to decline
                 inviter.sendDeclineInvite();
@@ -244,8 +236,8 @@ public class Server extends Observable {
      * When a client responses to an invite, reset the timeout,
      * to prevent duplicate method calls.
      *
-     * @param inviter
-     * @param invitee
+     * @param inviter clientHandler that invites
+     * @param invitee clientHandler that gets invited
      */
     public void resetInviteTimeout(ClientHandler inviter, ClientHandler invitee) {
         Map<ClientHandler, ClientHandler> compareMap = new HashMap<>();
@@ -272,10 +264,10 @@ public class Server extends Observable {
     }
 
     /**
-     * Get inviter, used to start a game with an oponnent
+     * Get inviter, used to start a game with an oponnent.
      *
-     * @param invitee
-     * @return
+     * @param invitee clientHandler that gets invited
+     * @return clientHandler that acted as inviter
      */
     public ClientHandler getInviter(ClientHandler invitee) {
         return invites.get(invitee);
@@ -318,7 +310,7 @@ public class Server extends Observable {
     /**
      * Add lobby to internal list of lobbies.
      *
-     * @param lobby
+     * @param lobby Lobby object to be added to the list
      */
     public void addLobby(Lobby lobby) {
         this.lobbies.add(lobby);
@@ -326,13 +318,15 @@ public class Server extends Observable {
 
     /**
      * Removes lobby.
+     *
+     * @param lobby Lobby that needs to be removed from the list
      */
     public void removeLobby(Lobby lobby) {
         lobbies.remove(lobby);
     }
 
     /**
-     * Removes client from lobby
+     * Removes client from lobby.
      *
      * @param client ClientHandler to remove
      */
@@ -355,7 +349,7 @@ public class Server extends Observable {
 
     /**
      * Adds a client to a lobby, if no lobby available
-     * or lobby is full it will create a new lobby
+     * or lobby is full it will create a new lobby.
      *
      * @param client ClientHandler to be added
      */
@@ -397,7 +391,7 @@ public class Server extends Observable {
      * @return String array holding the features
      */
     public String[] getFeatures() {
-        return this.FEATURES;
+        return this.features;
     }
 
     /**
@@ -405,7 +399,7 @@ public class Server extends Observable {
      * argument, on which the server will be listening for
      * clients.
      *
-     * @param args <port>
+     * @param args portNumber
      */
     public static void main(String[] args) {
 

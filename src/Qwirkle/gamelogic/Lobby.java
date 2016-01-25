@@ -5,8 +5,6 @@
 
 package qwirkle.gamelogic;
 
-
-import qwirkle.client.Client;
 import qwirkle.server.ClientHandler;
 import qwirkle.server.Server;
 import qwirkle.server.ServerLogger;
@@ -42,7 +40,7 @@ public class Lobby {
      * Lobby constructor creates a lobby, and takes
      * a server object for communication.
      *
-     * @param server
+     * @param server Server from which lobby was started
      */
     public Lobby(Server server) {
         this.lobbyClients = new ArrayList<>();
@@ -56,21 +54,6 @@ public class Lobby {
      * @param clients Clients to be used for the new game
      */
     public void startGame(ArrayList<ClientHandler> clients) {
-
-//        Code below can be commented out if we want to wait some time
-//        before starting the game, to give players a chance to
-//        disconnect/decline.
-
-//        for (int i = 0; i < clients.size(); i++) {
-//            clients.get(i).sendMessage("Game was found, players: " + clients + " game will start in 10 seconds. If you don't want to play this game, please disconnect.");
-//        }
-//
-//        // Wait for 12 seconds
-//        try {
-//            Thread.sleep(12000);
-//        } catch(InterruptedException ex) {
-//            Thread.currentThread().interrupt();
-//        }
 
         // Check if clients are still present
         boolean clientsPresent = true;
@@ -109,9 +92,7 @@ public class Lobby {
                 // And remove them from the lobby
                 this.removeClientFromLobby(clients.get(j));
             }
-        }
-        // Indicate a client has left
-        else {
+        } else {
 
             // Client left
             for (int i = 0; i < clients.size(); i++) {
@@ -187,8 +168,8 @@ public class Lobby {
     /**
      * Getter for game objects, can be fetch by clientHandler.
      *
-     * @param client
-     * @return Game
+     * @param client Client of which you want to retrieve the game
+     * @return Game the game client is in
      */
     public Game getGame(ClientHandler client) {
         for (int i = 0; i < this.games.size(); i++) {
@@ -202,7 +183,7 @@ public class Lobby {
     /**
      * After game was terminated, remove it from the lobby.
      *
-     * @param game
+     * @param game Game object that needs to be removed
      */
     public void endGame(Game game) {
         games.remove(game);
@@ -252,7 +233,7 @@ public class Lobby {
      * Removes client from lobby, for example when game is started,
      * or client disconnected.
      *
-     * @param clientHandler
+     * @param clientHandler ClientHandler that needs to be removed
      */
     public void removeClientFromLobby(ClientHandler clientHandler) {
 
@@ -298,7 +279,7 @@ public class Lobby {
     }
 
     /**
-     * Check if lobby is empty
+     * Check if lobby is empty.
      *
      * @return true if empty
      */

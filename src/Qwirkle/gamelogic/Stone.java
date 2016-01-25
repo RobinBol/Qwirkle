@@ -54,20 +54,26 @@ public class Stone {
     }
 
     public boolean isValidStone() {
-        if (allowedShape(getShape()) && allowedColor(getColor())) return true;
+        if (allowedShape(getShape()) && allowedColor(getColor())) {
+            return true;
+        }
         return false;
     }
 
     public static boolean allowedShape(char c) {
         for (int i = 0; i < SHAPES.length; i++) {
-            if (c == SHAPES[i]) return true;
+            if (c == SHAPES[i]) {
+                return true;
+            }
         }
         return false;
     }
 
     public static boolean allowedColor(char c) {
         for (int i = 0; i < COLORS.length; i++) {
-            if (c == COLORS[i]) return true;
+            if (c == COLORS[i]) {
+                return true;
+            }
         }
         return false;
     }

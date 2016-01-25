@@ -29,7 +29,10 @@ public class ClientGUI extends JPanel {
         //tests
         board.createTestMap();
         System.out.println(board);
-        Stone[] valid = new Stone[]{new Stone('B', 'A', -1, -1), new Stone('C', 'A', 0, -1), new Stone('D', 'A', 1, -1)};
+        Stone a = new Stone('B', 'A', -1, -1);
+        Stone b = new Stone('C', 'A', 0, -1);
+        Stone c = new Stone('D', 'A', 1, -1);
+        Stone[] valid = new Stone[]{a, b, c};
         board.makeMove(valid);
 
     }
@@ -37,11 +40,12 @@ public class ClientGUI extends JPanel {
     public void paint(Graphics g) {
         Map<String, Stone> boardMap = board.getBoard();
         int[] mapMiddle = board.getBoardWidthHeight();
-        this.xOffset = (WIDTH / 2);
-        this.yOffset = (HEIGHT / 2);
+        this.xOffset = WIDTH / 2;
+        this.yOffset = HEIGHT / 2;
         int iteration = 0;
         for (Stone stone : boardMap.values()) {
-            //g.fillRect(stone.getX() * (TILESIZE + TILESPACING) + xOffset, stone.getY() * (TILESIZE + TILESPACING) + yOffset, TILESIZE, TILESIZE);
+            //g.fillRect(stone.getX() * (TILESIZE + TILESPACING) +
+            // xOffset, stone.getY() * (TILESIZE + TILESPACING) + yOffset, TILESIZE, TILESIZE);
             drawPlus(g, stone.getX(), stone.getY());
             iteration++;
         }
@@ -51,8 +55,10 @@ public class ClientGUI extends JPanel {
     }
 
     public void drawPlus(Graphics g, int x, int y) {
-        g.fillRect(x * (TILESIZE + TILESPACING) + xOffset + ((TILESIZE / 2) - (TILESIZE / 6)), y * (TILESIZE + TILESPACING) + yOffset, TILESIZE / 3, TILESIZE);
-        g.fillRect(x * (TILESIZE + TILESPACING) + xOffset, y * (TILESIZE + TILESPACING) + yOffset + ((TILESIZE / 2) - (TILESIZE / 6)), TILESIZE, TILESIZE / 3);
+        g.fillRect(x * (TILESIZE + TILESPACING) + xOffset + ((TILESIZE / 2) -
+            (TILESIZE / 6)), y * (TILESIZE + TILESPACING) + yOffset, TILESIZE / 3, TILESIZE);
+        g.fillRect(x * (TILESIZE + TILESPACING) + xOffset, y * (TILESIZE +
+            TILESPACING) + yOffset + ((TILESIZE / 2) - (TILESIZE / 6)), TILESIZE, TILESIZE / 3);
     }
 
     public static void main(String[] args) {

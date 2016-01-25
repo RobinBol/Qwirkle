@@ -7,7 +7,6 @@
 
 package qwirkle.gamelogic;
 
-import qwirkle.client.Client;
 import qwirkle.server.ClientHandler;
 
 import java.util.ArrayList;
@@ -52,8 +51,8 @@ public class Game {
      * so that the game can create its players and have a reference
      * to the lobby from which it was created.
      *
-     * @param clients
-     * @param lobby
+     * @param clients Players in the game
+     * @param lobby   Lobby from which they were fetched
      */
     public Game(ArrayList<ClientHandler> clients, Lobby lobby) {
 
@@ -98,6 +97,8 @@ public class Game {
 
     /**
      * Take stone from the bag.
+     *
+     * @return A newly compased array of stones for a hand
      */
     public Stone[] getFirstHand() {
         Stone[] hand = new Stone[Game.MAXHANDSIZE];
@@ -120,6 +121,8 @@ public class Game {
      * Forwards a make move from a client, to the board.
      *
      * @param stones Stone array
+     * @param client Clienthandler that makes a move
+     * @return int holding score of move (-1 if invalid)
      */
     public int makeMove(Stone[] stones, ClientHandler client) {
 
@@ -214,8 +217,10 @@ public class Game {
             moveOrder.add(highestScoreClient);
             moveOrder.add(secondHighestScoreClient);
             for (int i = 0; i < clients.size(); i++) {
-                if (!clients.get(i).getClientName().equalsIgnoreCase(highestScoreClient.getClientName())
-                        && !clients.get(i).getClientName().equalsIgnoreCase(secondHighestScoreClient.getClientName())) {
+                if (!clients.get(i).getClientName().equalsIgnoreCase(
+                    highestScoreClient.getClientName())
+                    && !clients.get(i).getClientName().equalsIgnoreCase(
+                    secondHighestScoreClient.getClientName())) {
                     // Do not re add highest score client and second highest score client
                     moveOrder.add(clients.get(i));
                 }
@@ -236,7 +241,8 @@ public class Game {
      * Takes a client as parameter, and skips the turn
      * for this client. Gives the turn to the next
      * player in the row.
-     * @param client
+     *
+     * @param client Clienthandler that skips a turn
      */
     public void skipTurn(ClientHandler client) {
 
@@ -272,13 +278,14 @@ public class Game {
     }
 
     /**
-     * Send message to all clients, about who made a move, what move, and who is next
+     * Send message to all clients, about who made a move, what move, and who is next.
      *
-     * @param currentClient
-     * @param nextClient
-     * @param move
+     * @param currentClient ClientHandler that made a move
+     * @param nextClient    ClientHandler that gets the turn
+     * @param move          Move that currentClient made
      */
-    public void broadcastNextTurn(ClientHandler currentClient, ClientHandler nextClient, Stone[] move) {
+    public void broadcastNextTurn(ClientHandler currentClient,
+                                  ClientHandler nextClient, Stone[] move) {
 
         // Prevent looping over stones if user skips turn (no stones)
         if (move != null) {
@@ -287,7 +294,9 @@ public class Game {
             ArrayList<Stone> newStones = new ArrayList<>();
             for (int i = 0; i < move.length; i++) {
                 Stone stone = this.bag.takeStone();
-                if (stone != null) newStones.add(stone);
+                if (stone != null) {
+                    newStones.add(stone);
+                }
             }
 
             // Give currentClient new stones
