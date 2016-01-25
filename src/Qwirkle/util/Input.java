@@ -20,6 +20,8 @@ public class Input {
      * @param asker    Object whom wants to ask something
      * @return String with the input
      */
+    /*@ requires question != null && !question.isEmpty() && asker != null && typeof asker ==
+     Client || typeof asker == Server */
     public static String ask(String question, Object asker) {
 
         if (asker instanceof Server) {
@@ -49,6 +51,9 @@ public class Input {
      * @param asker Object whom wants to ask something
      * @return int valid port number
      */
+    /*@ requires asker != null && typeof asker ==
+     Client || typeof asker == Server
+     ensures \result >= 0 && 65535 > \result */
     public static int askForPort(Object asker) {
         return askForPort(asker, null);
     }
@@ -62,6 +67,8 @@ public class Input {
      * @param enteredPort String used to recursively test input
      * @return int valid port number
      */
+    /*@ requires asker != null && typeof asker ==
+     Client || typeof asker == Server */
     public static int askForPort(Object asker, String enteredPort) {
         String port = enteredPort;
         // If no provided as argument, ask for it
@@ -100,6 +107,9 @@ public class Input {
      * @param asker Object whom wants to ask something
      * @return String valid host address
      */
+    /*@ requires asker != null && typeof asker ==
+     Client || typeof asker == Server
+     ensures Validation.checkIP(\result) */
     public static String askForHostAddress(Object asker) {
         return askForHostAddress(asker, null);
     }
@@ -111,6 +121,8 @@ public class Input {
      * @param enteredAddress String used to recursively test input
      * @return String valid host address
      */
+    /*@ requires asker != null && typeof asker ==
+     Client || typeof asker == Server */
     public static String askForHostAddress(Object asker, String enteredAddress) {
         String address = enteredAddress;
 
@@ -136,6 +148,9 @@ public class Input {
      * @param asker Object whom wants to ask something
      * @return String valid username
      */
+    /*@ requires asker != null && typeof asker ==
+     Client || typeof asker == Server
+     ensures \result != null */
     public static String askForUsername(Object asker) {
         return askForUsername(asker, null);
     }
@@ -147,6 +162,8 @@ public class Input {
      * @param enteredUsername String used to recursively test input
      * @return String valid username
      */
+    /*@ requires asker != null && typeof asker ==
+     Client || typeof asker == Server */
     public static String askForUsername(Object asker, String enteredUsername) {
         String username = enteredUsername;
 
@@ -179,6 +196,9 @@ public class Input {
      * @param asker Object whom wants to ask something
      * @return int gameType
      */
+     /*@ requires asker != null && typeof asker ==
+     Client || typeof asker == Server
+     ensures \result >= 0 && 6 <= \result */
     public static int askForGameType(Object asker) {
         return askForGameType(asker, null);
     }
@@ -190,6 +210,8 @@ public class Input {
      * @param enteredGameType String used to recursively test input
      * @return int gameType
      */
+    /*@ requires asker != null && typeof asker ==
+     Client || typeof asker == Server */
     public static int askForGameType(Object asker, String enteredGameType) {
         String gameType = enteredGameType;
 
@@ -221,6 +243,9 @@ public class Input {
      * @param asker Object whom wants to ask something
      * @return String playername
      */
+    /*@ requires asker != null && typeof asker ==
+     Client || typeof asker == Server
+     ensures \result != null */
     public static String askForOpponent(Object asker) {
         return ask("Please provide the name of the player you would like to challenge:", asker);
     }
@@ -232,6 +257,8 @@ public class Input {
      * @param handSize int used to recursively test input
      * @return String stone chosen
      */
+    /*@ requires asker != null && typeof asker ==
+     Client || typeof asker == Server */
     public static String askForStone(Object asker, int handSize) {
 
         // Ask to make a move
@@ -285,6 +312,9 @@ public class Input {
      * @param asker Object whom wants to ask something
      * @return String containing stone position
      */
+    /*@ requires asker != null && typeof asker ==
+     Client || typeof asker == Server
+     ensures \result != null */
     public static String askForStonePosition(Object asker) {
 
         // Ask for position
@@ -325,7 +355,7 @@ public class Input {
             invalidPosition = true;
         }
 
-        // While user provides invalid position, ask for valid inptu
+        // While user provides invalid position, ask for valid input
         while (invalidPosition) {
 
             // Indicate invalid format, retry
@@ -369,6 +399,8 @@ public class Input {
      * @param client Client that needs to be asked for a move
      * @return Stone[] with valid stones
      */
+    /*@ requires client != null
+    ensures \result != null */
     public static Stone[] askForMove(Client client) {
 
         // Get current hand of the player
@@ -428,4 +460,3 @@ public class Input {
         return move.toArray(moveArray);
     }
 }
-
