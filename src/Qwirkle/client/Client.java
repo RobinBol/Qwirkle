@@ -161,16 +161,16 @@ public class Client extends Observable implements Runnable {
      * instance variables; in and out, to be the incoming
      * and outgoing buffer.
      *
-     * @param socket
+     * @param socket Socket from which i/o should be created
      */
     public void setupIOStreams(Socket socket) {
         try {
 
             // Setup input and output streams
             InputStreamReader inputstreamreader =
-                    new InputStreamReader(socket.getInputStream());
+                new InputStreamReader(socket.getInputStream());
             OutputStreamWriter outputstreamwriter =
-                    new OutputStreamWriter(socket.getOutputStream());
+                new OutputStreamWriter(socket.getOutputStream());
 
             // Store them to be used by instance
             this.in = new BufferedReader(inputstreamreader);
@@ -194,6 +194,8 @@ public class Client extends Observable implements Runnable {
 
     /**
      * Stores matched features with server.
+     *
+     * @param feature String representing feature that needs to be saved
      */
     public void saveMatchedFeature(String feature) {
         this.commonFeatures.add(feature);
@@ -202,7 +204,8 @@ public class Client extends Observable implements Runnable {
     /**
      * Checks if client has certain feature.
      *
-     * @param feature
+     * @param feature String representing feature that has to be found
+     * @return true if has feature
      */
     public boolean hasFeature(String feature) {
         for (int i = 0; i < this.features.length; i++) {
@@ -216,7 +219,7 @@ public class Client extends Observable implements Runnable {
     /**
      * Store player object.
      *
-     * @param player
+     * @param player Player object that has to be stored
      */
     public void setPlayer(Player player) {
         this.player = player;
@@ -225,7 +228,7 @@ public class Client extends Observable implements Runnable {
     /**
      * Return player object.
      *
-     * @return
+     * @return Player object belonging to client
      */
     public Player getPlayer() {
         return this.player;
@@ -260,7 +263,7 @@ public class Client extends Observable implements Runnable {
     /**
      * Updates observer with messages.
      *
-     * @param message
+     * @param message String that holds message to be printed
      */
     public void updateObserver(String message) {
         setChanged();
@@ -269,6 +272,8 @@ public class Client extends Observable implements Runnable {
 
     /**
      * Send a move made by the client to the server.
+     *
+     * @param stones holding all stones in the move
      */
     public void sendMove(Stone[] stones) {
         // Create parameters array
@@ -279,8 +284,8 @@ public class Client extends Observable implements Runnable {
 
             // Add them properly formatted as parameter
             parameters.add("" + stones[i].getColor() + stones[i].getShape()
-                    + Protocol.Server.Settings.DELIMITER2 + stones[i].getX()
-                    + Protocol.Server.Settings.DELIMITER2 + stones[i].getY());
+                + Protocol.Server.Settings.DELIMITER2 + stones[i].getX()
+                + Protocol.Server.Settings.DELIMITER2 + stones[i].getY());
         }
 
         // Send package according to protocol
@@ -289,6 +294,8 @@ public class Client extends Observable implements Runnable {
 
     /**
      * Gets name of client.
+     *
+     * @return String name of this client
      */
     public String getName() {
         return this.name;
@@ -296,10 +303,10 @@ public class Client extends Observable implements Runnable {
 
     /**
      * Handles starting of the client, parses the args
-     * given to the program (<name> <host> <port>) or uses
+     * given to the program (name host port) or uses
      * default values if none are provided.
      *
-     * @param args <name> <host> <port>
+     * @param args name host port
      */
     public static void main(String[] args) {
 

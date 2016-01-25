@@ -60,7 +60,7 @@ public class ClientHandler extends Thread {
      *
      * @param server QwirkleServer on which the client connects
      * @param sock   Socket used to read from/write to client
-     * @throws IOException
+     * @throws IOException if something failes regarding the socket
      */
     public ClientHandler(Server server, Socket sock) throws IOException {
         this.server = server;
@@ -260,7 +260,7 @@ public class ClientHandler extends Thread {
      * Sends ADDTOHAND message to client. Takes
      * a stone array as parameter.
      *
-     * @param stones
+     * @param stones Stone array holding all stones need to be send to the hand
      */
     public void sendAddToHand(Stone[] stones) {
 
@@ -289,9 +289,9 @@ public class ClientHandler extends Thread {
      * Sends a give turn message to the client, indicating whose turn
      * it is, whose it was, and what move was made.
      *
-     * @param currentClient
-     * @param nextClient
-     * @param stones
+     * @param currentClient Client that performed a move
+     * @param nextClient    Client that gets the turn
+     * @param stones        Move that was made by the currentClient
      */
     public void giveTurn(ClientHandler currentClient, ClientHandler nextClient, Stone[] stones) {
 
@@ -329,7 +329,7 @@ public class ClientHandler extends Thread {
      * Method that initiates a server broadcast to let
      * all clients know a new client has connected.
      *
-     * @throws IOException
+     * @throws IOException when sending fails
      */
     public void waitForHandshake() throws IOException {
 
@@ -437,7 +437,7 @@ public class ClientHandler extends Thread {
      * Add lobby to this clientHandler to keep
      * track of the lobby a client is in.
      *
-     * @param lobby
+     * @param lobby Lobby object to be saved as this.lobby
      */
     public void setLobby(Lobby lobby) {
         this.lobby = lobby;
@@ -447,7 +447,7 @@ public class ClientHandler extends Thread {
      * Send message to client that game has ended, indicate
      * how the game has ended by giving the type parameter.
      *
-     * @param type
+     * @param type Description of how game ended
      */
     public void sendGameEnd(String type) {
 
@@ -461,8 +461,8 @@ public class ClientHandler extends Thread {
      * if end is caused by a winner, also send the name of
      * the winner along.
      *
-     * @param type
-     * @param winner
+     * @param type   Description of how game ended
+     * @param winner If game ended by winning, send the winner
      */
     public void sendGameEnd(String type, String winner) {
 
@@ -546,19 +546,11 @@ public class ClientHandler extends Thread {
      * Return a different string representation
      * of a client than default, use the clientName.
      *
-     * @return
+     * @return clients clientName
      */
     @Override
     public String toString() {
         return getClientName();
-    }
-
-    /**
-     * Method that forwards a request from Player
-     * to log the board to the console.
-     */
-    public void showBoard(Board board) {
-        server.updateObserver(board);
     }
 
     /**

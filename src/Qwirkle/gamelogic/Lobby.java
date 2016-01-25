@@ -40,7 +40,7 @@ public class Lobby {
      * Lobby constructor creates a lobby, and takes
      * a server object for communication.
      *
-     * @param server
+     * @param server Server from which lobby was started
      */
     public Lobby(Server server) {
         this.lobbyClients = new ArrayList<>();
@@ -168,8 +168,8 @@ public class Lobby {
     /**
      * Getter for game objects, can be fetch by clientHandler.
      *
-     * @param client
-     * @return Game
+     * @param client Client of which you want to retrieve the game
+     * @return Game the game client is in
      */
     public Game getGame(ClientHandler client) {
         for (int i = 0; i < this.games.size(); i++) {
@@ -183,7 +183,7 @@ public class Lobby {
     /**
      * After game was terminated, remove it from the lobby.
      *
-     * @param game
+     * @param game Game object that needs to be removed
      */
     public void endGame(Game game) {
         games.remove(game);
@@ -233,7 +233,7 @@ public class Lobby {
      * Removes client from lobby, for example when game is started,
      * or client disconnected.
      *
-     * @param clientHandler
+     * @param clientHandler ClientHandler that needs to be removed
      */
     public void removeClientFromLobby(ClientHandler clientHandler) {
 

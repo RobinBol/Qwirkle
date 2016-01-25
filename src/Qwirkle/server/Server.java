@@ -66,8 +66,6 @@ public class Server extends Observable {
     /**
      * Method that starts the Server and creates an SSL connection,
      * for potential clients. Returns the success value.
-     *
-     * @return success (of server startup)
      */
     public void startServer() {
 
@@ -142,7 +140,7 @@ public class Server extends Observable {
     /**
      * Add clientHandler to internal list of handlers.
      *
-     * @param clientHandler
+     * @param clientHandler clientHandler to be added
      */
     public void addClientHandler(ClientHandler clientHandler) {
         this.clientHandlers.add(clientHandler);
@@ -151,7 +149,7 @@ public class Server extends Observable {
     /**
      * Remove clientHandler and disconnect remaining socket.
      *
-     * @param clientHandler
+     * @param clientHandler clientHandler to be removed
      */
     public void removeClientHandler(ClientHandler clientHandler) {
 
@@ -169,8 +167,8 @@ public class Server extends Observable {
      * Return clientHandler registered at a specific
      * clientname.
      *
-     * @param clientName
-     * @return clientHandler
+     * @param clientName Name of to be created clientHandler
+     * @return clientHandler The created clientHandler
      */
     public ClientHandler getClientHandler(String clientName) {
 
@@ -188,8 +186,8 @@ public class Server extends Observable {
     /**
      * Register invite from client.
      *
-     * @param inviter
-     * @param invitee
+     * @param inviter clientHandler that invites
+     * @param invitee clientHandler that gets invited
      */
     public void registerInvite(ClientHandler inviter, ClientHandler invitee) {
         invites.put(invitee, inviter);
@@ -199,8 +197,8 @@ public class Server extends Observable {
      * Remove invite from internal list, game has started
      * or invite was aborted.
      *
-     * @param inviter
-     * @param invitee
+     * @param inviter clientHandler that invites
+     * @param invitee clientHandler that gets invited
      */
     public void removeInvite(ClientHandler inviter, ClientHandler invitee) {
         invites.remove(invitee, inviter);
@@ -211,8 +209,8 @@ public class Server extends Observable {
      * Makes sure that invite gets cancelled and removed after
      * a set amount of time of no reaction.
      *
-     * @param inviter
-     * @param invitee
+     * @param inviter clientHandler that invites
+     * @param invitee clientHandler that gets invited
      */
     public void setTimeoutForInvite(ClientHandler inviter, ClientHandler invitee) {
 
@@ -238,8 +236,8 @@ public class Server extends Observable {
      * When a client responses to an invite, reset the timeout,
      * to prevent duplicate method calls.
      *
-     * @param inviter
-     * @param invitee
+     * @param inviter clientHandler that invites
+     * @param invitee clientHandler that gets invited
      */
     public void resetInviteTimeout(ClientHandler inviter, ClientHandler invitee) {
         Map<ClientHandler, ClientHandler> compareMap = new HashMap<>();
@@ -268,8 +266,8 @@ public class Server extends Observable {
     /**
      * Get inviter, used to start a game with an oponnent.
      *
-     * @param invitee
-     * @return
+     * @param invitee clientHandler that gets invited
+     * @return clientHandler that acted as inviter
      */
     public ClientHandler getInviter(ClientHandler invitee) {
         return invites.get(invitee);
@@ -312,7 +310,7 @@ public class Server extends Observable {
     /**
      * Add lobby to internal list of lobbies.
      *
-     * @param lobby
+     * @param lobby Lobby object to be added to the list
      */
     public void addLobby(Lobby lobby) {
         this.lobbies.add(lobby);
@@ -320,6 +318,8 @@ public class Server extends Observable {
 
     /**
      * Removes lobby.
+     *
+     * @param lobby Lobby that needs to be removed from the list
      */
     public void removeLobby(Lobby lobby) {
         lobbies.remove(lobby);
@@ -399,7 +399,7 @@ public class Server extends Observable {
      * argument, on which the server will be listening for
      * clients.
      *
-     * @param args <port>
+     * @param args portNumber
      */
     public static void main(String[] args) {
 

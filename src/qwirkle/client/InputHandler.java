@@ -32,8 +32,8 @@ public class InputHandler extends Thread {
     /**
      * Constructor takes a client an input.
      *
-     * @param client
-     * @param input
+     * @param client Client from which input handler is created
+     * @param input  BufferedReader holding the input
      */
     public InputHandler(Client client, BufferedReader input) {
         this.client = client;

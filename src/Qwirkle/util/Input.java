@@ -17,6 +17,8 @@ public class Input {
      * input.
      *
      * @param question Question to ask the user
+     * @param asker    Object whom wants to ask something
+     * @return String with the input
      */
     public static String ask(String question, Object asker) {
 
@@ -44,6 +46,7 @@ public class Input {
      * invalid input is provided it will keep asking
      * for valid input.
      *
+     * @param asker Object whom wants to ask something
      * @return int valid port number
      */
     public static int askForPort(Object asker) {
@@ -55,6 +58,8 @@ public class Input {
      * invalid input is provided it will keep asking
      * for valid input.
      *
+     * @param asker       Object whom wants to ask something
+     * @param enteredPort String used to recursively test input
      * @return int valid port number
      */
     public static int askForPort(Object asker, String enteredPort) {
@@ -92,6 +97,7 @@ public class Input {
     /**
      * Ask user to give a valid host address for the server.
      *
+     * @param asker Object whom wants to ask something
      * @return String valid host address
      */
     public static String askForHostAddress(Object asker) {
@@ -101,6 +107,8 @@ public class Input {
     /**
      * Ask user to give a valid host address for the server.
      *
+     * @param asker          Object whom wants to ask something
+     * @param enteredAddress String used to recursively test input
      * @return String valid host address
      */
     public static String askForHostAddress(Object asker, String enteredAddress) {
@@ -125,6 +133,7 @@ public class Input {
     /**
      * Ask user to give a username.
      *
+     * @param asker Object whom wants to ask something
      * @return String valid username
      */
     public static String askForUsername(Object asker) {
@@ -134,6 +143,8 @@ public class Input {
     /**
      * Ask user to give a username.
      *
+     * @param asker           Object whom wants to ask something
+     * @param enteredUsername String used to recursively test input
      * @return String valid username
      */
     public static String askForUsername(Object asker, String enteredUsername) {
@@ -165,6 +176,7 @@ public class Input {
     /**
      * Ask user to give a valid game type.
      *
+     * @param asker Object whom wants to ask something
      * @return int gameType
      */
     public static int askForGameType(Object asker) {
@@ -174,7 +186,8 @@ public class Input {
     /**
      * Ask user to give a valid game type.
      *
-     * @param enteredGameType gameType, to check if valid
+     * @param asker           Object whom wants to ask something
+     * @param enteredGameType String used to recursively test input
      * @return int gameType
      */
     public static int askForGameType(Object asker, String enteredGameType) {
@@ -205,6 +218,7 @@ public class Input {
     /**
      * Ask user to give a valid opponent to challenge.
      *
+     * @param asker Object whom wants to ask something
      * @return String playername
      */
     public static String askForOpponent(Object asker) {
@@ -214,9 +228,9 @@ public class Input {
     /**
      * Ask user for a valid stone input.
      *
-     * @param asker
-     * @param handSize
-     * @return
+     * @param asker    Object whom wants to ask something
+     * @param handSize int used to recursively test input
+     * @return String stone chosen
      */
     public static String askForStone(Object asker, int handSize) {
 
@@ -268,8 +282,8 @@ public class Input {
     /**
      * Ask a user for a valid stone position.
      *
-     * @param asker
-     * @return
+     * @param asker Object whom wants to ask something
+     * @return String containing stone position
      */
     public static String askForStonePosition(Object asker) {
 
@@ -352,7 +366,7 @@ public class Input {
      * Asks a user for a valid move. Using the ask for stone,
      * and ask for stone position methods.
      *
-     * @param client
+     * @param client Client that needs to be asked for a move
      * @return Stone[] with valid stones
      */
     public static Stone[] askForMove(Client client) {

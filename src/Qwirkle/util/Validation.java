@@ -5,7 +5,7 @@ public class Validation {
      * Checks a string to be a valid ip address
      *
      * @param host ip address String
-     * @return
+     * @return boolean that indicates a valid/invalid ip
      */
     public static boolean checkIP(String host) {
 
@@ -35,8 +35,8 @@ public class Validation {
     /**
      * Checks a string to be a valid port
      *
-     * @param port
-     * @return
+     * @param port String port that needs to be validated
+     * @return boolean that indicates a valid/invalid port
      */
     public static boolean checkPort(String port) {
         try {
