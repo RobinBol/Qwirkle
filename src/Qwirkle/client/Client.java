@@ -297,6 +297,21 @@ public class Client extends Observable implements Runnable {
         // Send package according to protocol
         sendMessage(ProtocolHandler.createPackage(Protocol.Client.MAKEMOVE, parameters));
     }
+    
+    public void sendTrade(Stone[] stones) {
+    	 // Create parameters array
+        ArrayList<Object> parameters = new ArrayList<>();
+
+        // Loop over all stones
+        for (int i = 0; i < stones.length; i++) {
+
+            // Add them properly formatted as parameter
+            parameters.add("" + stones[i].getColor() + stones[i].getShape());
+        }
+
+        // Send package according to protocol
+        sendMessage(ProtocolHandler.createPackage(Protocol.Client.CHANGESTONE, parameters));
+    }
 
     /**
      * Gets name of client.
@@ -318,34 +333,42 @@ public class Client extends Observable implements Runnable {
     	skippedTurn = false;
         // Store the hand to be able to reset
         getPlayer().saveHand();
+        
+        int turnType = Input.askForMoveOrTrade(this);
+        
+        if (turnType == 1) {
+        	// Ask user to input move
+            Stone[] move = Input.askForMove(this);
 
-        // Ask user to input move
-        Stone[] move = Input.askForMove(this);
+            if (move.length != 0) {
 
-        if (move.length != 0) {
+                // Make the move locally, and get score
+                int score = getPlayer().makeMove(move);
 
-            // Make the move locally, and get score
-            int score = getPlayer().makeMove(move);
+                // TODO handle cases below
+                if (score != -1) {
+                    // Move is valid on local board, now send to server
+                    sendMove(move);
+                    
+                } else {
+                    // Locally placed an invalid move
+                    Logger.print("Invalid move entered, retry:");
 
-            // TODO handle cases below
-            if (score != -1) {
-                // Move is valid on local board, now send to server
-                sendMove(move);
-                
+                    // Make sure hand and board are reset to prev state
+                    getPlayer().undoLastMove();
+
+                    // Recursively call this method till valid move
+                    makeMove();
+                }
             } else {
-                // Locally placed an invalid move
-                Logger.print("Invalid move entered, retry:");
-
-                // Make sure hand and board are reset to prev state
-                getPlayer().undoLastMove();
-
-                // Recursively call this method till valid move
-                makeMove();
+                // No move made, skip turn
+                sendMove(move);
+                skippedTurn = true;
             }
-        } else {
-            // No move made, skip turn
-            sendMove(move);
-            skippedTurn = true;
+        }
+        else if (turnType == 2) {
+        	Stone[] stones = Input.askForTradeStones(this);
+        	sendTrade(stones);
         }
     }
 

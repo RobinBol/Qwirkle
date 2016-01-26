@@ -6,6 +6,8 @@ import qwirkle.server.Server;
 import qwirkle.server.ServerLogger;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -390,6 +392,60 @@ public class Input {
 
         // Return x and y position as a string
         return x + "_" + y;
+    }
+    
+    public static int askForMoveOrTrade(Client client) {
+    	
+    	// Update current hand
+        ArrayList<Stone> hand = client.getPlayer().getHand();
+
+        // Log the board to let the player fill it in
+        Logger.print("The current board:");
+        Logger.print("\n" + client.getPlayer().getBoard());
+
+        // Print out the hand to read for the player
+        Logger.print("Your current hand:");
+        for (int i = 0; i < hand.size(); i++) {
+            Logger.print("Stone " + (i + 1) + ": " + hand.get(i));
+        }
+    	
+    	while (true) {
+    		String answer = ask("Type 1 for stone placement or 2 for trading stones:", client);
+    		
+    		if (answer.charAt(0) == '1') {
+    			return 1;
+    		}
+    		if (answer.charAt(0) == '2') {
+    			return 2;
+    		} else {
+    			return -1;
+    		}
+    	}
+    }
+    
+    public static Stone[] askForTradeStones(Client client) {
+    	List<Stone> stones = new ArrayList<>();
+    	String answer = ask("Enter the numbers of the stones you want to trade with the bag, use spaces.", client);
+    	List<Stone> hand = client.getPlayer().getHand(); 
+    	int count = 0;
+    	
+    	Scanner scanner = new Scanner(answer);
+    	List<Integer> indexes = new ArrayList<>(); 
+    	while (scanner.hasNextInt() && count < hand.size()) {
+    		int index = scanner.nextInt();
+    		if (index <= hand.size() && index > 0 && !indexes.contains(index)) {
+    			indexes.add(index);
+    		}
+    		
+    	}
+    	int count2 = 0;
+    	for (Integer i : indexes) {
+    		stones.add(hand.get(i - 1 - count2));
+    		hand.remove(i - 1 - count2);
+    		count2++;
+    	}
+    	scanner.close();
+    	return stones.toArray(new Stone[stones.size()]);
     }
 
     /**

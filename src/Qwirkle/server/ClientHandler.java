@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 import static qwirkle.util.Protocol.Client.DECLINEINVITE;
 
@@ -187,6 +188,20 @@ public class ClientHandler extends Thread {
                                 // Make sure to reset timer
                                 server.resetInviteTimeout(this, opponent);
                             }
+                        } else if (result.get(0).equals(Protocol.Client.CHANGESTONE)) {
+                        	//change stones.
+                        	Game game = this.getLobby().getGame(this);
+                        	List<Stone> stones = new ArrayList<>();
+                        	for (int i = 1; i < result.size(); i++) {
+                        		String stone = (String) result.get(i);
+                        		stones.add(new Stone(stone.charAt(0),stone.charAt(1)));
+                        	}
+                        	Stone[] toHand = game.changeStones(stones.toArray(new Stone[stones.size()]));
+                        	
+                        	sendAddToHand(toHand);
+                        	//skip turn
+                        	game.skipTurn(this);
+                        	
 
                         } else if (result.get(0).equals(Protocol.Client.MAKEMOVE)) {
 
@@ -282,6 +297,7 @@ public class ClientHandler extends Thread {
             // Create single stone parameter
             parameters.add("" + stones[i].getColor() + stones[i].getShape());
         }
+        System.out.println(parameters);
 
         // Send package to client to give its initial hand
         sendMessage(ProtocolHandler.createPackage(Protocol.Server.ADDTOHAND, parameters));

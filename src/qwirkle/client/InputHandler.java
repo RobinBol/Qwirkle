@@ -204,10 +204,13 @@ public class InputHandler extends Thread {
                         getGameType();
                     } else if (result.get(0).equals(Protocol.Server.ADDTOHAND)) {
                         for (int i = 1; i < result.size(); i++) {
-                            Stone stone = new Stone(String.valueOf(result.get(i)).charAt(1),
-                                String.valueOf(result.get(i)).charAt(0));
+                        	String string = (String)result.get(i); 
+                            Stone stone = new Stone(string.charAt(0), string.charAt(1));
                             client.getPlayer().addStoneToHand(stone);
                         }
+                        //make sure stones aren't undone when traded. Usually getting stones mean u didn't do a move.
+                        client.getPlayer().getBoard().removeLastMoves();
+                        client.getPlayer().saveHand();
                     }
                 }
 

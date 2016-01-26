@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.validator.PublicClassValidator;
+
 /**
  * This class handles everything related to a game. It can be started
  * by creating a new game object, and giving the clients and the lobby
@@ -107,6 +109,8 @@ public class Game {
         }
         return hand;
     }
+    
+    
 
     /**
      * Forwards a make move from a client, to the board.
@@ -171,6 +175,7 @@ public class Game {
                 return -1;
             }
         }
+     
 
         // All first moves are in
         if (firstMove && firstMoves.size() == clients.size()) {
@@ -239,6 +244,13 @@ public class Game {
 
         // Return score to see if valid move
         return score;
+    }
+    
+    /**
+     * Changes out stones.
+     */
+    public Stone[] changeStones(Stone[] stones) {
+    	return bag.tradeStones(stones);
     }
 
     /**
@@ -313,7 +325,7 @@ public class Game {
             // Send all client give turn message
             clients.get(j).giveTurn(currentClient, nextClient, move);
         }
-    }
+    }   
 
     /**
      * Handles terminating the game, sends game end to all
