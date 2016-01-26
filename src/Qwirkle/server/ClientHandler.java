@@ -6,7 +6,6 @@
 
 package qwirkle.server;
 
-import qwirkle.gamelogic.Board;
 import qwirkle.gamelogic.Game;
 import qwirkle.gamelogic.Lobby;
 import qwirkle.gamelogic.Stone;
@@ -54,6 +53,12 @@ public class ClientHandler extends Thread {
     /* Keep track of in game mode */
     private boolean inGame = false;
 
+    /*@
+    invariant getClientName() == clientName
+    invariant server != null
+    invariant lobby != null && lobby == getLobby()
+     */
+
     /**
      * ClientHandler constructor, takes a QwirkleServer and Socket,
      * then handles all incoming messages from the client.
@@ -62,6 +67,7 @@ public class ClientHandler extends Thread {
      * @param sock   Socket used to read from/write to client
      * @throws IOException if something failes regarding the socket
      */
+    //@ requires server != null && sock != null
     public ClientHandler(Server server, Socket sock) throws IOException {
         this.server = server;
         this.socket = sock;
@@ -253,6 +259,7 @@ public class ClientHandler extends Thread {
      *
      * @param error ArrayList holding the error object
      */
+    //@ requires error != null
     public void handleIncomingError(ArrayList<Object> error) {
         //TODO handle incoming errors
     }
@@ -263,6 +270,7 @@ public class ClientHandler extends Thread {
      *
      * @param stones Stone array holding all stones need to be send to the hand
      */
+    //@ requires stones != null && stones.size() > 0
     public void sendAddToHand(Stone[] stones) {
 
         // Create new arraylist with parameters
@@ -294,6 +302,7 @@ public class ClientHandler extends Thread {
      * @param nextClient    Client that gets the turn
      * @param stones        Move that was made by the currentClient
      */
+    //@requires nextClient != null && stones != null
     public void giveTurn(ClientHandler currentClient, ClientHandler nextClient, Stone[] stones) {
 
         // Create new arraylist with parameters
@@ -386,6 +395,7 @@ public class ClientHandler extends Thread {
      *
      * @param message Message to send
      */
+    //@ requires message != null
     private void sendMessage(String message) {
         try {
             this.out.write(message);
@@ -404,6 +414,7 @@ public class ClientHandler extends Thread {
      * Handles properly removing a client from the server, lobby and games
      * it might be in.
      */
+    //@ requires disconnected == false
     public void disconnectClient() {
 
         // Make sure client doesn't get disconnected more than once
@@ -431,7 +442,8 @@ public class ClientHandler extends Thread {
      *
      * @return Lobby of client
      */
-    public Lobby getLobby() {
+    //@ requires lobby != null
+    /*@ pure */ public Lobby getLobby() {
         return this.lobby;
     }
 
@@ -441,6 +453,8 @@ public class ClientHandler extends Thread {
      *
      * @param lobby Lobby object to be saved as this.lobby
      */
+    //@ requires lobby != null
+    //@ ensures getLobby() == lobby
     public void setLobby(Lobby lobby) {
         this.lobby = lobby;
     }
@@ -451,6 +465,7 @@ public class ClientHandler extends Thread {
      *
      * @param type Description of how game ended
      */
+    //@ requires type != null && type.length > 0
     public void sendGameEnd(String type) {
 
         // Forward method call
@@ -466,6 +481,7 @@ public class ClientHandler extends Thread {
      * @param type   Description of how game ended
      * @param winner If game ended by winning, send the winner
      */
+    //@ requires type != null && type.length > 0
     public void sendGameEnd(String type, String winner) {
 
         // Create parameters list
@@ -490,6 +506,7 @@ public class ClientHandler extends Thread {
      *
      * @param clients List of clients in the game
      */
+    //@ requires clients != null && clients.size() > 0
     public void sendGameStarted(ArrayList<ClientHandler> clients) {
 
         // Create parameters list
@@ -531,7 +548,8 @@ public class ClientHandler extends Thread {
      *
      * @return int gameType
      */
-    public int getRequestsGameType() {
+    //@ ensures \result == this.requestsGameType
+    /*@ pure */ public int getRequestsGameType() {
         return this.requestsGameType;
     }
 
@@ -540,7 +558,8 @@ public class ClientHandler extends Thread {
      *
      * @return String clientName
      */
-    public String getClientName() {
+    //@ ensures \result == this.clientName
+    /*@ pure */ public String getClientName() {
         return this.clientName;
     }
 
@@ -551,7 +570,8 @@ public class ClientHandler extends Thread {
      * @return clients clientName
      */
     @Override
-    public String toString() {
+    //@ ensures \result == getClientName()
+    /*@ pure */ public String toString() {
         return getClientName();
     }
 
@@ -560,11 +580,32 @@ public class ClientHandler extends Thread {
      *
      * @param state in game
      */
+    //@ requires state != null
+    //@ ensures inGame == state
     public void setGameState(boolean state) {
         this.inGame = state;
     }
 
-    public boolean hasFeature(String feature) {
+    /**
+     * Returns the current game state.
+     * @return inGame game state
+     */
+    //@ ensures \result == this.inGame
+    public boolean getGameState() {
+        return this.inGame;
+    }
+
+    /**
+     *
+     */
+
+    /**
+     * Check if clientHandler has a certain feature
+     * @param feature Feature looking for
+     * @return true if clientHandler has the feature
+     */
+    //@ requires feature != null && feature.length > 0
+    /*@ pure */ public boolean hasFeature(String feature) {
         for (int i = 0; i < features.size(); i++) {
             if (features.get(i).equals(feature)) {
                 return true;

@@ -258,7 +258,7 @@ public class Lobby {
         for (int i = 0; i < lobbyClients.size(); i++) {
 
             // If clientName and clientName match
-            if (!this.lobbyClients.get(i).getClientName().equals(clientHandler.getClientName())) {
+            if (this.lobbyClients.get(i).getClientName().equals(clientHandler.getClientName())) {
 
                 // Return found true
                 return true;
