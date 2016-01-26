@@ -99,7 +99,7 @@ public class ProtocolHandler {
                     Scanner subparameterScanner = new Scanner(value);
                     subparameterScanner.useDelimiter("\\" + Protocol.Server.Settings.DELIMITER2);
 
-                    ArrayList<Object> subResult = new ArrayList<>();
+                    ArrayList<String> subResult = new ArrayList<>();
 
                     // Loop over inner parameters
                     while (subparameterScanner.hasNext()) {
