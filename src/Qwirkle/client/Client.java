@@ -9,6 +9,7 @@ package qwirkle.client;
 import qwirkle.gamelogic.Player;
 import qwirkle.gamelogic.Stone;
 import qwirkle.util.Input;
+import qwirkle.util.Logger;
 import qwirkle.util.Protocol;
 import qwirkle.util.ProtocolHandler;
 import qwirkle.util.Validation;
@@ -30,7 +31,7 @@ import java.util.Observable;
 public class Client extends Observable implements Runnable {
 
     /* Variables that identify a client, and its host*/
-    private static String name;
+    private String name;
     private static String host;
     private static int port;
 
@@ -299,6 +300,44 @@ public class Client extends Observable implements Runnable {
      */
     public String getName() {
         return this.name;
+    }
+    
+    /**
+     * Handles making a move, asks for correct
+     * input and validates the move locally,
+     * if move is valid send it to the server.
+     */
+    public void makeMove() {
+
+        // Store the hand to be able to reset
+        getPlayer().saveHand();
+
+        // Ask user to input move
+        Stone[] move = Input.askForMove(this);
+
+        if (move.length != 0) {
+
+            // Make the move locally, and get score
+            int score = getPlayer().makeMove(move);
+
+            // TODO handle cases below
+            if (score != -1) {
+                // Move is valid on local board, now send to server
+                sendMove(move);
+            } else {
+                // Locally placed an invalid move
+                Logger.print("Invalid move entered, retry:");
+
+                // Make sure hand and board are reset to prev state
+                getPlayer().undoLastMove();
+
+                // Recursively call this method till valid move
+                makeMove();
+            }
+        } else {
+            // No move made, skip turn
+            sendMove(move);
+        }
     }
 
     /**

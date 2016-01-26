@@ -10,6 +10,7 @@ import qwirkle.util.ProtocolHandler;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -41,7 +42,7 @@ public class InputHandler extends Thread {
     }
 
     /**
-     * Listen on seperate thread to avoid blocking the client.
+     * Listen on separate thread to avoid blocking the client.
      */
     public void run() {
         String incomingValue;
@@ -104,44 +105,43 @@ public class InputHandler extends Thread {
                         getGameType();
 
                     } else if (result.get(0).equals(Protocol.Server.MOVE) && result.size() >= 3) {
-
+                    	ArrayList<Stone> stones = new ArrayList<>();
                         // You made a move, (initial move?) but it was not used, reset hand
                         if (this.madeMove
                             && !((String) result.get(1)).equalsIgnoreCase(client.getName())) {
 
                             // Undo last move, reset hand and board
-                            client.getPlayer().undoLastMove();
-                        } else if (!((String) result.get(1)).equalsIgnoreCase(client.getName())
+                            client.getPlayer().undoLastMove();                          
+                            
+                        } 
+                        if (!((String) result.get(1)).equalsIgnoreCase(client.getName())
                             && !((String) result.get(1)).equalsIgnoreCase("null")) {
-
-                            ArrayList<Stone> stones = new ArrayList<>();
                             // Loop over all stones
-                            for (int i = 3; i < result.size(); i = i + 2) {
+                            for (int i = 3; i < result.size(); i++) {
 
                                 // Fetch positions
-                                String positions = String.valueOf(result.get(i + 1));
-                                int x = Integer.parseInt(
-                                    positions.split("\\" + Protocol.Server.Settings.DELIMITER2)[0]
-                                );
-                                int y = Integer.parseInt(
-                                    positions.split("\\" + Protocol.Server.Settings.DELIMITER2)[1]
-                                );
+                                ArrayList<String> data = (ArrayList<String>) result.get(i);
+                                int x = Integer.parseInt(data.get(1));
+                                int y = Integer.parseInt(data.get(2));
 
                                 // Add to arraylist
-                                stones.add(new Stone(String.valueOf(result.get(i)).charAt(1),
-                                    String.valueOf(result.get(i)).charAt(0), x, y));
+                                stones.add(new Stone(data.get(0).charAt(0), data.get(0).charAt(1), x, y));
                             }
 
                             // Other player made a move, add it to your board
-                            int score = client.getPlayer().makeMove(
-                                stones.toArray(new Stone[stones.size()]));
+                            if (stones.size() > 0) {
+                            	 client.getPlayer().updateBoard(
+                                         stones.toArray(new Stone[stones.size()]));
+                            }                
                         }
 
                         // Check if client is his turn
                         if (((String) result.get(2)).equalsIgnoreCase(client.getName())) {
 
                             // You have to make move
-                            makeMove();
+                            client.makeMove();
+                            // Indicate that the last move was made by this client.
+                            this.madeMove = true;
                         } else {
 
                             // Other clients turn
@@ -220,46 +220,7 @@ public class InputHandler extends Thread {
         }
     }
 
-    /**
-     * Handles making a move, asks for correct
-     * input and validates the move locally,
-     * if move is valid send it to the server.
-     */
-    public void makeMove() {
-
-        // Indicate last move was yours
-        this.madeMove = true;
-
-        // Store the hand to be able to reset
-        client.getPlayer().saveHand();
-
-        // Ask user to input move
-        Stone[] move = Input.askForMove(client);
-
-        if (move.length != 0) {
-
-            // Make the move locally, and get score
-            int score = client.getPlayer().makeMove(move);
-
-            // TODO handle cases below
-            if (score != -1) {
-                // Move is valid on local board, now send to server
-                client.sendMove(move);
-            } else {
-                // Locally placed an invalid move
-                Logger.print("Invalid move entered, retry:");
-
-                // Make sure hand and board are reset to prev state
-                client.getPlayer().undoLastMove();
-
-                // Recursively call this method till valid move
-                makeMove();
-            }
-        } else {
-            // No move made, skip turn
-            client.sendMove(move);
-        }
-    }
+    //TODO: moved make move away from here, make sure this is replaced if it didnt work out in player.
 
     /**
      * Let the client enter a preferred game type and

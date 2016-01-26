@@ -446,7 +446,7 @@ public class Input {
 
             // Add stone to move
             Stone handStone = hand.get(Integer.valueOf(stone) - 1);
-            Stone moveStone = new Stone(handStone.getShape(), handStone.getColor(), x, y);
+            Stone moveStone = new Stone(handStone.getColor(), handStone.getShape(), x, y);
             move.add(moveStone);
 
             // Remove the chosen stone from the hand

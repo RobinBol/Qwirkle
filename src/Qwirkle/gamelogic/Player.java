@@ -1,6 +1,8 @@
 package qwirkle.gamelogic;
 
 import qwirkle.client.Client;
+import qwirkle.util.Input;
+import qwirkle.util.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.List;
 public class Player {
     private String name;
     private Board board;
+    private int score;
     public Client client;
     private ArrayList<Stone> hand = new ArrayList<>(); //stones that are in the hand.
     private boolean hasTurn;
@@ -56,6 +59,7 @@ public class Player {
         return this.name;
     }
 
+   
     public int makeMove(Stone[] stones) {
 
         int score = -1;
@@ -64,8 +68,22 @@ public class Player {
         // If invalid move, undo last move
         if (score == -1) {
             undoLastMove();
+        } else {
+        	this.score = this.score + score;
         }
+        
+        //TODO: generate suggestions either by thread or just a call, might lockup the main thread then. Want to break is after a certain amount of time.
+        
         return score;
+    }
+    
+    /** 
+     * Makes the moves on board the server has sent back, opponents made these moves.
+     * Main difference is that this doesn't add score.
+     * @param stones
+     */
+    public int updateBoard(Stone[] stones) {
+    	return board.makeMove(stones);
     }
 
     //only if board is empty.

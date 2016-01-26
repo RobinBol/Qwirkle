@@ -292,7 +292,7 @@ public class Board {
             }
 
             searchY = sameX != stones.length;
-            System.out.println(searchY + " " + sameX);
+            //System.out.println(searchY + " " + sameX);
 
             //after stones are placed go calculate scores and check valid placement.
             List<Stone> moves = Arrays.asList(stones);
@@ -316,7 +316,7 @@ public class Board {
 
             }
             checkRow = getRows(!searchY, stones[0]);
-            System.out.println(checkRow.toString());
+            //System.out.println(checkRow.toString());
             Stone[] array = checkRow.toArray(new Stone[checkRow.size()]);
             checkRow.clear();
             allRows.add(array);
@@ -325,9 +325,9 @@ public class Board {
             //check validity moves.
             int score = 0;
             for (int i = 0; i < allRows.size(); i++) {
-                System.out.println(Arrays.toString(allRows.get(i)));
+                //System.out.println(Arrays.toString(allRows.get(i)));
                 if (isValidPlacedMove(allRows.get(i))) {
-                    System.out.println(score);
+                    //System.out.println(score);
                     score = score + allRows.get(i).length;
                     if (allRows.get(i).length == 6) {
                         score = score + 6;
@@ -336,7 +336,7 @@ public class Board {
                     return -1;
                 }
             }
-            System.out.println(score);
+            //System.out.println(score);
 
             return score;
         }
@@ -364,7 +364,7 @@ public class Board {
                     current = current.down;
 
                 }
-                System.out.println(checkRow.toString() + "UPDOWN");
+                //System.out.println(checkRow.toString() + "UPDOWN");
                 done = true;
             }
         } else {
@@ -381,7 +381,7 @@ public class Board {
                     }
                     current = current.right;
                 }
-                System.out.println(checkRow.toString() + "LEFTRIGHT");
+                //System.out.println(checkRow.toString() + "LEFTRIGHT");
                 done = true;
             }
         }
@@ -563,10 +563,10 @@ public class Board {
     }
 
     public boolean areConnectedToBoard(Stone[] stones) {
-        System.out.println(board.keySet() + ";;");
+        //System.out.println(board.keySet() + ";;");
         for (int i = 0; i < stones.length; i++) {
             if (isConnected(stones[i])) {
-                System.out.println(isConnected(stones[i]));
+                //System.out.println(isConnected(stones[i]));
                 return true;
             }
         }
@@ -668,7 +668,9 @@ public class Board {
 
                 Suggestion suggestion = suggestions.get(Coordinate.getCoordinateHash(j, i));
                 if (stone != null || suggestion != null) {
-                    System.out.println(stone + " " + suggestion + ":");
+                	//TODO: unchck for suggestion debugging?
+                	
+                    //System.out.println(stone + " " + suggestion + ":");
                 }
                 if (stone != null && suggestion == null) {
                     boardString = boardString + stone + " ";

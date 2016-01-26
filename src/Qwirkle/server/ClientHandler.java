@@ -99,6 +99,7 @@ public class ClientHandler extends Thread {
 
                     // Parse package
                     ArrayList<Object> result = ProtocolHandler.readPackage(incomingMessage);
+                    System.out.println(result + "TEST");
 
                     // Check if properly parsed data is present
                     if (!result.isEmpty()) {
@@ -324,13 +325,14 @@ public class ClientHandler extends Thread {
             for (int i = 0; i < stones.length; i++) {
 
                 // Create single stone parameter
-                parameters.add("" + stones[i].getColor() + stones[i].getShape() + Protocol.Server
-                    .Settings.DELIMITER + stones[i].getX() + Protocol.Server.Settings
+                parameters.add("" + stones[i].getColor() + "" + stones[i].getShape() + Protocol.Server
+                    .Settings.DELIMITER2 + stones[i].getX() + Protocol.Server.Settings
                     .DELIMITER2 + stones[i].getY());
             }
         }
 
         // Send package to client to give it the turn
+        System.out.println("FUCK" + parameters);
         sendMessage(ProtocolHandler.createPackage(Protocol.Server.MOVE, parameters));
     }
 
