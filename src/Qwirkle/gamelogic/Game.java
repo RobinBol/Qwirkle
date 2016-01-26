@@ -137,8 +137,9 @@ public class Game {
             // Save score, client and its move
             firstMoves.put(client, playerMove);
 
+            //TODO READD?
             // Undo it for now, until we know it is highest score
-            this.board.undoMove();
+            //this.board.undoMove();
         } else if (client != null) { // Make regular move
 
             // Check if stones are present

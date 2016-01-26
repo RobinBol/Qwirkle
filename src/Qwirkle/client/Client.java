@@ -49,6 +49,7 @@ public class Client extends Observable implements Runnable {
 
     /* If client is within game, it has a player object */
     private Player player;
+    private boolean skippedTurn = false;
 
     /**
      * Client constructor that takes a name, host and port.
@@ -260,6 +261,10 @@ public class Client extends Observable implements Runnable {
     public boolean inGame() {
         return this.inGame;
     }
+    
+    public boolean skippedTurn() {
+    	return skippedTurn;
+    }
 
     /**
      * Updates observer with messages.
@@ -309,6 +314,8 @@ public class Client extends Observable implements Runnable {
      */
     public void makeMove() {
 
+    	//reset skipped turn.
+    	skippedTurn = false;
         // Store the hand to be able to reset
         getPlayer().saveHand();
 
@@ -324,6 +331,7 @@ public class Client extends Observable implements Runnable {
             if (score != -1) {
                 // Move is valid on local board, now send to server
                 sendMove(move);
+                
             } else {
                 // Locally placed an invalid move
                 Logger.print("Invalid move entered, retry:");
@@ -337,6 +345,7 @@ public class Client extends Observable implements Runnable {
         } else {
             // No move made, skip turn
             sendMove(move);
+            skippedTurn = true;
         }
     }
 

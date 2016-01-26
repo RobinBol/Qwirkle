@@ -107,7 +107,7 @@ public class InputHandler extends Thread {
                     } else if (result.get(0).equals(Protocol.Server.MOVE) && result.size() >= 3) {
                     	ArrayList<Stone> stones = new ArrayList<>();
                         // You made a move, (initial move?) but it was not used, reset hand
-                        if (this.madeMove
+                        if (madeMove && !client.skippedTurn()
                             && !((String) result.get(1)).equalsIgnoreCase(client.getName())) {
 
                             // Undo last move, reset hand and board
@@ -140,12 +140,13 @@ public class InputHandler extends Thread {
 
                             // You have to make move
                             client.makeMove();
-                            // Indicate that the last move was made by this client.
-                            this.madeMove = true;
+                            //TODO doesnt work when skipped.
+                            madeMove = true;
+                            // Indicate that the last move was made by this client. 
                         } else {
 
                             // Other clients turn
-                            this.madeMove = false;
+                            madeMove = false;
                         }
 
                         //TODO handle input from other players

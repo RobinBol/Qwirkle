@@ -261,6 +261,13 @@ public class Board {
         for (int i = 0; i < lastMoves.size(); i++) {
             removeStone(lastMoves.get(i));
         }
+        removeLastMoves();
+    }
+    
+    public void removeLastMoves() {
+    	if (!lastMoves.isEmpty()) {
+        	lastMoves.removeAll(lastMoves);
+        }
     }
 
     /**
@@ -277,7 +284,7 @@ public class Board {
         }
         if (isEmptyBoard() && stones.length == 1 && stones[0] != null && containsZeroZero(stones)) {
             placeStone(stones[0]);
-            lastMoves = Arrays.asList(stones);
+            addToLastMoves(stones);
             return 1;
         }
 
@@ -301,7 +308,7 @@ public class Board {
             List<Stone> checkRow = new ArrayList<>();
 
             //save last made moves.
-            lastMoves = moves;
+	        addToLastMoves(stones);
 
             Stone current;
             for (int i = 0; i < stones.length; i++) {
@@ -318,11 +325,11 @@ public class Board {
             }
             checkRow = getRows(!searchY, stones[0]);
             //System.out.println(checkRow.toString());
-            Stone[] array = checkRow.toArray(new Stone[checkRow.size()]);
-            checkRow.clear();
-            allRows.add(array);
-
-
+            if (checkRow != null) {
+            	Stone[] array = checkRow.toArray(new Stone[checkRow.size()]);
+            	allRows.add(array);
+            	checkRow.clear();
+            }                
             //check validity moves.
             int score = 0;
             for (int i = 0; i < allRows.size(); i++) {
@@ -390,6 +397,12 @@ public class Board {
             return null;
         }
         return checkRow;
+    }
+    
+    public void addToLastMoves(Stone[] stones) {
+    	for (int i = 0; i < stones.length; i++) {
+			lastMoves.add(stones[i]);
+		}
     }
 
     public boolean isEmptyBoard() {

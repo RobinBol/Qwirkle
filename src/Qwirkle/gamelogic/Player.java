@@ -83,7 +83,9 @@ public class Player {
      * @param stones
      */
     public int updateBoard(Stone[] stones) {
-    	return board.makeMove(stones);
+    	int updated = board.makeMove(stones);
+    	board.removeLastMoves();
+    	return updated;
     }
 
     //only if board is empty.
