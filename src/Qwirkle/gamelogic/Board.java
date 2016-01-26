@@ -277,6 +277,7 @@ public class Board {
         }
         if (isEmptyBoard() && stones.length == 1 && stones[0] != null && containsZeroZero(stones)) {
             placeStone(stones[0]);
+            lastMoves = Arrays.asList(stones);
             return 1;
         }
 

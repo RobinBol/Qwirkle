@@ -99,7 +99,7 @@ public class ClientHandler extends Thread {
 
                     // Parse package
                     ArrayList<Object> result = ProtocolHandler.readPackage(incomingMessage);
-                    System.out.println(result + "TEST");
+                    //System.out.println(result + "TEST");
 
                     // Check if properly parsed data is present
                     if (!result.isEmpty()) {

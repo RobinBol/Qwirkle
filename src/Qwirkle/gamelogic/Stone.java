@@ -79,7 +79,7 @@ public class Stone {
     }
 
     public String toString() {
-        return "COLOR: " + color + " SHAPE: " + shape;
+        return color + "" + shape;
     }
 
 }

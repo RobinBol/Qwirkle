@@ -95,17 +95,20 @@ public class BoardTest {
             new Stone('A', 'C', 2, -3),
             new Stone('A', 'E', 3, -3),
             new Stone('A', 'F', 4, -3)};
+        Stone[] valid4 = new Stone[]{new Stone('B', 'F', 4, -2)};
         Stone[] inValid = new Stone[]{new Stone('B', 'G', 5, -3)};
         System.out.println(board);
         assertEquals(9, board.makeMove(valid));
         System.out.println(board);
         assertEquals(3, board.makeMove(valid2));
         assertEquals(16, board.makeMove(valid3));
+        board.makeMove(valid4);
         assertEquals(-1, board.makeMove(inValid));
         System.out.println(board);
 
         board.resetMap();
         assertEquals(1, board.makeMove(new Stone[]{new Stone('A', 'B', 0, 0)}));
+        
         System.out.println(board);
         board.resetMap();
         assertEquals(-1, board.makeMove(inValid));
