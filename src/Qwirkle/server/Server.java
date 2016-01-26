@@ -144,7 +144,7 @@ public class Server extends Observable {
      */
     public void addClientHandler(ClientHandler clientHandler) {
         this.clientHandlers.add(clientHandler);
-    }
+    }	
 
     /**
      * Remove clientHandler and disconnect remaining socket.

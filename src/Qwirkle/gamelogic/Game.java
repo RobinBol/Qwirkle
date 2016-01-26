@@ -98,7 +98,7 @@ public class Game {
     /**
      * Take stone from the bag.
      *
-     * @return A newly compased array of stones for a hand
+     * @return A newly composed array of stones for a hand
      */
     public Stone[] getFirstHand() {
         Stone[] hand = new Stone[Game.MAXHANDSIZE];
@@ -198,6 +198,8 @@ public class Game {
                         // Set new highscore
                         highestScore = scoreAndMoveEntry.getKey();
                         highestScoreClient = move.getKey();
+                        
+                        //TODO this doesnt keep in mind that 2 player might have same score and thus you retrieve a wrong moveSet.
                         highestScoreMove = move.getValue().get(highestScore);
 
                     } else {
@@ -208,7 +210,8 @@ public class Game {
             }
 
             // Make the move on the board
-            this.board.makeMove(highestScoreMove);
+            this.board.makeMove(highestScoreMove); 
+            //TODO: Synced with local instances?
 
             // Reset firstMove variable, to indicate regular game flow
             firstMove = false;

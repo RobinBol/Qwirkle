@@ -15,13 +15,13 @@ public class Stone {
     //Red, Orange, Yellow, Green, Blue, Purple.
     public static final char[] COLORS = {'A', 'B', 'C', 'D', 'E', 'F'};
 
-    public Stone(char shape, char color) {
+    public Stone(char color, char shape) {
         this.shape = shape;
         this.color = color;
         //Maybe save the coordinates?
     }
 
-    public Stone(char shape, char color, int x, int y) {
+    public Stone(char color, char shape, int x, int y) {
         this.shape = shape;
         this.color = color;
         this.x = x;
@@ -79,7 +79,7 @@ public class Stone {
     }
 
     public String toString() {
-        return color + "" + shape;
+        return "COLOR: " + color + " SHAPE: " + shape;
     }
 
 }
