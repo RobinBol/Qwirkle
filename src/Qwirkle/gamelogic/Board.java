@@ -5,20 +5,26 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class Board {
-    //public static final int MAXBOARDSIZE = 11;
-
+	/**
+	 * Handles all Board related things. 
+	 * This contains placing stone and awarding point and validating moves.
+	 */
     private Map<String, Stone> board;
     private Map<String, Suggestion> suggestions;
     private List<Stone> lastMoves;
 
 
+    /**
+     * Takes no parameters initializes the board, suggestions and lastmoves list and maps.
+     */
+    /*
+     * @ensures board != null && suggestions != null && lastMoves != null;
+     */
     public Board() {
         board = new HashMap<>();
         suggestions = new HashMap<>();
-//        bag = new Bag();
         lastMoves = new ArrayList<>();
     }
 
@@ -28,6 +34,10 @@ public class Board {
      * The stone is connected top top down left right stones if they are available.
      *
      * @param stone takes a Stone and make sure it is placed properly on the board.
+     */
+    
+    /* 
+     * @requires stone != null;
      */
     public void placeStone(Stone stone) {
         int x = stone.getX();
@@ -55,6 +65,14 @@ public class Board {
         board.put(Coordinate.getCoordinateHash(stone.getX(), stone.getY()), stone);
         suggestions.remove(Coordinate.getCoordinateHash(stone.getX(), stone.getY()));
     }
+    
+    /**
+     * Removes the stone and sets the neighbors reference to this stone back to null.
+     * @param The Stone to be removed from the board.
+     */
+    
+    //@requires stone != null;
+    //@ensures board.get(Coordinate.getCoordinateHash(stone.getX(), stone.getY()) == null;
 
     public void removeStone(Stone stone) {
         int x = stone.getX();
@@ -81,14 +99,14 @@ public class Board {
         board.remove(Coordinate.getCoordinateHash(stone.getX(), stone.getY()));
     }
 
-    //TODO: fix that suggestions on other side of the row are also adjusted.
-
     /**
      * Creates new suggestions for hinting and AI.
      *
      * @param stone the stone which is placed at the board.
      * @return whether or not assigning succeeded.
      */
+    
+    //@require stone != null;
     public boolean createSuggestions(Stone stone) {
     	//List<StoneType> suggestionTypes = new ArrayList<>();
     	if (stone == null) return false;
@@ -122,14 +140,6 @@ public class Board {
     		} else {
     			suggestions.remove(cordHash);
     		}
-    		/*
-    		if (suggestions.containsKey(Coordinate.getCoordinateHash(current.getX(), current.getY() - 1))) {
-    			suggestion = suggestions.get(cordHash);
-    		} else {
-    			suggestion = new Suggestion(current.getX(), current.getY() - 1);
-    		}
-    		suggestion.addType(placable, scoreValue);
-    		*/
     		
     	}    	
     	encounteredTypes.clear();
@@ -248,20 +258,41 @@ public class Board {
     }
 
 
+    /**
+     * Gets the stone a x, y;
+     * @param x
+     * @param y
+     * @return stone at this position.
+     */
     public Stone getStone(int x, int y) {
         return board.get(Coordinate.getCoordinateHash(x, y));
     }
+    
+    /**
+     * Gets the Board.
+     * @return the board.
+     */
 
     public Map<String, Stone> getBoard() {
         return board;
     }
 
+    /**
+     * Undoes the last made move on the board that was saved.
+     */
+    
     public void undoMove() {
         for (int i = 0; i < lastMoves.size(); i++) {
             removeStone(lastMoves.get(i));
         }
         removeLastMoves();
     }
+    
+    /**
+     * Removes all saved moves.
+     */
+    
+    //@ensures lastMoves.isEmpty();
     
     public void removeLastMoves() {
     	if (!lastMoves.isEmpty()) {
@@ -277,6 +308,8 @@ public class Board {
      * @return Returns a value containing the gained score.
      * Returns -1 if the move was invalid.
      */
+    
+    //@ensures \result >= -1 && \result <= 24;
     public int makeMove(Stone[] stones) {
         if (stones == null || stones.length == 0) {
             return -1;
@@ -349,7 +382,16 @@ public class Board {
         }
         return -1;
     }
+    
+    /**
+     * Returns a list of all found stones in the row in the searchDirection starting with pCurrent.
+     * @param searchDirection True if has to search in y direction false if has to search in x direction.
+     * @param pCurrent
+     * @return
+     */
 
+    //@requires pCurrent != null;
+    
     public List<Stone> getRows(boolean searchDirection, Stone pCurrent) {
         Stone current = pCurrent;
         boolean done = false;
@@ -398,22 +440,46 @@ public class Board {
         return checkRow;
     }
     
+    /**
+     * Saves the last made moves for undo.
+     * @param stones
+     */
+    
+    //@ensures !lastMoves.isEmpty();
+    
     public void addToLastMoves(Stone[] stones) {
     	for (int i = 0; i < stones.length; i++) {
 			lastMoves.add(stones[i]);
 		}
     }
 
+    /**
+     * Returns whether the board is empty.
+     * @return
+     */
     public boolean isEmptyBoard() {
         return board.isEmpty();
     }
-
+    
+    /**
+     * Returns if a spot is free on the board at x, y.
+     * @param x
+     * @param y
+     * @return
+     */
+    
     public boolean isEmptySpot(int x, int y) {
         if (getStone(x, y) == null) {
             return true;
         }
         return false;
     }
+    
+    /**
+     * Checks if the stones in the parameter are valid moves.
+     * @param moves to be made.
+     * @return
+     */
 
     public boolean isValidMove(Stone[] stones) {
         if (!areValidStones(stones)) {
@@ -444,6 +510,11 @@ public class Board {
         return true;
     }
 
+    /**
+     * Returns if a moves array is validly placed.
+     * @param stones
+     * @return
+     */
     public boolean isValidPlacedMove(Stone[] stones) {
         if (!areValidStones(stones)) {
             return false;
@@ -461,7 +532,7 @@ public class Board {
         return true;
     }
 
-    /*
+    /**
      * Tests if the stones in array (moves) are in connected to each other.
 	 */
     public boolean areConnected(Stone[] stones) {
@@ -488,6 +559,12 @@ public class Board {
         return highestX - lowestX + 1 == stones.length
             || highestY - lowestY + 1 == stones.length;
     }
+    
+    /**
+     * Checks if Stones are in the Same row or column.
+     * @param stones
+     * @return
+     */
 
     public boolean inSameRow(Stone[] stones) {
         int amountSameX = 0;
@@ -528,6 +605,12 @@ public class Board {
             return 0;
         }
     }
+    
+    /**
+     * Returns if Stones are a valid color shape combination.
+     * @param stones
+     * @return
+     */
 
     public boolean validShapeColorCombination(Stone[] stones) {
         int amountSameShape = 0;
@@ -544,6 +627,12 @@ public class Board {
         return (amountSameShape == stones.length && amountSameColor == 1)
             || (amountSameColor == stones.length && amountSameShape == 1);
     }
+    
+    /**
+     * Returns if stones have allowed shape and color.
+     * @param stones
+     * @return
+     */
 
     public boolean areValidStones(Stone[] stones) {
         for (int i = 0; i < stones.length; i++) {
@@ -554,8 +643,10 @@ public class Board {
         return true;
     }
 
-    /*
-     * returns if a position is next to an already placed stone.
+    /**
+     * Returns if a position is next to an already placed stone on the board.
+     * @param stone
+     * @return
      */
     public boolean isConnected(Stone stone) {
         int x = stone.getX();
@@ -574,6 +665,12 @@ public class Board {
         }
         return false;
     }
+    
+    /**
+     * Returns if at least on stone is connected to the board.
+     * @param stones
+     * @return
+     */
 
     public boolean areConnectedToBoard(Stone[] stones) {
         //System.out.println(board.keySet() + ";;");
@@ -586,6 +683,11 @@ public class Board {
         return false;
     }
 
+    /**
+     * Returns true if one of the stones is 0,0.
+     * @param stones
+     * @return
+     */
     public boolean containsZeroZero(Stone[] stones) {
         for (int i = 0; i < stones.length; i++) {
             if (stones[i].getX() == 0 && stones[i].getY() == 0) {
@@ -595,6 +697,11 @@ public class Board {
         return false;
     }
 
+    /**
+     * Checks if any of the stones is connected to the board.
+     * @param stones
+     * @return
+     */
     public boolean takeOccupiedPlaces(Stone[] stones) {
         for (Stone stone : stones) {
             String positionHash = Coordinate.getCoordinateHash(stone.getX(), stone.getY());
@@ -605,8 +712,14 @@ public class Board {
         return false;
     }
 
+    /**
+     * Returns the width and height in an int array.
+     * @return
+     */
+    
+    //@ensures \result.length == 2;
     public int[] getBoardWidthHeight() {
-	    if (isEmptyBoard()) return new int[]{0, 0};
+	    if (isEmptyBoard()) { return new int[] {0, 0}; }
 	    int lowestX = 0;
 	    int lowestY = 0;
 	    int highestX = 0;
@@ -625,36 +738,51 @@ public class Board {
 	    return new int[]{width, height};
 	}
 
+    /**
+     * Creates a map for testing.
+     */
 	public void createTestMap() {
         for (int i = -2; i < 3; i++) {
             //test purpose only, is not valid according to game rules.
-            placeStone(new Stone(Stone.SHAPES[0], Stone.COLORS[i + 2], i, 0));
-           
+            placeStone(new Stone(Stone.SHAPES[0], Stone.COLORS[i + 2], i, 0));   
         }
-        //board.put(Coordinate.getCoordinateHash(-2, -1), new Stone(Stone.SHAPES[0], Stone.COLORS[4], -2, -1));
     }
 	
+	/**
+	 * Another Test Map.
+	 */
 	public void createTestMap2() {
         for (int i = 0; i <= 3; i++) {
             //test purpose only, is not valid according to game rules.
             placeStone(new Stone(Stone.SHAPES[0], Stone.COLORS[i + 2], i, 0));
         }
-        placeStone(new Stone('B', 'B',-1 ,-1 ));
-        placeStone(new Stone('C', 'B',-1 ,-2 ));
-        placeStone(new Stone('A', 'B',-1 ,-3 ));
+        placeStone(new Stone('B', 'B', -1, -1 ));
+        placeStone(new Stone('C', 'B', -1, -2 ));
+        placeStone(new Stone('A', 'B', -1, -3 ));
         //board.put(Coordinate.getCoordinateHash(-2, -1),
         // new Stone(Stone.SHAPES[0], Stone.COLORS[4], -2, -1));
     }
 	
+	/**
+	 * Creates suggestions for each possible spot.
+	 */
 	public void buildSuggestionMap() {
 		for (Stone stone : board.values()) {
 			createSuggestions(stone);
 		}
 	}
+	
+	/**
+	 * Clears the board, mainly used for test purposes.
+	 */
 
     public void resetMap() {
         board.clear();
     }
+    
+    /**
+     * Creates a string to be print as representation for the map.
+     */
 
     @Override
     public String toString() {
@@ -676,15 +804,8 @@ public class Board {
                 if (i == 1 && j == 0) {
                     System.out.print("\n"); 
                 }
-
                 Stone stone = this.getBoard().get(Coordinate.getCoordinateHash(j, i));
-
                 Suggestion suggestion = suggestions.get(Coordinate.getCoordinateHash(j, i));
-                if (stone != null || suggestion != null) {
-                	//TODO: unchck for suggestion debugging?
-                	
-                    //System.out.println(stone + " " + suggestion + ":");
-                }
                 if (stone != null && suggestion == null) {
                     boardString = boardString + stone + " ";
                 } else if (suggestion != null && stone == null) {

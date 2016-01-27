@@ -2,9 +2,6 @@ package qwirkle.gamelogic;
 
 public class Stone {
 
-    //maybe unique id?
-    private int id;
-
     private char shape, color;
     private Integer x, y;
 
@@ -26,15 +23,6 @@ public class Stone {
         this.color = color;
         this.x = x;
         this.y = y;
-    }
-
-    //might be unfair distribution due to how type casting works to int.
-    public static char getRandomShape() {
-        return SHAPES[(int) (Math.random() * SHAPES.length)];
-    }
-
-    public static char getRandomColor() {
-        return COLORS[(int) (Math.random() * COLORS.length)];
     }
 
     public char getShape() {

@@ -1,8 +1,6 @@
 package qwirkle.gamelogic;
 
 import qwirkle.client.Client;
-import qwirkle.util.Input;
-import qwirkle.util.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,13 +26,8 @@ public class Player {
         hand.add(stone);
     }
 
-    // TODO implement has Turn functionality
     public boolean hasTurn() {
         return this.hasTurn;
-    }
-
-    public void setTurn() {
-        //todo
     }
 
     public Board getBoard() {
@@ -79,9 +72,6 @@ public class Player {
         	this.score = this.score + score;
         	this.lastScoreUpdate = score;
         }
-        
-        //TODO: generate suggestions either by thread or just a call, might lockup the main thread then. Want to break is after a certain amount of time.
-        
         return score;
     }
     
@@ -99,38 +89,6 @@ public class Player {
     //only if board is empty.
     public Stone[] tradeStones(Stone[] stones) {
         return null;
-    }
-
-    public void skipTurn() {
-
-    }
-
-    /*
-     * Gets the longest line possible with the stones held in the hand.
-     * TODO: not needed thus to large to implement now.
-     */
-    public int getLongestCombination() {
-        int longest = 0;
-        Stone startingStone;
-        List<Stone> foundShapes = new ArrayList<Stone>();
-        List<Stone> foundColors = new ArrayList<Stone>();
-
-        for (int i = 0; i < hand.size(); i++) {
-            startingStone = hand.get(i);
-            for (int j = 0; j < hand.size(); j++) {
-                if (j != i) {
-                    if (startingStone.getColor() == hand.get(j).getColor()
-                        && startingStone.getShape() != hand.get(j).getShape()) {
-                        foundColors.add(hand.get(j));
-                    }
-                    if (startingStone.getColor() != hand.get(j).getColor()
-                        && startingStone.getShape() == hand.get(j).getShape()) {
-                        foundShapes.add(hand.get(j));
-                    }
-                }
-            }
-        }
-        return 0;
     }
 
     public ArrayList<Stone> getHand() {

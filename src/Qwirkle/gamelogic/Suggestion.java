@@ -16,7 +16,7 @@ public class Suggestion {
 		this.y = y;
 	}
 	
-	public int getScore(){
+	public int getScore() {
 		return score;
 	}
 	
@@ -24,15 +24,15 @@ public class Suggestion {
 		score = s;
 	}
 	
-	public void addType(List<StoneType> types , int score) {
+	public void addType(List<StoneType> types, int score) {
 		if (possiblePlacements.isEmpty()) {
-			for (StoneType type : types){	
+			for (StoneType type : types) {	
 				possiblePlacements.add(type);
 			}
 			this.score = this.score + score;
 		} else {
 			Iterator<StoneType> iterator = possiblePlacements.listIterator();
-			while (iterator.hasNext()){
+			while (iterator.hasNext()) {
 				if (!types.contains(iterator.next())) {
 					iterator.remove();
 				} 

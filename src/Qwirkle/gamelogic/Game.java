@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.validator.PublicClassValidator;
-
 /**
  * This class handles everything related to a game. It can be started
  * by creating a new game object, and giving the clients and the lobby

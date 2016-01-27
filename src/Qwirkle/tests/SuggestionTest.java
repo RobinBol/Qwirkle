@@ -46,6 +46,7 @@ public class SuggestionTest {
 		board.buildSuggestionMap();
 		System.out.println(board);
 		
+		
 	}
 
 }

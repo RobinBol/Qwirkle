@@ -1,19 +1,7 @@
 package qwirkle.gamelogic;
 
 public final class Coordinate {
-
-    public Coordinate(int x, int y) {
-
-    }
-
-    //Override
-    public void getHashCode() {
-    }
-
-    //Override
-    public void equals() {
-    }
-
+	
     /**
      * Returns an String to pas into the hashmap the contains,
      * the keys to tiles that may or may not contain a stone.

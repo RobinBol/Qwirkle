@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <fileset-config file-format-version="1.2.0" simple-config="true" sync-formatter="false">
-  <local-check-config name="SS checkstyle" location="C:\Users\Boris Das\Documents\Create\Software Systems\Programmeren\checkstyle-softwaresystems.xml" type="external" description="">
+  <local-check-config name="SS checkstyle" location="E:\Documenten\Create\Software Systems\Programmeren\checkstyle-softwaresystems.xml" type="external" description="">
     <additional-data name="protect-config-file" value="false"/>
   </local-check-config>
   <fileset name="all" enabled="true" check-config-name="SS checkstyle" local="true">
