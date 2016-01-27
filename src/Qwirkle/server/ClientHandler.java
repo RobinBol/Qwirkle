@@ -348,7 +348,6 @@ public class ClientHandler extends Thread {
         }
 
         // Send package to client to give it the turn
-        System.out.println(parameters);
         sendMessage(ProtocolHandler.createPackage(Protocol.Server.MOVE, parameters));
     }
 
