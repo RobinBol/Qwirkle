@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 public class Board {
     //public static final int MAXBOARDSIZE = 11;
 
-    private Bag bag;
     private Map<String, Stone> board;
     private Map<String, Suggestion> suggestions;
     private List<Stone> lastMoves;

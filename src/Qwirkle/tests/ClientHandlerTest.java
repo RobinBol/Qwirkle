@@ -37,19 +37,15 @@ public class ClientHandlerTest {
 
         // Start client on new thread
         new Thread(client).start();
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-
-        }
+        
+        Thread.sleep(2000);
+        
         client2 = new Client("Pieter", InetAddress.getByName(host), port);
         new Thread(client2).start();
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-
-        }
+        
+        Thread.sleep(2000);
+        
         clientHandler = server.getClientHandler(clientName);
         assertNotNull(clientHandler);
     }
