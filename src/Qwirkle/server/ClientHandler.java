@@ -348,7 +348,7 @@ public class ClientHandler extends Thread {
         }
 
         // Send package to client to give it the turn
-        System.out.println("FUCK" + parameters);
+        System.out.println(6parameters);
         sendMessage(ProtocolHandler.createPackage(Protocol.Server.MOVE, parameters));
     }
 

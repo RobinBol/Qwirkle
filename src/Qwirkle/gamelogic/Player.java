@@ -11,6 +11,7 @@ public class Player {
     private String name;
     private Board board;
     private int score;
+    private int lastScoreUpdate = 0;
     public Client client;
     private ArrayList<Stone> hand = new ArrayList<>(); //stones that are in the hand.
     private boolean hasTurn;
@@ -39,10 +40,16 @@ public class Player {
     public Board getBoard() {
         return this.board;
     }
+    
+    public int getScore() {
+    	return score;
+    }
 
     public void undoLastMove() {
         this.board.undoMove();
         this.resetHand();
+        this.score = this.score - this.lastScoreUpdate;
+        this.lastScoreUpdate = 0;
     }
 
     public void resetHand() {
@@ -70,6 +77,7 @@ public class Player {
             undoLastMove();
         } else {
         	this.score = this.score + score;
+        	this.lastScoreUpdate = score;
         }
         
         //TODO: generate suggestions either by thread or just a call, might lockup the main thread then. Want to break is after a certain amount of time.

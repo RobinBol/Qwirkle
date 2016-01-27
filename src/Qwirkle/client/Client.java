@@ -334,6 +334,8 @@ public class Client extends Observable implements Runnable {
         // Store the hand to be able to reset
         getPlayer().saveHand();
         
+        Logger.print("Your score is: " + getPlayer().getScore());
+        
         int turnType = Input.askForMoveOrTrade(this);
         
         if (turnType == 1) {
