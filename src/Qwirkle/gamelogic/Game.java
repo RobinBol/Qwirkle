@@ -172,7 +172,7 @@ public class Game {
             } else {
 
                 // No stones provided, return empty score
-                return -1;
+                return 0;
             }
         }
      
