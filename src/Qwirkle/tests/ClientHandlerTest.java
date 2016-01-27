@@ -25,39 +25,46 @@ public class ClientHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-        Thread one = new Thread() {
+        Thread a = new Thread() {
             public void run() {
                 server = new Server(port);
                 server.startServer();
             }
         };
 
-        one.start();
+        a.start();
         client = new Client(clientName, InetAddress.getByName(host), port);
 
         // Start client on new thread
         new Thread(client).start();
-        
+
         Thread.sleep(2000);
-        
+
         client2 = new Client("Pieter", InetAddress.getByName(host), port);
         new Thread(client2).start();
-
-        
         Thread.sleep(2000);
-        
+
         clientHandler = server.getClientHandler(clientName);
         assertNotNull(clientHandler);
     }
-
     @Test
-    public void clientShouldHaveFeature() throws Exception {
+    public void shouldRemoveClientTest() throws Exception {
+        clientHandler = server.getClientHandler(clientName);
+        Lobby lobby = clientHandler.getLobby();
+        assertNotNull(lobby);
+        assertTrue(lobby.hasClient(clientHandler));
+        clientHandler.disconnectClient();
+        assertFalse(lobby.hasClient(clientHandler));
+        assertNull(server.getClientHandler(clientName));
+    }
+    @Test
+    public void clientShouldHaveFeatureTest() throws Exception {
         clientHandler = server.getClientHandler(clientName);
         assertTrue(clientHandler.hasFeature(Protocol.Server.Features.CHALLENGE));
     }
 
     @Test
-    public void shouldSetGameState() throws Exception {
+    public void shouldSetGameStateTest() throws Exception {
         clientHandler = server.getClientHandler(clientName);
         assertFalse(clientHandler.getGameState());
         clientHandler.setGameState(true);
@@ -67,19 +74,19 @@ public class ClientHandlerTest {
     }
 
     @Test
-    public void shouldPrintClientName() throws Exception {
+    public void shouldPrintClientNameTest() throws Exception {
         clientHandler = server.getClientHandler(clientName);
         assertEquals(clientHandler.toString(), clientName);
     }
 
     @Test
-    public void shouldGetLobby() throws Exception {
+    public void shouldGetLobbyTest() throws Exception {
         clientHandler = server.getClientHandler(clientName);
         assertNotNull(clientHandler.getLobby());
     }
 
     @Test
-    public void shouldSendMessage() throws Exception {
+    public void shouldSendMessageTest() throws Exception {
         clientHandler = server.getClientHandler(clientName);
         clientHandler.sendDeclineInvite();
         try {
@@ -87,17 +94,5 @@ public class ClientHandlerTest {
         } catch (InterruptedException e) {
 
         }
-    }
-
-
-    @Test
-    public void shouldRemoveClient() throws Exception {
-        clientHandler = server.getClientHandler(clientName);
-        Lobby lobby = clientHandler.getLobby();
-        assertNotNull(lobby);
-        assertTrue(lobby.hasClient(clientHandler));
-        clientHandler.disconnectClient();
-        assertFalse(lobby.hasClient(clientHandler));
-        assertNull(server.getClientHandler(clientName));
     }
 }
