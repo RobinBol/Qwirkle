@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,8 +75,10 @@ public class ClientHandler extends Thread {
     public ClientHandler(Server server, Socket sock) throws IOException {
         this.server = server;
         this.socket = sock;
-        this.in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-        this.out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
+        this.in = new BufferedReader(new InputStreamReader(sock.getInputStream(), Charset.forName
+            ("UTF-16")));
+        this.out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream(), Charset.forName
+            ("UTF-16")));
     }
 
     /**

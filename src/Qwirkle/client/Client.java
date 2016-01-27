@@ -17,6 +17,7 @@ import qwirkle.util.Validation;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -170,9 +171,11 @@ public class Client extends Observable implements Runnable {
 
             // Setup input and output streams
             InputStreamReader inputstreamreader =
-                new InputStreamReader(socket.getInputStream());
+                new InputStreamReader(socket.getInputStream(), Charset.forName
+                    ("UTF-16"));
             OutputStreamWriter outputstreamwriter =
-                new OutputStreamWriter(socket.getOutputStream());
+                new OutputStreamWriter(socket.getOutputStream(), Charset.forName
+                    ("UTF-16"));
 
             // Store them to be used by instance
             this.in = new BufferedReader(inputstreamreader);
