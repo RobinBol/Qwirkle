@@ -110,8 +110,7 @@ public class Game {
         }
         return hand;
     }
-    
-    
+
 
     /**
      * Forwards a make move from a client, to the board.
@@ -150,7 +149,7 @@ public class Game {
 
             //TODO READD?
             // Undo it for now, until we know it is highest score
-            //this.board.undoMove();
+            this.board.undoMove();
         } else if (client != null) { // Make regular move
 
             // Check if stones are present
@@ -182,7 +181,7 @@ public class Game {
                 return 0;
             }
         }
-     
+
 
         // All first moves are in
         if (firstMove && firstMoves.size() == clients.size()) {
@@ -211,8 +210,9 @@ public class Game {
                         // Set new highscore
                         highestScore = scoreAndMoveEntry.getKey();
                         highestScoreClient = move.getKey();
-                        
-                        //TODO this doesnt keep in mind that 2 player might have same score and thus you retrieve a wrong moveSet.
+
+                        //TODO this doesnt keep in mind that 2 player might have same score and
+                        // thus you retrieve a wrong moveSet.
                         highestScoreMove = move.getValue().get(highestScore);
 
                     } else {
@@ -223,7 +223,7 @@ public class Game {
             }
 
             // Make the move on the board
-            this.board.makeMove(highestScoreMove); 
+            this.board.makeMove(highestScoreMove);
             //TODO: Synced with local instances?
 
             // Reset firstMove variable, to indicate regular game flow
@@ -252,12 +252,12 @@ public class Game {
         // Return score to see if valid move
         return score;
     }
-    
+
     /**
      * Changes out stones.
      */
     public Stone[] changeStones(Stone[] stones) {
-    	return bag.tradeStones(stones);
+        return bag.tradeStones(stones);
     }
 
     /**
@@ -276,11 +276,11 @@ public class Game {
         ClientHandler winner = null;
 
         // Game ended
-        if(skipCounter == clients.size()){
+        if (skipCounter == clients.size()) {
             for (int i = 0; i < clients.size(); i++) {
 
                 // Mark client as not in game
-                if(clients.get(i).getScore() > highScore){
+                if (clients.get(i).getScore() > highScore) {
                     highScore = clients.get(i).getScore();
                     winner = clients.get(i);
                 }
@@ -360,7 +360,7 @@ public class Game {
             // Send all client give turn message
             clients.get(j).giveTurn(currentClient, nextClient, move);
         }
-    }   
+    }
 
     /**
      * Handles terminating the game, sends game end to all
