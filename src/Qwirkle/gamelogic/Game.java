@@ -47,6 +47,7 @@ public class Game {
 
     private List<ClientHandler> moveOrder = new ArrayList<>();
     int currentMove = 0;
+    int skipCounter = 0;
 
     /**
      * Game constructor, give clients and lobby as parameters
@@ -132,6 +133,12 @@ public class Game {
 
         // Make firstmove and retrieve score
         int score = this.board.makeMove(stones);
+
+        if (score > 0) {
+            // reset skip counter
+            skipCounter = 0;
+        }
+
         if (firstMove && client != null) {
 
             // Create map to hold client and stones
@@ -262,6 +269,34 @@ public class Game {
      */
     public void skipTurn(ClientHandler client) {
 
+        // Add skipped turn
+        skipCounter++;
+
+        int highScore = 0;
+        ClientHandler winner = null;
+
+        // Game ended
+        if(skipCounter == clients.size()){
+            for (int i = 0; i < clients.size(); i++) {
+
+                // Mark client as not in game
+                if(clients.get(i).getScore() > highScore){
+                    highScore = clients.get(i).getScore();
+                    winner = clients.get(i);
+                }
+
+            }
+            // Loop over all clients
+            for (int i = 0; i < clients.size(); i++) {
+
+                // Mark client as not in game
+                clients.get(i).setGameState(false);
+
+                // Create player from client
+                clients.get(i).sendGameEnd("WIN", winner.getClientName());
+            }
+        }
+        // add client to counter
         if (firstMove) {
             // Create map to hold client and stones
             Map<Integer, Stone[]> playerMove = new HashMap<>();

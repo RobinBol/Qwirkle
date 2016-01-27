@@ -54,6 +54,8 @@ public class ClientHandler extends Thread {
     /* Keep track of in game mode */
     private boolean inGame = false;
 
+    private int score = 0;
+
     /*@
     invariant getClientName() == clientName
     invariant server != null
@@ -245,6 +247,8 @@ public class ClientHandler extends Thread {
                                     // Send error package
                                     sendMessage(ProtocolHandler.createPackage(Protocol.Client
                                         .ERROR, errorCode));
+                                } else {
+                                    this.score = this.score + score;
                                 }
                             } else {
                                 // Skip this player
@@ -277,6 +281,10 @@ public class ClientHandler extends Thread {
     //@ requires error != null
     public void handleIncomingError(ArrayList<Object> error) {
         //TODO handle incoming errors
+    }
+
+    public int getScore(){
+        return this.score;
     }
 
     /**
