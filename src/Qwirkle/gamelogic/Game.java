@@ -30,9 +30,6 @@ public class Game {
     /* List of clients */
     private ArrayList<ClientHandler> clients;
 
-    /* List of players in the game */
-    private Player[] players;
-
     /* Board on which the game is played */
     private Board board;
 

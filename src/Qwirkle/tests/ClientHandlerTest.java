@@ -11,8 +11,6 @@ import qwirkle.server.Server;
 import qwirkle.util.Protocol;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
-
 
 public class ClientHandlerTest {
     int port = 6000;
